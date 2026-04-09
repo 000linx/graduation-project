@@ -16,13 +16,35 @@ class Order:
         :param shipping_address: 收货地址
         :return: 新订单的 ObjectId
         """
+        normalized_items = []
+        for item in items or []:
+            pid = item.get("product_id")
+            qty = item.get("quantity")
+            unit_price = item.get("unit_price", item.get("price"))
+            name = item.get("name")
+            normalized_items.append({
+                "product_id": ObjectId(pid) if pid is not None else None,
+                "quantity": int(qty),
+                "unit_price": float(unit_price) if unit_price is not None else None,
+                "name": name
+            })
+
         order_data = {
             "user_id": ObjectId(user_id),
-            "items": items, # list of {product_id, quantity, price}
+            "items": normalized_items,
             "total_amount": float(total_amount),
             "shipping_address": shipping_address,
-            "status": "pending", # pending, paid, shipped, delivered, cancelled
-            "created_at": datetime.utcnow()
+            "status": "pending",
+            "payment": {
+                "status": "unpaid",
+                "method": None,
+                "paid_at": None
+            },
+            "cancel_request": None,
+            "review": None,
+            "after_sale": None,
+            "created_at": datetime.now(),
+            "updated_at": datetime.now()
         }
         
         result = mongo.db.orders.insert_one(order_data)
@@ -47,6 +69,10 @@ class Order:
         return mongo.db.orders.find_one({"_id": ObjectId(order_id)})
 
     @staticmethod
+    def find_all():
+        return list(mongo.db.orders.find())
+
+    @staticmethod
     def update_status(order_id, status):
         """
         更新订单状态
@@ -56,5 +82,72 @@ class Order:
         """
         return mongo.db.orders.update_one(
             {"_id": ObjectId(order_id)},
-            {"$set": {"status": status}}
+            {"$set": {"status": status, "updated_at": datetime.now()}}
+        )
+
+    @staticmethod
+    def set_payment(order_id, method, status, paid_at=None):
+        update = {
+            "payment.status": status,
+            "payment.method": method,
+            "updated_at": datetime.now()
+        }
+        if paid_at is not None:
+            update["payment.paid_at"] = paid_at
+        return mongo.db.orders.update_one(
+            {"_id": ObjectId(order_id)},
+            {"$set": update}
+        )
+
+    @staticmethod
+    def request_cancel(order_id, user_id, reason):
+        return mongo.db.orders.update_one(
+            {"_id": ObjectId(order_id), "user_id": ObjectId(user_id)},
+            {"$set": {
+                "status": "cancel_requested",
+                "cancel_request": {"reason": reason, "created_at": datetime.now()},
+                "updated_at": datetime.now()
+            }}
+        )
+
+    @staticmethod
+    def add_review(order_id, user_id, rating, content):
+        return mongo.db.orders.update_one(
+            {"_id": ObjectId(order_id), "user_id": ObjectId(user_id)},
+            {"$set": {
+                "review": {"rating": int(rating), "content": content, "created_at": datetime.now()},
+                "status": "completed",
+                "updated_at": datetime.now()
+            }}
+        )
+
+    @staticmethod
+    def create_after_sale(order_id, user_id, req_type, reason):
+        return mongo.db.orders.update_one(
+            {"_id": ObjectId(order_id), "user_id": ObjectId(user_id)},
+            {"$set": {
+                "after_sale": {
+                    "type": req_type,
+                    "reason": reason,
+                    "status": "pending",
+                    "created_at": datetime.now(),
+                    "processed_at": None,
+                    "remark": None
+                },
+                "status": "after_sale_pending",
+                "updated_at": datetime.now()
+            }}
+        )
+
+    @staticmethod
+    def process_after_sale(order_id, status, remark=None):
+        return mongo.db.orders.update_one(
+            {"_id": ObjectId(order_id)},
+            {"$set": {
+                "after_sale.status": status,
+                "after_sale.processed_at": datetime.now(),
+                "after_sale.remark": remark,
+                "status": f"after_sale_{status}",
+                "updated_at": datetime.now()
+            }}
         )

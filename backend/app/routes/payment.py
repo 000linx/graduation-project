@@ -13,7 +13,7 @@ def checkout():
     POST /api/payment/checkout
     Body: { "order_id": "...", "payment_method": "..." }
     """
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
     order_id = data.get('order_id')
     payment_method = data.get('payment_method')
     

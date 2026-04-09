@@ -4,68 +4,90 @@ from datetime import datetime
 
 class Cart:
     """
-    购物车数据模型，负责购物车数据的 CRUD 操作
+    购物车数据模型，负责购物车数据的 CRUD 操作 (单文档内嵌数组结构)
     """
+    
+    @staticmethod
+    def get_cart(user_id):
+        """
+        获取用户的完整购物车文档
+        """
+        return mongo.db.cart.find_one({"user_id": ObjectId(user_id)})
+
     @staticmethod
     def add_item(user_id, product_id, quantity):
         """
-        添加商品到购物车
-        :param user_id: 用户 ID
-        :param product_id: 产品 ID
-        :param quantity: 数量
-        :return: 更新结果或插入结果
+        添加商品到购物车（更新数量或追加）
         """
-        # 检查购物车中是否已存在该商品
-        existing_item = mongo.db.cart.find_one({
-            "user_id": ObjectId(user_id),
-            "product_id": ObjectId(product_id)
-        })
+        # 尝试更新已存在商品的数量
+        result = mongo.db.cart.update_one(
+            {"user_id": ObjectId(user_id), "items.product_id": ObjectId(product_id)},
+            {"$inc": {"items.$.quantity": quantity}, "$set": {"updated_at": datetime.now()}}
+        )
         
-        if existing_item:
-            # 如果存在，增加数量
-            return mongo.db.cart.update_one(
-                {"_id": existing_item["_id"]},
-                {"$inc": {"quantity": quantity}, "$set": {"updated_at": datetime.utcnow()}}
-            )
-        else:
-            # 如果不存在，创建新条目
-            cart_data = {
-                "user_id": ObjectId(user_id),
+        # 如果商品不存在于数组中，则追加新商品项 (同时 upsert 文档本身)
+        if result.matched_count == 0:
+            item = {
                 "product_id": ObjectId(product_id),
                 "quantity": quantity,
-                "created_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow()
+                "added_at": datetime.now()
             }
-            result = mongo.db.cart.insert_one(cart_data)
-            return result.inserted_id
+            mongo.db.cart.update_one(
+                {"user_id": ObjectId(user_id)},
+                {"$push": {"items": item}, "$set": {"updated_at": datetime.now()}, "$setOnInsert": {"created_at": datetime.now()}},
+                upsert=True
+            )
+        return True
 
     @staticmethod
     def remove_item(user_id, product_id):
         """
         从购物车移除商品
-        :param user_id: 用户 ID
-        :param product_id: 产品 ID
-        :return: 删除结果
         """
-        return mongo.db.cart.delete_one({
-            "user_id": ObjectId(user_id),
-            "product_id": ObjectId(product_id)
-        })
+        return mongo.db.cart.update_one(
+            {"user_id": ObjectId(user_id)},
+            {"$pull": {"items": {"product_id": ObjectId(product_id)}}, "$set": {"updated_at": datetime.now()}}
+        )
 
     @staticmethod
     def find_by_user_id(user_id):
         """
-        查找用户的购物车内容
-        :param user_id: 用户 ID
-        :return: 购物车项列表
+        查找用户的购物车内容，返回兼容旧版的列表格式
         """
-        return list(mongo.db.cart.find({"user_id": ObjectId(user_id)}))
+        cart = mongo.db.cart.find_one({"user_id": ObjectId(user_id)})
+        if not cart:
+            return []
+        
+        formatted_items = []
+        for item in cart.get("items", []):
+            formatted_items.append({
+                "_id": cart["_id"],  # 兼容旧版的 _id
+                "user_id": cart["user_id"],
+                "product_id": item["product_id"],
+                "quantity": item["quantity"]
+            })
+        return formatted_items
 
     @staticmethod
     def clear_cart(user_id):
         """
         清空用户的购物车
-        :param user_id: 用户 ID
-        :return: 删除结果
         """
-        return mongo.db.cart.delete_many({"user_id": ObjectId(user_id)})
+        return mongo.db.cart.update_one(
+            {"user_id": ObjectId(user_id)},
+            {"$set": {"items": [], "updated_at": datetime.now()}}
+        )
+    
+    @staticmethod
+    def update_item(user_id, product_id, quantity):
+        """
+        更新购物车中的商品数量
+        """
+        if quantity <= 0:
+            return Cart.remove_item(user_id, product_id)
+            
+        result = mongo.db.cart.update_one(
+            {"user_id": ObjectId(user_id), "items.product_id": ObjectId(product_id)},
+            {"$set": {"items.$.quantity": quantity, "updated_at": datetime.now()}}
+        )
+        return result.matched_count > 0

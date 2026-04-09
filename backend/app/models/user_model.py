@@ -8,31 +8,36 @@ class User:
     用户数据模型，负责用户数据的 CRUD 操作
     """
     @staticmethod
-    def create(username, email, password):
+    def create(username, phone, password, role="user"):
         """
         创建新用户
         :param username: 用户名
-        :param email: 邮箱
+        :param phone: 手机号
         :param password: 明文密码
         :return: 新用户的 ObjectId
         """
         user_data = {
             "username": username,
-            "email": email,
+            "phone": phone,
             "password_hash": generate_password_hash(password),
-            "created_at": datetime.utcnow()
+            "role": role,
+            "created_at": datetime.now()
         }
         
         result = mongo.db.users.insert_one(user_data)
         return result.inserted_id
 
     @staticmethod
-    def find_by_email(email):
+    def find_by_phone(phone):
         """
-        根据邮箱查找用户
-        :param email: 邮箱
+        根据手机号查找用户
+        :param phone: 手机号
         :return: 用户文档或 None
         """
+        return mongo.db.users.find_one({"phone": phone})
+
+    @staticmethod
+    def find_by_email(email):
         return mongo.db.users.find_one({"email": email})
 
     @staticmethod
@@ -45,6 +50,17 @@ class User:
         return mongo.db.users.find_one({"_id": ObjectId(user_id)})
 
     @staticmethod
+    def find_all():
+        return list(mongo.db.users.find())
+
+    @staticmethod
+    def set_role(user_id, role):
+        return mongo.db.users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"role": role}}
+        )
+
+    @staticmethod
     def verify_password(stored_hash, password):
         """
         验证密码
@@ -53,3 +69,10 @@ class User:
         :return: 布尔值，是否匹配
         """
         return check_password_hash(stored_hash, password)
+
+    @staticmethod
+    def update_password(user_id, new_password):
+        return mongo.db.users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"password_hash": generate_password_hash(new_password)}}
+        )

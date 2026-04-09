@@ -25,7 +25,8 @@ class Product:
             "stock": int(stock),
             "category": category,
             "image_url": image_url,
-            "created_at": datetime.utcnow()
+            "created_at": datetime.now(),
+            "updated_at": datetime.now()
         }
         
         result = mongo.db.products.insert_one(product_data)
@@ -67,5 +68,24 @@ class Product:
         """
         return mongo.db.products.update_one(
             {"_id": ObjectId(product_id)},
-            {"$inc": {"stock": -quantity}}
+            {"$inc": {"stock": -quantity}, "$set": {"updated_at": datetime.now()}}
         )
+
+    @staticmethod
+    def update_by_id(product_id, updates: dict):
+        if not updates:
+            return None
+        updates = {k: v for k, v in updates.items() if v is not None}
+        if "price" in updates:
+            updates["price"] = float(updates["price"])
+        if "stock" in updates:
+            updates["stock"] = int(updates["stock"])
+        updates["updated_at"] = datetime.now()
+        return mongo.db.products.update_one(
+            {"_id": ObjectId(product_id)},
+            {"$set": updates}
+        )
+
+    @staticmethod
+    def delete_by_id(product_id):
+        return mongo.db.products.delete_one({"_id": ObjectId(product_id)})

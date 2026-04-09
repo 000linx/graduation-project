@@ -12,7 +12,7 @@ def test_register(client):
     # Basic test for registration endpoint structure
     response = client.post('/api/user/register', json={
         "username": "testuser",
-        "email": "test@example.com",
+        "phone": "13800138000",
         "password": "password123"
     })
     # This might fail if MongoDB is not running, but the route exists
@@ -20,7 +20,15 @@ def test_register(client):
 
 def test_login(client):
     response = client.post('/api/user/login', json={
-        "email": "test@example.com",
+        "phone": "13800138000",
         "password": "password123"
     })
     assert response.status_code in [200, 401]
+
+
+def test_change_password_unauthorized(client):
+    response = client.post('/api/user/change_password', json={
+        "old_password": "a",
+        "new_password": "b"
+    })
+    assert response.status_code == 401

@@ -1,5 +1,6 @@
 from ..models.order_model import Order
 import time
+from datetime import datetime
 
 class PaymentService:
     """
@@ -22,8 +23,9 @@ class PaymentService:
         payment_status = "success"
         
         if payment_status == "success":
-            # 支付成功，更新订单状态
+            Order.set_payment(order_id, payment_method, "paid", paid_at=datetime.now())
             Order.update_status(order_id, "paid")
             return {"status": "success", "message": "Payment processed successfully"}
         else:
+            Order.set_payment(order_id, payment_method, "failed")
             return {"status": "failed", "message": "Payment failed"}
