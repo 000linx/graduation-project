@@ -1,12 +1,19 @@
 /// <reference types="../../node_modules/.vue-global-types/vue_3.5_0_0_0.d.ts" />
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import ProductCard from '../components/ProductCard.vue';
 import Pagination from '../components/Pagination.vue';
 import { ChevronRight } from 'lucide-vue-next';
 import axios from 'axios';
+const route = useRoute();
 const categories = ['全部', '耳背式', '耳内式', '隐形式', '充电款'];
 const activeCategory = ref('全部');
 const currentPage = ref(1);
+const totalPages = ref(1);
+const keyword = computed(() => {
+    const q = route.query.q;
+    return typeof q === 'string' ? q.trim() : '';
+});
 const products = ref([
     {
         id: '1',
@@ -46,13 +53,20 @@ const errorMessage = ref(null);
 const fetchProducts = async () => {
     loading.value = true;
     errorMessage.value = null;
-    const params = {};
+    const params = {
+        page: currentPage.value,
+        page_size: 12
+    };
     if (activeCategory.value && activeCategory.value !== '全部') {
         params.category = activeCategory.value;
+    }
+    if (keyword.value) {
+        params.q = keyword.value;
     }
     try {
         const { data } = await axios.get('/api/product/list', { params });
         const apiProducts = Array.isArray(data?.data?.products) ? data.data.products : [];
+        const apiPagination = data?.data?.pagination;
         products.value = apiProducts.map((p) => ({
             id: String(p._id ?? p.id ?? ''),
             name: String(p.name ?? '未命名产品'),
@@ -63,6 +77,9 @@ const fetchProducts = async () => {
             category: String(p.category ?? '未分类'),
             rating: Number(p.rating ?? 4.6)
         }));
+        totalPages.value = Number(apiPagination?.total_pages ?? 1) || 1;
+        if (currentPage.value > totalPages.value)
+            currentPage.value = totalPages.value;
     }
     catch (e) {
         errorMessage.value = e?.message ?? '获取产品失败';
@@ -72,7 +89,14 @@ const fetchProducts = async () => {
     }
 };
 onMounted(fetchProducts);
-watch(activeCategory, fetchProducts);
+watch([activeCategory, keyword], () => {
+    currentPage.value = 1;
+});
+watch([activeCategory, currentPage, keyword], () => {
+    if (currentPage.value < 1)
+        currentPage.value = 1;
+    fetchProducts();
+});
 debugger; /* PartiallyEnd: #3632/scriptSetup.vue */
 const __VLS_ctx = {};
 let __VLS_components;
@@ -191,11 +215,11 @@ for (const [product] of __VLS_getVForSourceType((__VLS_ctx.products))) {
 // @ts-ignore
 const __VLS_11 = __VLS_asFunctionalComponent(Pagination, new Pagination({
     currentPage: (__VLS_ctx.currentPage),
-    totalPages: (5),
+    totalPages: (__VLS_ctx.totalPages),
 }));
 const __VLS_12 = __VLS_11({
     currentPage: (__VLS_ctx.currentPage),
-    totalPages: (5),
+    totalPages: (__VLS_ctx.totalPages),
 }, ...__VLS_functionalComponentArgsRest(__VLS_11));
 /** @type {__VLS_StyleScopedClasses['space-y-12']} */ ;
 /** @type {__VLS_StyleScopedClasses['relative']} */ ;
@@ -291,6 +315,7 @@ const __VLS_self = (await import('vue')).defineComponent({
             categories: categories,
             activeCategory: activeCategory,
             currentPage: currentPage,
+            totalPages: totalPages,
             products: products,
             loading: loading,
             errorMessage: errorMessage,

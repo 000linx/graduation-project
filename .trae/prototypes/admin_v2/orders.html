@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>管理后台 V2 - 订单与售后</title>
+    <style>
+      :root{--bg:#f5f7fa;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--primary:#2563eb;--danger:#dc2626;--warning:#f59e0b;--success:#16a34a;}
+      *{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text)}
+      a{color:inherit;text-decoration:none}
+      .app{display:flex;min-height:100vh}
+      .side{width:256px;background:#0f172a;color:#e5e7eb;padding:18px 14px;position:sticky;top:0;height:100vh}
+      .brand{font-weight:800;font-size:16px}
+      .nav{margin-top:18px;display:flex;flex-direction:column;gap:6px}
+      .nav a{padding:10px 12px;border-radius:10px;color:#cbd5e1}
+      .nav a.active{background:rgba(37,99,235,.18);color:#fff}
+      .nav a:hover{background:rgba(148,163,184,.12)}
+      .main{flex:1;display:flex;flex-direction:column}
+      .top{height:64px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 18px}
+      .title{font-weight:700}
+      .pill{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;background:#fff}
+      .btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;font-size:13px;cursor:pointer}
+      .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+      .btn.danger{background:var(--danger);border-color:var(--danger);color:#fff}
+      .wrap{padding:18px;max-width:1280px}
+      .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+      .tabs{display:flex;gap:8px;border-bottom:1px solid var(--line);padding-bottom:10px}
+      .tab{padding:8px 12px;border-radius:999px;border:1px solid var(--line);font-size:13px;color:var(--muted);background:#fff}
+      .tab.active{border-color:rgba(37,99,235,.35);color:var(--primary);background:rgba(37,99,235,.06);font-weight:700}
+      .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px}
+      .input,.select{border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:#fff;font-size:13px;min-width:220px}
+      .select{min-width:160px}
+      .table{width:100%;border-collapse:collapse;margin-top:12px}
+      .table th,.table td{padding:10px 12px;border-bottom:1px solid var(--line);font-size:13px;text-align:left}
+      .table th{color:var(--muted);font-weight:700;background:#fafafa}
+      .tag{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;font-size:12px;border:1px solid var(--line);background:#fff}
+      .tag.pending{border-color:rgba(245,158,11,.35);color:#92400e;background:rgba(245,158,11,.08)}
+      .tag.paid{border-color:rgba(22,163,74,.35);color:#166534;background:rgba(22,163,74,.08)}
+      .tag.ship{border-color:rgba(59,130,246,.25);color:#1d4ed8;background:rgba(59,130,246,.06)}
+      .tag.danger{border-color:rgba(220,38,38,.35);color:#991b1b;background:rgba(220,38,38,.08)}
+      .bar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:10px}
+      .muted{color:var(--muted);font-size:12px}
+      @media (max-width: 1024px){.side{display:none}}
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="side">
+        <div class="brand">管理后台 V2</div>
+        <div class="nav">
+          <a href="./index.html">概览</a>
+          <a href="./users.html">用户管理</a>
+          <a href="./products.html">商品管理</a>
+          <a class="active" href="./orders.html">订单与售后</a>
+          <a href="./roles.html">角色与权限</a>
+          <a href="./audit.html">审计日志</a>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="top">
+          <div class="title">订单与售后</div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <div class="pill">OrderAdmin · 13900000000</div>
+            <button class="btn">刷新</button>
+            <button class="btn primary">退出</button>
+          </div>
+        </header>
+
+        <div class="wrap">
+          <div class="card">
+            <div class="tabs">
+              <div class="tab active">订单列表</div>
+              <div class="tab">待发货</div>
+              <div class="tab">取消申请</div>
+              <div class="tab">售后待处理</div>
+            </div>
+
+            <div class="filters">
+              <input class="input" placeholder="搜索：订单号 / 用户手机号" />
+              <select class="select">
+                <option>全部状态</option>
+                <option>pending</option>
+                <option>paid</option>
+                <option>shipped</option>
+                <option>delivered</option>
+                <option>completed</option>
+                <option>cancel_requested</option>
+                <option>after_sale_pending</option>
+              </select>
+              <input class="select" placeholder="开始日期 2026-04-01" />
+              <input class="select" placeholder="结束日期 2026-04-09" />
+              <button class="btn">清空</button>
+              <button class="btn primary">查询</button>
+            </div>
+
+            <div class="bar">
+              <div style="display:flex;gap:8px;align-items:center">
+                <button class="btn">批量发货</button>
+                <button class="btn">批量改状态</button>
+                <button class="btn">导出 CSV</button>
+              </div>
+              <div class="muted">已选择 0 项</div>
+            </div>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th style="width:44px"><input type="checkbox" /></th>
+                  <th>订单号</th>
+                  <th>金额</th>
+                  <th>状态</th>
+                  <th>创建时间</th>
+                  <th style="width:260px">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>69d7…e4c7</td>
+                  <td>¥3998.00</td>
+                  <td><span class="tag paid">paid</span></td>
+                  <td>2026-04-09 10:42</td>
+                  <td>
+                    <a href="#" style="color:var(--primary);font-weight:700">明细</a>
+                    <span style="color:var(--line)"> | </span>
+                    <a href="#" style="color:var(--primary);font-weight:700">发货</a>
+                    <span style="color:var(--line)"> | </span>
+                    <a href="#" style="color:var(--primary);font-weight:700">改状态</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td>69d7…a1b2</td>
+                  <td>¥1999.00</td>
+                  <td><span class="tag danger">after_sale_pending</span></td>
+                  <td>2026-04-09 10:43</td>
+                  <td>
+                    <a href="#" style="color:var(--primary);font-weight:700">明细</a>
+                    <span style="color:var(--line)"> | </span>
+                    <a href="#" style="color:var(--danger);font-weight:700">处理售后</a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="bar">
+              <div class="muted">第 1 页 / 共 90 页 · 总计 1,800 条</div>
+              <div style="display:flex;gap:8px">
+                <button class="btn">上一页</button>
+                <button class="btn">下一页</button>
+              </div>
+            </div>
+          </div>
+          <div class="muted" style="margin-top:10px">
+            订单状态变更必须符合状态机；批量操作与售后处理需二次确认并写入审计日志。
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
+

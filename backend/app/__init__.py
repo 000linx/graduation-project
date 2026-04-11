@@ -10,6 +10,7 @@ from .extensions import jwt
 from . import extensions
 from .utils.log_util import setup_logger
 from .utils.response import ApiResponse
+from .utils.errors import AppError
 
 def create_app(config_name='default'):
     """
@@ -102,6 +103,18 @@ def register_error_handlers(app: Flask):
         if request.path.startswith("/api/"):
             return ApiResponse.error("Database error", code=500)
         return ApiResponse.error("Database error", code=500)
+
+    @app.errorhandler(AppError)
+    def handle_app_error(e: AppError):
+        data = e.data
+        if e.error_code:
+            if isinstance(data, dict):
+                data = {**data, "error_code": e.error_code}
+            elif data is None:
+                data = {"error_code": e.error_code}
+        if request.path.startswith("/api/"):
+            return ApiResponse.error(e.message, code=e.status_code, data=data)
+        return ApiResponse.error(e.message, code=e.status_code, data=data)
 
     @app.errorhandler(RedisError)
     def handle_redis_error(e: RedisError):

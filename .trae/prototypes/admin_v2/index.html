@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>管理后台 V2 - 概览</title>
+    <style>
+      :root{--bg:#f5f7fa;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--primary:#2563eb;--danger:#dc2626;--warning:#f59e0b;--success:#16a34a;}
+      *{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text)}
+      a{color:inherit;text-decoration:none}
+      .app{display:flex;min-height:100vh}
+      .side{width:256px;background:#0f172a;color:#e5e7eb;padding:18px 14px;position:sticky;top:0;height:100vh}
+      .brand{font-weight:800;font-size:16px;letter-spacing:.5px}
+      .nav{margin-top:18px;display:flex;flex-direction:column;gap:6px}
+      .nav a{padding:10px 12px;border-radius:10px;color:#cbd5e1}
+      .nav a.active{background:rgba(37,99,235,.18);color:#fff}
+      .nav a:hover{background:rgba(148,163,184,.12)}
+      .main{flex:1;display:flex;flex-direction:column}
+      .top{height:64px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 18px}
+      .title{font-weight:700}
+      .user{display:flex;gap:10px;align-items:center}
+      .pill{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;background:#fff}
+      .btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;font-size:13px;cursor:pointer}
+      .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+      .wrap{padding:18px;max-width:1280px}
+      .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+      .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+      .k{font-size:12px;color:var(--muted)} .v{font-size:22px;font-weight:800;margin-top:6px}
+      .row{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-top:12px}
+      .table{width:100%;border-collapse:collapse}
+      .table th,.table td{padding:10px 12px;border-bottom:1px solid var(--line);font-size:13px;text-align:left}
+      .table th{color:var(--muted);font-weight:700;background:#fafafa}
+      .tag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;border:1px solid var(--line);background:#fff}
+      .tag.warning{border-color:rgba(245,158,11,.35);color:#92400e;background:rgba(245,158,11,.08)}
+      .tag.danger{border-color:rgba(220,38,38,.35);color:#991b1b;background:rgba(220,38,38,.08)}
+      .tag.success{border-color:rgba(22,163,74,.35);color:#166534;background:rgba(22,163,74,.08)}
+      .quick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+      .q{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+      .q h3{margin:0;font-size:14px} .q p{margin:6px 0 0;color:var(--muted);font-size:12px}
+      .q a{display:inline-block;margin-top:10px;color:var(--primary);font-size:13px;font-weight:700}
+      @media (max-width: 1024px){.grid{grid-template-columns:repeat(2,1fr)} .row{grid-template-columns:1fr} .side{display:none}}
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="side">
+        <div class="brand">管理后台 V2</div>
+        <div class="nav">
+          <a class="active" href="./index.html">概览</a>
+          <a href="./users.html">用户管理</a>
+          <a href="./products.html">商品管理</a>
+          <a href="./orders.html">订单与售后</a>
+          <a href="./roles.html">角色与权限</a>
+          <a href="./audit.html">审计日志</a>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="top">
+          <div class="title">概览</div>
+          <div class="user">
+            <div class="pill">SuperAdmin · 13900000000</div>
+            <button class="btn">刷新</button>
+            <button class="btn primary">退出</button>
+          </div>
+        </header>
+
+        <div class="wrap">
+          <div class="grid">
+            <div class="card"><div class="k">用户数</div><div class="v">12,345</div></div>
+            <div class="card"><div class="k">商品数</div><div class="v">1,208</div></div>
+            <div class="card"><div class="k">订单数</div><div class="v">8,901</div></div>
+            <div class="card"><div class="k">累计销售额</div><div class="v">¥ 3,280,120</div></div>
+          </div>
+
+          <div class="quick">
+            <div class="q">
+              <h3>待发货订单</h3>
+              <p>快速处理订单发货，减少用户等待。</p>
+              <a href="./orders.html">进入处理 →</a>
+            </div>
+            <div class="q">
+              <h3>待处理售后</h3>
+              <p>审核售后申请，记录处理意见并留痕。</p>
+              <a href="./orders.html">进入处理 →</a>
+            </div>
+            <div class="q">
+              <h3>权限审计</h3>
+              <p>查看管理员权限分配是否符合最小权限。</p>
+              <a href="./roles.html">查看权限 →</a>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="card">
+              <div class="k">近期任务</div>
+              <table class="table" style="margin-top:10px">
+                <thead>
+                  <tr><th>任务</th><th>数量</th><th>优先级</th><th>动作</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>待发货</td><td>18</td><td><span class="tag warning">高</span></td><td><a href="./orders.html" style="color:var(--primary);font-weight:700">去处理</a></td></tr>
+                  <tr><td>取消申请</td><td>6</td><td><span class="tag warning">中</span></td><td><a href="./orders.html" style="color:var(--primary);font-weight:700">去处理</a></td></tr>
+                  <tr><td>售后待审核</td><td>4</td><td><span class="tag danger">高</span></td><td><a href="./orders.html" style="color:var(--primary);font-weight:700">去处理</a></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="card">
+              <div class="k">系统状态</div>
+              <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+                <div class="tag success">API 正常</div>
+                <div class="tag success">数据库 正常</div>
+                <div class="tag warning">审计日志 已启用</div>
+              </div>
+              <div style="margin-top:12px;color:var(--muted);font-size:12px;line-height:1.6">
+                高风险操作将强制二次确认并写入审计日志；无权限模块将隐藏入口。
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
+

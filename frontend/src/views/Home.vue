@@ -1,13 +1,22 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import ProductCard from '../components/ProductCard.vue'
 import Pagination from '../components/Pagination.vue'
 import { ChevronRight } from 'lucide-vue-next'
 import axios from 'axios'
 
+const route = useRoute()
+
 const categories = ['全部', '耳背式', '耳内式', '隐形式', '充电款']
 const activeCategory = ref('全部')
 const currentPage = ref(1)
+const totalPages = ref(1)
+
+const keyword = computed(() => {
+  const q = route.query.q
+  return typeof q === 'string' ? q.trim() : ''
+})
 
 type ProductCardItem = {
   id: string
@@ -60,14 +69,21 @@ const fetchProducts = async () => {
   loading.value = true
   errorMessage.value = null
 
-  const params: Record<string, string> = {}
+  const params: Record<string, any> = {
+    page: currentPage.value,
+    page_size: 12
+  }
   if (activeCategory.value && activeCategory.value !== '全部') {
     params.category = activeCategory.value
+  }
+  if (keyword.value) {
+    params.q = keyword.value
   }
 
   try {
     const { data } = await axios.get('/api/product/list', { params })
     const apiProducts = Array.isArray(data?.data?.products) ? data.data.products : []
+    const apiPagination = data?.data?.pagination
     products.value = apiProducts.map((p: any) => ({
       id: String(p._id ?? p.id ?? ''),
       name: String(p.name ?? '未命名产品'),
@@ -80,6 +96,8 @@ const fetchProducts = async () => {
       category: String(p.category ?? '未分类'),
       rating: Number(p.rating ?? 4.6)
     }))
+    totalPages.value = Number(apiPagination?.total_pages ?? 1) || 1
+    if (currentPage.value > totalPages.value) currentPage.value = totalPages.value
   } catch (e: any) {
     errorMessage.value = e?.message ?? '获取产品失败'
   } finally {
@@ -88,7 +106,14 @@ const fetchProducts = async () => {
 }
 
 onMounted(fetchProducts)
-watch(activeCategory, fetchProducts)
+watch([activeCategory, keyword], () => {
+  currentPage.value = 1
+})
+
+watch([activeCategory, currentPage, keyword], () => {
+  if (currentPage.value < 1) currentPage.value = 1
+  fetchProducts()
+})
 </script>
 
 <template>
@@ -150,7 +175,7 @@ watch(activeCategory, fetchProducts)
 
       <Pagination
         v-model:currentPage="currentPage"
-        :totalPages="5"
+        :totalPages="totalPages"
       />
     </section>
   </div>

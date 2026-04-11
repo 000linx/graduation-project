@@ -1,5 +1,5 @@
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   currentPage: number
   totalPages: number
 }>()
@@ -7,14 +7,14 @@ defineProps<{
 const emit = defineEmits(['update:currentPage'])
 
 const changePage = (page: number) => {
-  if (page >= 1 && page <= 5) { // Simple mock pagination
+  if (page >= 1 && page <= props.totalPages) {
     emit('update:currentPage', page)
   }
 }
 </script>
 
 <template>
-  <div class="flex items-center justify-center space-x-2 mt-12">
+  <div v-if="totalPages > 1" class="flex items-center justify-center space-x-2 mt-12">
     <button
       class="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-50"
       :disabled="currentPage === 1"
@@ -24,7 +24,7 @@ const changePage = (page: number) => {
     </button>
     
     <button
-      v-for="page in 5"
+      v-for="page in totalPages"
       :key="page"
       @click="changePage(page)"
       :class="[
@@ -39,7 +39,7 @@ const changePage = (page: number) => {
 
     <button
       class="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-50"
-      :disabled="currentPage === 5"
+      :disabled="currentPage === totalPages"
       @click="changePage(currentPage + 1)"
     >
       下一页

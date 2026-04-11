@@ -20,4 +20,13 @@ def init_extensions(app):
     
     # 初始化 Redis 客户端
     global redis_client
-    redis_client = redis.from_url(app.config['REDIS_URL'])
+    redis_url = app.config.get("REDIS_URL")
+    if not redis_url:
+        redis_client = None
+        return
+    try:
+        client = redis.from_url(redis_url)
+        client.ping()
+        redis_client = client
+    except Exception:
+        redis_client = None

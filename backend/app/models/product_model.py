@@ -1,6 +1,7 @@
 from ..extensions import mongo
 from bson import ObjectId
 from datetime import datetime
+import re
 
 class Product:
     """
@@ -57,6 +58,43 @@ class Product:
         :return: 产品文档列表
         """
         return list(mongo.db.products.find({"category": category}))
+
+    @staticmethod
+    def query(category=None, q=None, min_price=None, max_price=None, sort="newest", page=1, page_size=20):
+        query = {}
+
+        if category:
+            query["category"] = category
+
+        if q:
+            keyword = re.escape(str(q).strip())
+            if keyword:
+                query["$or"] = [
+                    {"name": {"$regex": keyword, "$options": "i"}},
+                    {"description": {"$regex": keyword, "$options": "i"}}
+                ]
+
+        price_filter = {}
+        if min_price is not None:
+            price_filter["$gte"] = float(min_price)
+        if max_price is not None:
+            price_filter["$lte"] = float(max_price)
+        if price_filter:
+            query["price"] = price_filter
+
+        page = max(int(page), 1)
+        page_size = max(min(int(page_size), 100), 1)
+        skip = (page - 1) * page_size
+
+        sort_spec = [("created_at", -1)]
+        if sort == "price_asc":
+            sort_spec = [("price", 1), ("created_at", -1)]
+        elif sort == "price_desc":
+            sort_spec = [("price", -1), ("created_at", -1)]
+
+        total = mongo.db.products.count_documents(query)
+        items = list(mongo.db.products.find(query).sort(sort_spec).skip(skip).limit(page_size))
+        return items, total, page, page_size
 
     @staticmethod
     def update_stock(product_id, quantity):

@@ -1,9 +1,12 @@
 /// <reference types="../../node_modules/.vue-global-types/vue_3.5_0_0_0.d.ts" />
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { ShoppingCart, User, Search } from 'lucide-vue-next';
+const router = useRouter();
 const searchQuery = ref('');
 const handleSearch = () => {
-    console.log('Searching for:', searchQuery.value);
+    const q = searchQuery.value.trim();
+    router.push({ path: '/', query: q ? { q } : {} });
 };
 debugger; /* PartiallyEnd: #3632/scriptSetup.vue */
 const __VLS_ctx = {};

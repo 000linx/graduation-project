@@ -42,6 +42,9 @@ def login():
     data = request.get_json(silent=True) or {}
     phone = data.get('phone')
     password = data.get('password')
+
+    if not phone or not password:
+        return ApiResponse.error("Missing fields")
     
     # 查找用户并验证密码
     user = User.find_by_phone(phone)
