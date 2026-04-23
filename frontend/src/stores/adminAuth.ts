@@ -8,16 +8,16 @@ type LoginResponse = {
 }
 
 export const useAdminAuthStore = defineStore('adminAuth', () => {
-  const accessToken = ref<string | null>(localStorage.getItem('access_token'))
-  const refreshToken = ref<string | null>(localStorage.getItem('refresh_token'))
+  const accessToken = ref<string | null>(localStorage.getItem('admin_access_token'))
+  const refreshToken = ref<string | null>(localStorage.getItem('admin_refresh_token'))
   const userPhone = ref<string | null>(null)
   const userName = ref<string | null>(null)
 
   const isAuthed = computed(() => Boolean(accessToken.value))
 
   function syncFromStorage() {
-    accessToken.value = localStorage.getItem('access_token')
-    refreshToken.value = localStorage.getItem('refresh_token')
+    accessToken.value = localStorage.getItem('admin_access_token')
+    refreshToken.value = localStorage.getItem('admin_refresh_token')
   }
 
   async function login(phone: string, password: string) {
@@ -28,8 +28,8 @@ export const useAdminAuthStore = defineStore('adminAuth', () => {
     if (!at) {
       throw new Error(resp?.data?.message || '登录失败')
     }
-    localStorage.setItem('access_token', String(at))
-    if (rt) localStorage.setItem('refresh_token', String(rt))
+    localStorage.setItem('admin_access_token', String(at))
+    if (rt) localStorage.setItem('admin_refresh_token', String(rt))
     accessToken.value = String(at)
     refreshToken.value = rt ? String(rt) : null
     userPhone.value = data?.user?.phone ? String(data.user.phone) : phone
@@ -37,8 +37,8 @@ export const useAdminAuthStore = defineStore('adminAuth', () => {
   }
 
   function logout() {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
+    localStorage.removeItem('admin_access_token')
+    localStorage.removeItem('admin_refresh_token')
     accessToken.value = null
     refreshToken.value = null
     userPhone.value = null

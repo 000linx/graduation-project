@@ -97,6 +97,34 @@ class Product:
         return items, total, page, page_size
 
     @staticmethod
+    def find_reco_candidates(category_in=None, q=None, min_price=None, max_price=None, limit=300):
+        query = {
+            "stock": {"$gt": 0},
+            "$or": [{"status": {"$exists": False}}, {"status": "on_sale"}],
+        }
+
+        if category_in:
+            query["category"] = {"$in": list(category_in)}
+
+        if q:
+            keyword = re.escape(str(q).strip())
+            if keyword:
+                query["$and"] = [
+                    {"$or": [{"name": {"$regex": keyword, "$options": "i"}}, {"description": {"$regex": keyword, "$options": "i"}}]}
+                ]
+
+        price_filter = {}
+        if min_price is not None:
+            price_filter["$gte"] = float(min_price)
+        if max_price is not None:
+            price_filter["$lte"] = float(max_price)
+        if price_filter:
+            query["price"] = price_filter
+
+        lim = max(min(int(limit), 500), 1)
+        return list(mongo.db.products.find(query).sort([("created_at", -1)]).limit(lim))
+
+    @staticmethod
     def update_stock(product_id, quantity):
         """
         更新产品库存（减少库存）

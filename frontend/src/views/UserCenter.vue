@@ -123,7 +123,50 @@
         </el-tab-pane>
 
         <el-tab-pane label="收货地址" name="address">
-          <div class="py-6 text-sm text-gray-600">此模块可扩展：地址新增/编辑/删除、默认地址。</div>
+          <div class="py-4 space-y-4">
+            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div class="text-sm text-gray-500">支持新增、编辑、删除与默认地址设置。</div>
+              <div class="flex items-center gap-3">
+                <el-button :disabled="!hasToken" type="primary" @click="openAddAddress">新增地址</el-button>
+                <el-button :loading="addressLoading" :disabled="!hasToken" @click="fetchAddresses">刷新</el-button>
+              </div>
+            </div>
+
+            <el-alert v-if="!hasToken" type="warning" show-icon title="未登录" description="请先登录后管理收货地址。" />
+            <el-alert v-else-if="addressError" type="error" show-icon :title="addressError" />
+
+            <el-table
+              v-loading="addressLoading"
+              :data="addresses"
+              stripe
+              size="small"
+              class="bg-white rounded-2xl border"
+              :empty-text="hasToken ? '暂无地址' : '未登录'"
+            >
+              <el-table-column label="收货人" min-width="120">
+                <template #default="{ row }">
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium text-gray-900">{{ row.receiver }}</span>
+                    <el-tag v-if="row.is_default" type="success">默认</el-tag>
+                  </div>
+                </template>
+              </el-table-column>
+              <el-table-column prop="phone" label="手机号" width="140" />
+              <el-table-column label="地址" min-width="260" show-overflow-tooltip>
+                <template #default="{ row }">
+                  {{ row.province }}{{ row.city }}{{ row.district }}{{ row.detail }}
+                </template>
+              </el-table-column>
+              <el-table-column prop="label" label="标签" width="120" />
+              <el-table-column label="操作" width="240" fixed="right">
+                <template #default="{ row }">
+                  <el-button link type="primary" @click="openEditAddress(row)">编辑</el-button>
+                  <el-button link type="danger" @click="removeAddress(row)">删除</el-button>
+                  <el-button v-if="!row.is_default" link type="success" @click="setDefault(row)">设为默认</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -198,6 +241,52 @@
       <el-button type="primary" :loading="afterSaleLoading" :disabled="!afterSaleForm.type" @click="submitAfterSale">提交</el-button>
     </template>
   </el-dialog>
+
+  <el-drawer v-model="addressOpen" :title="addressEditingId ? '编辑地址' : '新增地址'" size="520px">
+    <el-alert
+      v-if="!hasToken"
+      type="warning"
+      show-icon
+      title="未登录"
+      description="请先登录后管理收货地址。"
+      class="mb-4"
+    />
+
+    <el-form v-else ref="addressFormRef" :model="addressForm" :rules="addressRules" label-position="top" status-icon>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <el-form-item label="收货人" prop="receiver">
+          <el-input v-model="addressForm.receiver" placeholder="请输入收货人姓名" />
+        </el-form-item>
+        <el-form-item label="手机号" prop="phone">
+          <el-input v-model="addressForm.phone" placeholder="请输入手机号" inputmode="numeric" autocomplete="tel" />
+        </el-form-item>
+        <el-form-item label="省份" prop="province">
+          <el-input v-model="addressForm.province" placeholder="如：北京市" />
+        </el-form-item>
+        <el-form-item label="城市" prop="city">
+          <el-input v-model="addressForm.city" placeholder="如：北京市" />
+        </el-form-item>
+        <el-form-item label="区/县" prop="district">
+          <el-input v-model="addressForm.district" placeholder="如：海淀区" />
+        </el-form-item>
+        <el-form-item label="标签" prop="label">
+          <el-input v-model="addressForm.label" placeholder="如：家/公司（可选）" />
+        </el-form-item>
+      </div>
+      <el-form-item label="详细地址" prop="detail">
+        <el-input v-model="addressForm.detail" type="textarea" :rows="3" placeholder="街道、门牌号等" />
+      </el-form-item>
+      <el-form-item>
+        <el-checkbox v-model="addressForm.is_default">设为默认地址</el-checkbox>
+      </el-form-item>
+      <el-form-item>
+        <div class="flex items-center gap-3">
+          <el-button type="primary" :loading="addressSaving" @click="saveAddress">保存</el-button>
+          <el-button :disabled="addressSaving" @click="resetAddressForm">重置</el-button>
+        </div>
+      </el-form-item>
+    </el-form>
+  </el-drawer>
 </template>
 
 <script setup lang="ts">
@@ -274,6 +363,56 @@ const pwdRules: FormRules = {
   ]
 }
 
+type Address = {
+  _id: string
+  receiver: string
+  phone: string
+  province: string
+  city: string
+  district: string
+  detail: string
+  label?: string
+  is_default: boolean
+}
+
+const addressLoading = ref(false)
+const addressError = ref<string | null>(null)
+const addresses = ref<Address[]>([])
+
+const addressOpen = ref(false)
+const addressSaving = ref(false)
+const addressEditingId = ref<string | null>(null)
+const addressFormRef = ref<FormInstance>()
+const addressForm = reactive({
+  receiver: '',
+  phone: '',
+  province: '',
+  city: '',
+  district: '',
+  detail: '',
+  label: '',
+  is_default: false
+})
+
+const addressRules: FormRules = {
+  receiver: [{ required: true, message: '请输入收货人', trigger: 'blur' }],
+  phone: [
+    { required: true, message: '请输入手机号', trigger: 'blur' },
+    {
+      validator: (_rule, value, callback) => {
+        const v = String(value || '').trim()
+        if (!/^1\d{10}$/.test(v)) callback(new Error('请输入 11 位手机号'))
+        else callback()
+      },
+      trigger: 'blur'
+    }
+  ],
+  province: [{ required: true, message: '请输入省份', trigger: 'blur' }],
+  city: [{ required: true, message: '请输入城市', trigger: 'blur' }],
+  district: [{ required: true, message: '请输入区/县', trigger: 'blur' }],
+  detail: [{ required: true, message: '请输入详细地址', trigger: 'blur' }]
+}
+
 const paymentText = computed(() => {
   const p = orderDetail.value?.payment
   if (!p) return '-'
@@ -344,6 +483,118 @@ async function fetchOrders() {
     ordersError.value = e?.response?.data?.message || e?.message || '加载失败'
   } finally {
     ordersLoading.value = false
+  }
+}
+
+async function fetchAddresses() {
+  if (!hasToken.value) return
+  addressLoading.value = true
+  addressError.value = null
+  try {
+    const resp = await http.get('/api/user/addresses')
+    const data = unwrap<{ addresses: Address[] }>(resp)
+    addresses.value = Array.isArray(data?.addresses) ? data.addresses : []
+  } catch (e: any) {
+    addressError.value = e?.response?.data?.message || e?.message || '加载失败'
+  } finally {
+    addressLoading.value = false
+  }
+}
+
+function resetAddressForm() {
+  addressForm.receiver = ''
+  addressForm.phone = ''
+  addressForm.province = ''
+  addressForm.city = ''
+  addressForm.district = ''
+  addressForm.detail = ''
+  addressForm.label = ''
+  addressForm.is_default = false
+  addressFormRef.value?.clearValidate()
+}
+
+function openAddAddress() {
+  addressEditingId.value = null
+  resetAddressForm()
+  addressOpen.value = true
+}
+
+function openEditAddress(row: Address) {
+  addressEditingId.value = row._id
+  addressForm.receiver = row.receiver
+  addressForm.phone = row.phone
+  addressForm.province = row.province
+  addressForm.city = row.city
+  addressForm.district = row.district
+  addressForm.detail = row.detail
+  addressForm.label = row.label || ''
+  addressForm.is_default = Boolean(row.is_default)
+  addressOpen.value = true
+}
+
+async function saveAddress() {
+  if (!hasToken.value) return
+  const formInst = addressFormRef.value
+  if (!formInst) return
+  const ok = await formInst.validate().catch(() => false)
+  if (!ok) return
+
+  addressSaving.value = true
+  try {
+    const payload = {
+      receiver: addressForm.receiver.trim(),
+      phone: addressForm.phone.trim(),
+      province: addressForm.province.trim(),
+      city: addressForm.city.trim(),
+      district: addressForm.district.trim(),
+      detail: addressForm.detail.trim(),
+      label: addressForm.label.trim() || undefined,
+      is_default: Boolean(addressForm.is_default)
+    }
+
+    if (addressEditingId.value) {
+      await http.put(`/api/user/addresses/${encodeURIComponent(addressEditingId.value)}`, payload)
+      ElMessage.success('地址已更新')
+    } else {
+      await http.post('/api/user/addresses', payload)
+      ElMessage.success('地址已新增')
+    }
+
+    addressOpen.value = false
+    await fetchAddresses()
+  } catch (e: any) {
+    ElMessage.error(e?.response?.data?.message || e?.message || '保存失败')
+  } finally {
+    addressSaving.value = false
+  }
+}
+
+async function removeAddress(row: Address) {
+  if (!hasToken.value) return
+  const ok = await ElMessageBox.confirm('确认删除该地址吗？', '删除地址', {
+    confirmButtonText: '删除',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).catch(() => false)
+  if (!ok) return
+
+  try {
+    await http.delete(`/api/user/addresses/${encodeURIComponent(row._id)}`)
+    ElMessage.success('已删除')
+    await fetchAddresses()
+  } catch (e: any) {
+    ElMessage.error(e?.response?.data?.message || e?.message || '删除失败')
+  }
+}
+
+async function setDefault(row: Address) {
+  if (!hasToken.value) return
+  try {
+    await http.put(`/api/user/addresses/${encodeURIComponent(row._id)}/default`)
+    ElMessage.success('默认地址已更新')
+    await fetchAddresses()
+  } catch (e: any) {
+    ElMessage.error(e?.response?.data?.message || e?.message || '设置失败')
   }
 }
 
@@ -462,6 +713,10 @@ async function logout() {
   } finally {
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
+    try {
+      window.dispatchEvent(new Event('auth:logout'))
+    } catch {
+    }
     hasToken.value = false
     profile.username = ''
     profile.phone = ''
@@ -508,6 +763,7 @@ onMounted(async () => {
   if (hasToken.value) {
     await fetchProfile()
     await fetchOrders()
+    await fetchAddresses()
   }
 })
 </script>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import ProductCard from '../components/ProductCard.vue'
 import Pagination from '../components/Pagination.vue'
@@ -64,6 +64,17 @@ const products = ref<ProductCardItem[]>([
 
 const loading = ref(false)
 const errorMessage = ref<string | null>(null)
+const skeletonCount = 12
+
+let es: EventSource | null = null
+let sseTimer: number | null = null
+
+function scheduleFetch() {
+  if (sseTimer) window.clearTimeout(sseTimer)
+  sseTimer = window.setTimeout(() => {
+    fetchProducts()
+  }, 200)
+}
 
 const fetchProducts = async () => {
   loading.value = true
@@ -105,7 +116,36 @@ const fetchProducts = async () => {
   }
 }
 
-onMounted(fetchProducts)
+function setupSse() {
+  try {
+    es = new EventSource('/api/product/stream')
+    es.addEventListener('products', () => {
+      scheduleFetch()
+    })
+    es.addEventListener('ping', () => {})
+    es.onerror = () => {
+      try {
+        es?.close()
+      } catch {}
+      es = null
+    }
+  } catch {
+    es = null
+  }
+}
+
+onMounted(() => {
+  fetchProducts()
+  setupSse()
+})
+
+onBeforeUnmount(() => {
+  if (sseTimer) window.clearTimeout(sseTimer)
+  try {
+    es?.close()
+  } catch {}
+  es = null
+})
 watch([activeCategory, keyword], () => {
   currentPage.value = 1
 })
@@ -119,35 +159,41 @@ watch([activeCategory, currentPage, keyword], () => {
 <template>
   <div class="space-y-12">
     <!-- Hero Banner -->
-    <section class="relative h-[400px] rounded-3xl overflow-hidden bg-blue-600 flex items-center">
+    <section class="relative h-[400px] rounded-3xl overflow-hidden bg-[var(--c-primary)] flex items-center">
       <div class="absolute inset-0 opacity-20">
         <img src="https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=abstract+blue+technology+background+clean+modern&image_size=landscape_16_9" alt="banner" class="w-full h-full object-cover" />
       </div>
-      <div class="relative container mx-auto px-12 text-white space-y-6">
+      <div class="relative container mx-auto px-12 text-[var(--c-on-primary)] space-y-6">
         <h1 class="text-5xl font-extrabold leading-tight">重新发现<br/>声音的美好</h1>
-        <p class="text-xl text-blue-100 max-w-lg">全球领先的听力技术，为您提供最专业、最舒适的听力解决方案。</p>
-        <button class="bg-white text-blue-600 px-8 py-3 rounded-full font-bold hover:bg-blue-50 transition-all flex items-center space-x-2">
+        <p class="text-xl opacity-90 max-w-lg">全球领先的听力技术，为您提供最专业、最舒适的听力解决方案。</p>
+        <router-link
+          to="/recommendations"
+          v-feedback
+          class="a11y-hit bg-[var(--c-on-primary)] text-[var(--c-primary)] px-8 py-3 rounded-full font-extrabold flex items-center space-x-2 w-fit"
+          aria-label="去个性化推荐"
+        >
           <span>立即选购</span>
           <ChevronRight class="h-5 w-5" />
-        </button>
+        </router-link>
       </div>
     </section>
 
     <!-- Categories -->
     <section>
       <div class="flex items-center justify-between mb-8">
-        <h2 class="text-2xl font-bold text-gray-900">产品分类</h2>
+        <h2 class="text-2xl font-extrabold text-[var(--c-text)]">产品分类</h2>
       </div>
       <div class="flex space-x-4 overflow-x-auto pb-4 no-scrollbar">
         <button
           v-for="cat in categories"
           :key="cat"
+          v-feedback
           @click="activeCategory = cat"
           :class="[
-            'px-6 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap',
+            'a11y-hit px-6 py-2.5 rounded-full text-base font-extrabold whitespace-nowrap border-2',
             activeCategory === cat
-              ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-              : 'bg-white text-gray-600 hover:bg-gray-100'
+              ? 'bg-[var(--c-primary)] text-[var(--c-on-primary)] border-[var(--c-primary)]'
+              : 'bg-[var(--c-surface)] text-[var(--c-text)] border-[var(--c-border)]'
           ]"
         >
           {{ cat }}
@@ -158,19 +204,31 @@ watch([activeCategory, currentPage, keyword], () => {
     <!-- Product Grid -->
     <section>
       <div class="flex items-center justify-between mb-8">
-        <h2 class="text-2xl font-bold text-gray-900">推荐产品</h2>
-        <button class="text-blue-600 font-medium hover:underline flex items-center">
+        <h2 class="text-2xl font-extrabold text-[var(--c-text)]">推荐产品</h2>
+        <button v-feedback class="a11y-hit text-[var(--c-primary)] font-extrabold underline flex items-center">
           查看全部 <ChevronRight class="h-4 w-4 ml-1" />
         </button>
       </div>
-      <div v-if="loading" class="text-gray-500 text-sm mb-4">正在加载产品...</div>
-      <div v-else-if="errorMessage" class="text-red-600 text-sm mb-4">接口错误：{{ errorMessage }}</div>
+      <div v-if="errorMessage" class="text-[var(--c-danger)] text-base font-bold mb-4">接口错误：{{ errorMessage }}</div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <ProductCard
-          v-for="product in products"
-          :key="product.id"
-          :product="product"
-        />
+        <template v-if="loading">
+          <div v-for="i in skeletonCount" :key="i" class="bg-[var(--c-surface)] rounded-2xl p-4 border-2 border-[var(--c-border)] shadow-sm">
+            <el-skeleton animated>
+              <template #template>
+                <el-skeleton-item variant="image" style="width: 100%; height: 160px" />
+                <div class="mt-4 space-y-2">
+                  <el-skeleton-item variant="h3" style="width: 80%" />
+                  <el-skeleton-item variant="text" style="width: 60%" />
+                  <el-skeleton-item variant="text" style="width: 40%" />
+                </div>
+              </template>
+            </el-skeleton>
+          </div>
+        </template>
+
+        <template v-else>
+          <ProductCard v-for="product in products" :key="product.id" :product="product" />
+        </template>
       </div>
 
       <Pagination

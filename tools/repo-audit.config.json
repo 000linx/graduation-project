@@ -1,0 +1,155 @@
+{
+  "repoName": "hearing-aid-mall",
+  "trashDir": ".trash",
+  "trashRetentionDays": 7,
+  "scan": {
+    "maxTextFileBytes": 2000000,
+    "hashAlgorithm": "sha256",
+    "ignoreDirNames": [
+      ".git",
+      ".svn",
+      ".hg",
+      ".idea",
+      ".vscode",
+      ".trae",
+      ".trash",
+      "audit",
+      "node_modules",
+      "build",
+      "coverage",
+      ".mypy_cache",
+      ".ruff_cache",
+      ".cache",
+      ".venv",
+      "venv"
+    ],
+    "ignoreFileNames": [
+      ".DS_Store",
+      "Thumbs.db"
+    ],
+    "tempExtensions": [
+      ".tmp",
+      ".temp",
+      ".log",
+      ".cache",
+      ".bak",
+      ".old",
+      ".swp",
+      ".swo"
+    ],
+    "sourceExtensions": [
+      ".ts",
+      ".tsx",
+      ".js",
+      ".jsx",
+      ".vue",
+      ".py",
+      ".css",
+      ".scss",
+      ".less",
+      ".html"
+    ],
+    "assetExtensions": [
+      ".png",
+      ".jpg",
+      ".jpeg",
+      ".gif",
+      ".webp",
+      ".svg",
+      ".ico",
+      ".mp3",
+      ".wav",
+      ".ogg",
+      ".ttf",
+      ".otf",
+      ".woff",
+      ".woff2",
+      ".eot",
+      ".pdf",
+      ".xlsx",
+      ".xls",
+      ".csv"
+    ],
+    "referenceExtensions": [
+      ".ts",
+      ".tsx",
+      ".js",
+      ".jsx",
+      ".vue",
+      ".css",
+      ".scss",
+      ".less",
+      ".html"
+    ],
+    "resolveExtensions": [
+      ".ts",
+      ".tsx",
+      ".js",
+      ".jsx",
+      ".vue",
+      ".json",
+      ".css",
+      ".scss",
+      ".less",
+      ".png",
+      ".jpg",
+      ".jpeg",
+      ".svg",
+      ".webp",
+      ".gif"
+    ],
+    "alias": {
+      "@": "frontend/src"
+    }
+  },
+  "qualityGates": {
+    "frontend": {
+      "cwd": "frontend",
+      "install": [
+        "npm",
+        "ci"
+      ],
+      "build": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "test": [
+        "npx",
+        "vitest",
+        "run"
+      ]
+    },
+    "backend": {
+      "cwd": "backend",
+      "venvDir": ".venv",
+      "pythonCandidates": [
+        "python",
+        "py"
+      ],
+      "install": [
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        "requirements.txt"
+      ],
+      "test": [
+        "-m",
+        "pytest",
+        "-q"
+      ]
+    },
+    "docker": {
+      "dockerfileCandidates": [
+        "Dockerfile",
+        "docker/Dockerfile"
+      ],
+      "buildCommand": [
+        "docker",
+        "build",
+        "."
+      ]
+    }
+  }
+}

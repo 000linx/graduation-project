@@ -29,6 +29,21 @@ const routes = [
     component: () => import('../views/Login.vue')
   },
   {
+    path: '/register',
+    name: 'Register',
+    component: () => import('../views/Register.vue')
+  },
+  {
+    path: '/recommendations',
+    name: 'Recommendations',
+    component: () => import('../views/Recommendations.vue')
+  },
+  {
+    path: '/admin/login',
+    name: 'AdminLogin',
+    component: () => import('../views/Login.vue')
+  },
+  {
     path: '/profile',
     name: 'UserCenter',
     component: () => import('../views/UserCenter.vue'),
@@ -61,6 +76,12 @@ const routes = [
         name: 'AdminOrders',
         component: () => import('../views/admin/AdminOrders.vue'),
         meta: { title: '订单管理' }
+      },
+      {
+        path: 'sales',
+        name: 'AdminSales',
+        component: () => import('../views/admin/AdminSales.vue'),
+        meta: { title: '销售报表' }
       }
     ]
   }
@@ -76,6 +97,16 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const requiresAuth = Boolean(to.meta?.requiresAuth)
+  const isAdmin = to.path === '/admin' || to.path.startsWith('/admin/')
+  const isAdminLogin = to.path === '/admin/login'
+
+  // Admin routes (excluding /admin/login) require authentication
+  if (isAdmin && !isAdminLogin) {
+    const adminToken = localStorage.getItem('admin_access_token')
+    if (!adminToken) return { path: '/admin/login', query: { redirect: to.fullPath } }
+    return true
+  }
+
   if (!requiresAuth) return true
   const token = localStorage.getItem('access_token')
   if (token) return true

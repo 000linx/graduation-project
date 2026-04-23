@@ -46,6 +46,7 @@ class CreateProductSchema(Schema):
     stock = fields.Int(required=True, validate=validate.Range(min=0))
     description = fields.Str(load_default="")
     image_url = fields.Str(load_default=None, allow_none=True)
+    status = fields.Str(load_default="on_sale", validate=validate.OneOf(["on_sale", "off_sale"]))
 
 
 class UpdateProductSchema(Schema):
@@ -58,6 +59,11 @@ class UpdateProductSchema(Schema):
     stock = fields.Int(load_default=None, allow_none=True, validate=validate.Range(min=0))
     description = fields.Str(load_default=None, allow_none=True)
     image_url = fields.Str(load_default=None, allow_none=True)
+    status = fields.Str(load_default=None, allow_none=True, validate=validate.OneOf(["on_sale", "off_sale"]))
+
+
+class CreateProductBatchSchema(Schema):
+    products = fields.List(fields.Nested(CreateProductSchema), required=True, validate=validate.Length(min=1, max=200))
 
 
 class ListOrdersQuerySchema(Schema):
@@ -126,5 +132,28 @@ class ListAuditLogsQuerySchema(Schema):
     action = fields.Str(load_default=None)
     resource_type = fields.Str(load_default=None)
     resource_id = fields.Str(load_default=None)
+    page = fields.Int(load_default=1, validate=validate.Range(min=1, max=100000))
+    page_size = fields.Int(load_default=20, validate=validate.Range(min=1, max=200))
+
+
+class SalesSeriesQuerySchema(Schema):
+    granularity = fields.Str(
+        load_default="day",
+        validate=validate.OneOf(["day", "week", "month", "quarter", "year"]),
+    )
+    start = fields.Str(load_default=None, allow_none=True)
+    end = fields.Str(load_default=None, allow_none=True)
+    category = fields.Str(load_default=None, allow_none=True)
+    page = fields.Int(load_default=1, validate=validate.Range(min=1, max=100000))
+    page_size = fields.Int(load_default=50, validate=validate.Range(min=1, max=500))
+
+
+class SalesDetailQuerySchema(Schema):
+    granularity = fields.Str(
+        load_default="day",
+        validate=validate.OneOf(["day", "week", "month", "quarter", "year"]),
+    )
+    bucket = fields.Str(required=True, validate=validate.Length(min=1, max=50))
+    category = fields.Str(load_default=None, allow_none=True)
     page = fields.Int(load_default=1, validate=validate.Range(min=1, max=100000))
     page_size = fields.Int(load_default=20, validate=validate.Range(min=1, max=200))

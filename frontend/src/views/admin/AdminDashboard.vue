@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import http, { unwrap } from '../../api/http'
+import SalesBarChart from '../../components/admin/SalesBarChart.vue'
 
 type Stats = {
   users: number
@@ -64,6 +65,7 @@ onMounted(fetchStats)
         <div class="text-3xl font-semibold mt-2">¥{{ Number(stats.total_sales || 0).toFixed(2) }}</div>
       </div>
     </div>
+
+    <SalesBarChart />
   </div>
 </template>
-

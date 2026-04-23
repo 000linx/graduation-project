@@ -5,6 +5,7 @@ from ..utils.jwt_util import JwtUtil
 from flask_jwt_extended import jwt_required, get_jwt, decode_token
 import time
 from .. import extensions
+from bson.errors import InvalidId
 
 user_bp = Blueprint('user', __name__)
 
@@ -136,3 +137,115 @@ def change_password():
         return ApiResponse.error("Failed to update password")
 
     return ApiResponse.success(message="Password updated")
+
+
+@user_bp.route('/addresses', methods=['GET'])
+@jwt_required()
+def list_addresses():
+    user_id = JwtUtil.get_current_user_id()
+    try:
+        addresses = User.list_addresses(user_id)
+        return ApiResponse.success({"addresses": addresses})
+    except Exception:
+        return ApiResponse.error("Failed to load addresses", 500)
+
+
+@user_bp.route('/addresses', methods=['POST'])
+@jwt_required()
+def create_address():
+    user_id = JwtUtil.get_current_user_id()
+    data = request.get_json(silent=True) or {}
+    required_fields = ["receiver", "phone", "province", "city", "district", "detail"]
+    for f in required_fields:
+        if not data.get(f):
+            return ApiResponse.error("Missing fields")
+    try:
+        addr_id = User.add_address(user_id, data)
+        return ApiResponse.success({"address_id": addr_id}, "Address created", 201)
+    except Exception:
+        return ApiResponse.error("Failed to create address", 500)
+
+
+@user_bp.route('/addresses/<address_id>', methods=['PUT'])
+@jwt_required()
+def update_address(address_id):
+    user_id = JwtUtil.get_current_user_id()
+    data = request.get_json(silent=True) or {}
+    allowed = {"receiver", "phone", "province", "city", "district", "detail", "label", "is_default"}
+    updates = {k: v for k, v in data.items() if k in allowed}
+    if not updates:
+        return ApiResponse.error("No updates")
+    try:
+        ok = User.update_address(user_id, address_id, updates)
+        if not ok:
+            return ApiResponse.not_found("Address not found")
+        return ApiResponse.success({"address_id": address_id}, "Address updated")
+    except InvalidId:
+        return ApiResponse.error("Invalid id")
+    except Exception:
+        return ApiResponse.error("Failed to update address", 500)
+
+
+@user_bp.route('/addresses/<address_id>', methods=['DELETE'])
+@jwt_required()
+def delete_address(address_id):
+    user_id = JwtUtil.get_current_user_id()
+    try:
+        ok = User.delete_address(user_id, address_id)
+        if not ok:
+            return ApiResponse.not_found("Address not found")
+        return ApiResponse.success({"address_id": address_id}, "Address deleted")
+    except InvalidId:
+        return ApiResponse.error("Invalid id")
+    except Exception:
+        return ApiResponse.error("Failed to delete address", 500)
+
+
+@user_bp.route('/addresses/<address_id>/default', methods=['PUT'])
+@jwt_required()
+def set_default_address(address_id):
+    user_id = JwtUtil.get_current_user_id()
+    try:
+        ok = User.set_default_address(user_id, address_id)
+        if not ok:
+            return ApiResponse.not_found("Address not found")
+        return ApiResponse.success({"address_id": address_id}, "Default updated")
+    except InvalidId:
+        return ApiResponse.error("Invalid id")
+    except Exception:
+        return ApiResponse.error("Failed to set default", 500)
+
+
+@user_bp.route('/hearing_profile', methods=['GET'])
+@jwt_required()
+def get_hearing_profile():
+    user_id = JwtUtil.get_current_user_id()
+    user = User.find_by_id(user_id)
+    if not user:
+        return ApiResponse.not_found("User not found")
+    profile = user.get("hearing_profile")
+    return ApiResponse.success({"hearing_profile": profile})
+
+
+@user_bp.route('/hearing_profile', methods=['PUT'])
+@jwt_required()
+def update_hearing_profile():
+    user_id = JwtUtil.get_current_user_id()
+    user = User.find_by_id(user_id)
+    if not user:
+        return ApiResponse.not_found("User not found")
+
+    data = request.get_json(silent=True) or {}
+    profile = data.get("hearing_profile") if isinstance(data, dict) else None
+    if not isinstance(profile, dict):
+        return ApiResponse.error("Missing fields")
+
+    allowed = {"hearing_level", "scenes", "budget_min", "budget_max", "brands"}
+    payload = {k: profile.get(k) for k in allowed if k in profile}
+
+    try:
+        User.set_hearing_profile(user_id, payload)
+    except Exception:
+        return ApiResponse.error("Failed to update", 500)
+
+    return ApiResponse.success({"hearing_profile": payload}, "Updated")

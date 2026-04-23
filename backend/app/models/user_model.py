@@ -21,6 +21,8 @@ class User:
             "phone": phone,
             "password_hash": generate_password_hash(password),
             "role": role,
+            "addresses": [],
+            "hearing_profile": None,
             "created_at": datetime.now()
         }
         
@@ -75,4 +77,150 @@ class User:
         return mongo.db.users.update_one(
             {"_id": ObjectId(user_id)},
             {"$set": {"password_hash": generate_password_hash(new_password)}}
+        )
+
+    @staticmethod
+    def list_addresses(user_id):
+        user = mongo.db.users.find_one({"_id": ObjectId(user_id)}, projection={"addresses": 1})
+        items = (user or {}).get("addresses") or []
+        result = []
+        for a in items:
+            result.append(
+                {
+                    "_id": str(a.get("_id")),
+                    "receiver": a.get("receiver"),
+                    "phone": a.get("phone"),
+                    "province": a.get("province"),
+                    "city": a.get("city"),
+                    "district": a.get("district"),
+                    "detail": a.get("detail"),
+                    "label": a.get("label"),
+                    "is_default": bool(a.get("is_default")),
+                    "created_at": a.get("created_at"),
+                    "updated_at": a.get("updated_at"),
+                }
+            )
+        return result
+
+    @staticmethod
+    def add_address(user_id, address: dict):
+        uid = ObjectId(user_id)
+        user = mongo.db.users.find_one({"_id": uid}, projection={"addresses": 1})
+        addresses = (user or {}).get("addresses") or []
+
+        now = datetime.now()
+        addr_id = ObjectId()
+        is_default = bool(address.get("is_default")) or len(addresses) == 0
+
+        if is_default:
+            for a in addresses:
+                a["is_default"] = False
+
+        new_addr = {
+            "_id": addr_id,
+            "receiver": address.get("receiver"),
+            "phone": address.get("phone"),
+            "province": address.get("province"),
+            "city": address.get("city"),
+            "district": address.get("district"),
+            "detail": address.get("detail"),
+            "label": address.get("label"),
+            "is_default": is_default,
+            "created_at": now,
+            "updated_at": now,
+        }
+        addresses.append(new_addr)
+        mongo.db.users.update_one({"_id": uid}, {"$set": {"addresses": addresses}})
+        return str(addr_id)
+
+    @staticmethod
+    def update_address(user_id, address_id, updates: dict):
+        uid = ObjectId(user_id)
+        aid = ObjectId(address_id)
+        user = mongo.db.users.find_one({"_id": uid}, projection={"addresses": 1})
+        addresses = (user or {}).get("addresses") or []
+
+        found = False
+        now = datetime.now()
+        for a in addresses:
+            if a.get("_id") == aid:
+                for k in ["receiver", "phone", "province", "city", "district", "detail", "label"]:
+                    if k in updates:
+                        a[k] = updates.get(k)
+                if "is_default" in updates and bool(updates.get("is_default")):
+                    for other in addresses:
+                        other["is_default"] = False
+                    a["is_default"] = True
+                a["updated_at"] = now
+                found = True
+                break
+
+        if not found:
+            return False
+
+        mongo.db.users.update_one({"_id": uid}, {"$set": {"addresses": addresses}})
+        return True
+
+    @staticmethod
+    def delete_address(user_id, address_id):
+        uid = ObjectId(user_id)
+        aid = ObjectId(address_id)
+        user = mongo.db.users.find_one({"_id": uid}, projection={"addresses": 1})
+        addresses = (user or {}).get("addresses") or []
+
+        new_list = []
+        removed_default = False
+        removed = False
+        for a in addresses:
+            if a.get("_id") == aid:
+                removed = True
+                removed_default = bool(a.get("is_default"))
+                continue
+            new_list.append(a)
+
+        if not removed:
+            return False
+
+        if removed_default and new_list:
+            for i, a in enumerate(new_list):
+                a["is_default"] = i == 0
+
+        mongo.db.users.update_one({"_id": uid}, {"$set": {"addresses": new_list}})
+        return True
+
+    @staticmethod
+    def set_default_address(user_id, address_id):
+        uid = ObjectId(user_id)
+        aid = ObjectId(address_id)
+        user = mongo.db.users.find_one({"_id": uid}, projection={"addresses": 1})
+        addresses = (user or {}).get("addresses") or []
+
+        found = False
+        for a in addresses:
+            if a.get("_id") == aid:
+                found = True
+                break
+        if not found:
+            return False
+
+        for a in addresses:
+            a["is_default"] = a.get("_id") == aid
+            if a["is_default"]:
+                a["updated_at"] = datetime.now()
+
+        mongo.db.users.update_one({"_id": uid}, {"$set": {"addresses": addresses}})
+        return True
+
+    @staticmethod
+    def get_hearing_profile(user_id):
+        user = mongo.db.users.find_one({"_id": ObjectId(user_id)}, projection={"hearing_profile": 1})
+        return (user or {}).get("hearing_profile")
+
+    @staticmethod
+    def set_hearing_profile(user_id, profile: dict):
+        payload = dict(profile or {})
+        payload["updated_at"] = datetime.now()
+        return mongo.db.users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"hearing_profile": payload}}
         )

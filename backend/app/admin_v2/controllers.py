@@ -20,6 +20,7 @@ from werkzeug.security import generate_password_hash
 from .. import extensions
 from ..extensions import mongo
 from ..models.order_model import Order
+from ..services.product_stream_service import ProductStreamService
 from ..utils.errors import ConflictError, ValidationError
 from ..utils.response import ApiResponse
 from ..utils.serialize import to_safe_json
@@ -30,10 +31,13 @@ from .daos.rbac_dao import RbacDao
 from .daos.user_dao import AdminUserDao
 from .schemas import (
     BootstrapAdminSchema,
+    CreateProductBatchSchema,
     CreateProductSchema,
     CreateRoleSchema,
     ListAuditLogsQuerySchema,
     ListOrdersQuerySchema,
+    SalesDetailQuerySchema,
+    SalesSeriesQuerySchema,
     ListUsersQuerySchema,
     LogoutSchema,
     ProcessAfterSaleSchema,
@@ -47,6 +51,8 @@ from .services.admin_service import AdminService
 from .services.audit_service import AuditService
 from .services.auth_service import AdminAuthService
 from .services.rbac_service import RbacService
+from .services.sales_service import SalesService
+from .services.reco_metrics_service import RecoMetricsService
 
 
 def _load_json(schema, payload):
@@ -209,6 +215,47 @@ def register_admin_routes(admin_bp):
         data = AdminService.get_stats()
         return ApiResponse.success(to_safe_json(data))
 
+    @admin_bp.route("/sales/series", methods=["GET"])
+    @require_permission("admin.stats.read")
+    @audit(action="admin.sales.series", resource_type="stats")
+    def sales_series():
+        q = _load_query(SalesSeriesQuerySchema())
+        data = SalesService.series(
+            granularity=q["granularity"],
+            start=q.get("start"),
+            end=q.get("end"),
+            category=q.get("category"),
+            page=int(q["page"]),
+            page_size=int(q["page_size"]),
+        )
+        return ApiResponse.success(to_safe_json(data))
+
+    @admin_bp.route("/sales/detail", methods=["GET"])
+    @require_permission("admin.stats.read")
+    @audit(action="admin.sales.detail", resource_type="stats")
+    def sales_detail():
+        q = _load_query(SalesDetailQuerySchema())
+        data = SalesService.detail(
+            granularity=q["granularity"],
+            bucket=q["bucket"],
+            category=q.get("category"),
+            page=int(q["page"]),
+            page_size=int(q["page_size"]),
+        )
+        return ApiResponse.success(to_safe_json(data))
+
+    @admin_bp.route("/reco/metrics", methods=["GET"])
+    @require_permission("admin.stats.read")
+    @audit(action="admin.reco.metrics", resource_type="stats")
+    def reco_metrics():
+        days = request.args.get("days", 7)
+        try:
+            d = int(days)
+        except Exception:
+            d = 7
+        data = RecoMetricsService.metrics(days=d)
+        return ApiResponse.success(to_safe_json(data))
+
     @admin_bp.route("/users", methods=["GET"])
     @require_permission("admin.users.read")
     @audit(action="admin.users.read", resource_type="user")
@@ -272,9 +319,31 @@ def register_admin_routes(admin_bp):
             "stock": int(data["stock"]),
             "description": data.get("description") or "",
             "image_url": data.get("image_url"),
+            "status": data.get("status") or "on_sale",
         }
         product_id = AdminProductDao.create(doc)
+        ProductStreamService.bump_version()
         return ApiResponse.success({"product_id": str(product_id)}, "Product created", 201)
+
+    @admin_bp.route("/products/batch", methods=["POST"])
+    @require_permission("admin.products.create")
+    @audit(action="admin.products.batch_create", resource_type="product")
+    def batch_create_products():
+        data = _load_json(CreateProductBatchSchema(), request.get_json(silent=True))
+        created_ids = []
+        for p in data.get("products") or []:
+            doc = {
+                "name": p["name"],
+                "category": p["category"],
+                "price": float(p["price"]),
+                "stock": int(p["stock"]),
+                "description": p.get("description") or "",
+                "image_url": p.get("image_url"),
+                "status": p.get("status") or "on_sale",
+            }
+            created_ids.append(str(AdminProductDao.create(doc)))
+        ProductStreamService.bump_version()
+        return ApiResponse.success({"product_ids": created_ids}, "Products created", 201)
 
     @admin_bp.route("/products/<product_id>", methods=["PUT"])
     @require_permission("admin.products.update")
@@ -288,6 +357,7 @@ def register_admin_routes(admin_bp):
         updated = AdminProductDao.update_by_id(product_id, updates)
         if not updated or updated.matched_count == 0:
             return ApiResponse.not_found("Product not found")
+        ProductStreamService.bump_version()
         return ApiResponse.success({"product_id": product_id}, "Product updated")
 
     @admin_bp.route("/products/<product_id>", methods=["DELETE"])
@@ -297,6 +367,7 @@ def register_admin_routes(admin_bp):
         deleted = AdminProductDao.delete_by_id(product_id)
         if not deleted or deleted.deleted_count == 0:
             return ApiResponse.not_found("Product not found")
+        ProductStreamService.bump_version()
         return ApiResponse.success({"product_id": product_id}, "Product deleted")
 
     @admin_bp.route("/orders", methods=["GET"])

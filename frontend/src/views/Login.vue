@@ -1,73 +1,13 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import type { FormInstance, FormRules } from 'element-plus'
-import { ElMessage } from 'element-plus'
-import axios from 'axios'
+import { computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useLoginMode } from '../hooks/useLoginMode'
+import UserLogin from '../components/auth/UserLogin.vue'
+import AdminLogin from '../components/auth/AdminLogin.vue'
+import { ShieldAlert, User } from 'lucide-vue-next'
 
 const router = useRouter()
-const route = useRoute()
-
-const formRef = ref<FormInstance>()
-const loading = ref(false)
-
-const form = reactive({
-  phone: '',
-  password: ''
-})
-
-const rules: FormRules = {
-  phone: [
-    { required: true, message: '请输入手机号', trigger: 'blur' },
-    {
-      validator: (_rule, value, callback) => {
-        const v = String(value || '').trim()
-        if (!/^1\d{10}$/.test(v)) callback(new Error('请输入 11 位手机号'))
-        else callback()
-      },
-      trigger: 'blur'
-    }
-  ],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }, { min: 6, message: '密码至少 6 位', trigger: 'blur' }]
-}
-
-const redirectTo = computed(() => {
-  const q = route.query.redirect
-  return typeof q === 'string' && q.length > 0 ? q : '/profile'
-})
-
-async function submit() {
-  const inst = formRef.value
-  if (!inst) return
-  const ok = await inst.validate().catch(() => false)
-  if (!ok) return
-
-  loading.value = true
-  try {
-    const resp = await axios.post('/api/user/login', {
-      phone: form.phone.trim(),
-      password: form.password
-    })
-    const tokens = resp?.data?.data?.tokens
-    const accessToken = tokens?.access_token
-    const refreshToken = tokens?.refresh_token
-    if (!accessToken) {
-      ElMessage.error('登录失败：未获取到令牌')
-      return
-    }
-
-    localStorage.setItem('access_token', String(accessToken))
-    if (refreshToken) localStorage.setItem('refresh_token', String(refreshToken))
-
-    ElMessage.success('登录成功')
-    await router.replace(redirectTo.value)
-  } catch (e: any) {
-    const msg = e?.response?.data?.message || e?.message || '登录失败'
-    ElMessage.error(String(msg))
-  } finally {
-    loading.value = false
-  }
-}
+const { isUserMode, isAdminMode, toggleMode } = useLoginMode()
 
 function goHome() {
   router.replace('/')
@@ -75,54 +15,138 @@ function goHome() {
 
 onMounted(() => {
   const token = localStorage.getItem('access_token')
-  if (token) router.replace(redirectTo.value)
+  if (token && isUserMode.value) {
+    router.replace('/profile')
+  }
 })
+
+// Keyboard accessible trigger
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault()
+    toggleMode()
+  }
+}
 </script>
 
 <template>
-  <div class="min-h-[calc(100vh-4rem)] bg-gray-50">
-    <div class="max-w-6xl mx-auto px-4 py-10">
+  <div class="min-h-[calc(100vh-4rem)] bg-[var(--c-bg)] flex items-center justify-center">
+    <div class="max-w-6xl w-full mx-auto px-4 py-10">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-        <div class="hidden lg:block">
-          <div class="text-3xl font-extrabold text-gray-900">欢迎回来</div>
-          <div class="text-gray-500 mt-3 leading-relaxed">
-            登录后可查看订单、进行支付、提交评价与售后申请。
-          </div>
-          <div class="mt-8 bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-            <div class="text-sm text-gray-600">提示</div>
-            <ul class="mt-3 text-sm text-gray-500 space-y-2">
-              <li>· 使用手机号登录</li>
-              <li>· 若提示登录过期，请重新登录</li>
-              <li>· 修改密码后会自动退出</li>
-            </ul>
-          </div>
+        <!-- 左侧信息区 -->
+        <div class="hidden lg:block relative overflow-hidden transition-all duration-300">
+          <transition name="fade-slide" mode="out-in">
+            <div v-if="isUserMode" key="user-info">
+              <div class="text-3xl font-extrabold text-[var(--c-text)]">欢迎回来</div>
+              <div class="text-[var(--c-muted)] mt-3 leading-relaxed">
+                一键登录，畅享极速下单与专属会员权益！
+              </div>
+              <div class="mt-8 bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-6 shadow-sm">
+                <div class="text-base text-[var(--c-text)] font-extrabold">提示</div>
+                <ul class="mt-3 text-base text-[var(--c-muted)] space-y-2">
+                  <li>· 使用手机号登录</li>
+                  <li>· 若提示登录过期，请重新登录</li>
+                  <li>· 修改密码后会自动退出</li>
+                </ul>
+              </div>
+            </div>
+            <div v-else key="admin-info">
+              <div class="text-3xl font-extrabold text-[var(--c-text)]">管理后台</div>
+              <div class="text-[var(--c-muted)] mt-3 leading-relaxed">
+                您正在登录系统管理后台，请使用管理员账号授权进入。
+              </div>
+              <div class="mt-8 bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-6 shadow-sm">
+                <div class="text-base text-[var(--c-text)] font-extrabold flex items-center gap-2">
+                  <ShieldAlert class="w-4 h-4" />
+                  安全提醒
+                </div>
+                <ul class="mt-3 text-base text-[var(--c-muted)] space-y-2">
+                  <li>· 管理员操作将被全程审计记录</li>
+                  <li>· 请勿在公共设备上保存后台密码</li>
+                  <li>· 离开座位前请务必登出后台</li>
+                </ul>
+              </div>
+            </div>
+          </transition>
         </div>
 
-        <div class="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-2xl font-bold text-gray-900">用户登录</div>
-              <div class="text-sm text-gray-500 mt-1">请输入手机号与密码</div>
-            </div>
-            <el-button text @click="goHome">返回首页</el-button>
+        <!-- 右侧登录区 -->
+        <div class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-8 shadow-sm relative transition-all duration-300">
+          <!-- 顶部区域 -->
+          <div class="flex items-center justify-between mb-2">
+            <transition name="fade-slide" mode="out-in">
+              <div v-if="isUserMode" key="user-title">
+                <div class="text-2xl font-extrabold text-[var(--c-text)]">用户登录</div>
+                <div class="text-base text-[var(--c-muted)] mt-1">请输入手机号与密码</div>
+              </div>
+              <div v-else key="admin-title">
+                <div class="text-2xl font-extrabold text-[var(--c-text)] flex items-center gap-2">
+                  <ShieldAlert class="w-6 h-6 text-[var(--c-danger)]" />
+                  管理员登录
+                </div>
+                <div class="text-base text-[var(--c-muted)] mt-1">仅授权管理员访问</div>
+              </div>
+            </transition>
+            
+            <el-button text @click="goHome" class="hidden sm:inline-flex">返回首页</el-button>
           </div>
 
-          <el-form ref="formRef" :model="form" :rules="rules" class="mt-8" label-position="top" status-icon>
-            <el-form-item label="手机号" prop="phone">
-              <el-input v-model="form.phone" placeholder="请输入 11 位手机号" inputmode="numeric" autocomplete="tel" />
-            </el-form-item>
-            <el-form-item label="密码" prop="password">
-              <el-input v-model="form.password" type="password" show-password placeholder="请输入密码" autocomplete="current-password" />
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" class="w-full" :loading="loading" @click="submit">登录</el-button>
-            </el-form-item>
-            <div class="text-xs text-gray-500 leading-relaxed">
-              登录即表示你同意平台服务条款与隐私政策。
+          <!-- 登录表单区 -->
+          <div class="min-h-[300px] relative">
+            <transition name="fade-slide" mode="out-in">
+              <UserLogin v-if="isUserMode" key="user-form" />
+              <AdminLogin v-else key="admin-form" />
+            </transition>
+          </div>
+          
+          <!-- 底部切换区：满足键盘访问性，移动端 ≥48x48，视觉层级低，无刷新切换 -->
+          <div class="mt-6 flex justify-center border-t border-[var(--c-border)] pt-6">
+            <div
+              role="button"
+              tabindex="0"
+              v-feedback
+              class="switch-mode-btn group flex items-center justify-center gap-2 text-base font-extrabold text-[var(--c-muted)] rounded-lg cursor-pointer"
+              @click="toggleMode"
+              @keydown="onKeydown"
+              :aria-label="isUserMode ? '切换到管理员登录' : '切换到用户登录'"
+            >
+              <span v-if="isUserMode" class="flex items-center gap-1.5 py-3 px-4">
+                <ShieldAlert class="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                后台登录
+              </span>
+              <span v-else class="flex items-center gap-1.5 py-3 px-4">
+                <User class="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                用户登录
+              </span>
             </div>
-          </el-form>
+          </div>
+          
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* 动画过渡，耗时 <= 300ms */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* 保证移动端点击区域 >= 48x48 */
+.switch-mode-btn {
+  min-width: 48px;
+  min-height: 48px;
+}
+</style>

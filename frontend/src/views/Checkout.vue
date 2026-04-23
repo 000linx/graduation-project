@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import http, { unwrap } from '../api/http'
+import { notify } from '../utils/notify'
+import { useRecoStore } from '../stores/reco'
 
 type CartItem = {
   product_id: string
@@ -10,6 +11,7 @@ type CartItem = {
 }
 
 const router = useRouter()
+const reco = useRecoStore()
 const loading = ref(false)
 const submitting = ref(false)
 const error = ref<string | null>(null)
@@ -48,10 +50,11 @@ async function submitOrder() {
       items: items.value.map((x) => ({ product_id: x.product_id, quantity: x.quantity }))
     }
     await http.post('/api/order/create', payload)
-    ElMessage.success('订单创建成功')
+    await reco.track('purchase', { meta: { items: payload.items } })
+    notify('订单创建成功', { tone: 'success' })
     await router.replace('/profile')
   } catch (e: any) {
-    ElMessage.error(e?.response?.data?.message || e?.message || '创建订单失败')
+    notify(e?.response?.data?.message || e?.message || '创建订单失败', { tone: 'error', flash: true })
   } finally {
     submitting.value = false
   }
@@ -63,20 +66,20 @@ onMounted(fetchCart)
 <template>
   <div class="max-w-3xl mx-auto py-12 px-4">
     <div class="flex items-center justify-between mb-8">
-      <h1 class="text-3xl font-bold">订单结算</h1>
+      <h1 class="text-3xl font-extrabold text-[var(--c-text)]">订单结算</h1>
       <el-button @click="fetchCart" :loading="loading">刷新购物车</el-button>
     </div>
 
     <el-alert v-if="error" type="error" show-icon :title="error" class="mb-6" />
 
-    <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 space-y-6">
-      <div class="text-lg font-semibold text-gray-900">商品清单</div>
+    <div class="bg-[var(--c-surface)] rounded-2xl p-8 shadow-sm border-2 border-[var(--c-border)] space-y-6">
+      <div class="text-lg font-extrabold text-[var(--c-text)]">商品清单</div>
       <el-table v-loading="loading" :data="items" stripe class="border rounded-xl">
         <el-table-column prop="product_id" label="商品ID" min-width="220" />
         <el-table-column prop="quantity" label="数量" width="120" />
       </el-table>
 
-      <div class="text-lg font-semibold text-gray-900">收货信息</div>
+      <div class="text-lg font-extrabold text-[var(--c-text)]">收货信息</div>
       <el-input v-model="form.shipping_address" placeholder="请输入收货地址" />
 
       <div class="flex justify-end">

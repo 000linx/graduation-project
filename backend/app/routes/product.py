@@ -1,7 +1,13 @@
-from flask import Blueprint, request
+import json
+import time
+
+from flask import Blueprint, request, Response
+from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 from ..models.product_model import Product
 from ..utils.response import ApiResponse
+from ..services.product_stream_service import ProductStreamService
 from ..services.recommender import RecommenderService
+from ..services.reco_event_service import RecoEventService
 
 product_bp = Blueprint('product', __name__)
 
@@ -89,3 +95,105 @@ def recommend():
         p['_id'] = str(p['_id'])
         
     return ApiResponse.success({"products": products})
+
+
+@product_bp.route('/recommendations', methods=['GET'])
+def recommendations_v2():
+    anon_id = request.headers.get("X-Anonymous-Id") or request.args.get("anon_id")
+    session_id = request.headers.get("X-Reco-Session") or request.args.get("session_id")
+    ab_override = request.args.get("ab") or request.headers.get("X-Ab-Variant")
+
+    user_id = None
+    try:
+        verify_jwt_in_request(optional=True)
+        user_id = get_jwt_identity()
+    except Exception:
+        user_id = None
+
+    profile = {
+        "hearing_level": request.args.get("hearing_level") or request.args.get("loss_degree") or "",
+        "scenes": request.args.get("scenes") or "",
+        "brands": request.args.get("brands") or "",
+        "budget_min": request.args.get("budget_min"),
+        "budget_max": request.args.get("budget_max"),
+    }
+
+    limit = request.args.get("limit", 12)
+    try:
+        limit_val = int(limit)
+    except Exception:
+        limit_val = 12
+
+    result = RecommenderService.recommend_v2(profile, user_id=user_id, anon_id=anon_id, limit=limit_val, ab_override=ab_override)
+
+    try:
+        RecoEventService.log_event(
+            {
+                "event": "reco_response",
+                "user_id": user_id,
+                "anon_id": anon_id,
+                "session_id": session_id,
+                "variant": result.get("variant"),
+                "profile": profile,
+                "count": len(result.get("items") or []),
+            }
+        )
+    except Exception:
+        pass
+
+    return ApiResponse.success(result)
+
+
+@product_bp.route('/reco/event', methods=['POST'])
+def reco_event():
+    data = request.get_json(silent=True) or {}
+    anon_id = request.headers.get("X-Anonymous-Id") or data.get("anon_id")
+    session_id = request.headers.get("X-Reco-Session") or data.get("session_id")
+
+    user_id = None
+    try:
+        verify_jwt_in_request(optional=True)
+        user_id = get_jwt_identity()
+    except Exception:
+        user_id = None
+
+    event = {
+        "event": data.get("event"),
+        "user_id": user_id,
+        "anon_id": anon_id,
+        "session_id": session_id,
+        "variant": data.get("variant"),
+        "product_id": data.get("product_id"),
+        "rank": data.get("rank"),
+        "meta": data.get("meta") or {},
+    }
+
+    if not event.get("event"):
+        return ApiResponse.error("Missing fields")
+
+    try:
+        RecoEventService.log_event(event)
+    except Exception:
+        return ApiResponse.error("Failed to log event", 500)
+
+    return ApiResponse.success({"ok": True})
+
+
+@product_bp.route('/stream', methods=['GET'])
+def product_stream():
+    def gen():
+        last = ProductStreamService.get_version()
+        yield f"event: products\ndata: {json.dumps({'version': last}, ensure_ascii=False)}\n\n"
+        start = time.time()
+        while True:
+            current = ProductStreamService.get_version()
+            if current != last:
+                last = current
+                yield f"event: products\ndata: {json.dumps({'version': last}, ensure_ascii=False)}\n\n"
+            else:
+                yield "event: ping\ndata: {}\n\n"
+            if time.time() - start > 55:
+                break
+            time.sleep(0.8)
+
+    return Response(gen(), mimetype='text/event-stream')
