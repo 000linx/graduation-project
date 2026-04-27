@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import axios from 'axios'
-import http, { unwrap } from '../api/http'
+import http, { unwrap } from '@/api/http'
 
 type CartItem = {
   product_id: string

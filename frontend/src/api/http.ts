@@ -1,6 +1,26 @@
-import axios from 'axios'
-import { notify } from '../utils/notify'
+/**
+ * HTTP 客户端封装（Axios）。
+ *
+ * 职责：
+ * - 统一为请求附加鉴权头（区分前台/后台 token）
+ * - 统一处理 401/403 等常见错误并给出用户提示
+ * - 提供 unwrap 辅助函数将 ApiEnvelope 解包为业务数据
+ *
+ * Author: Graduation Project Team
+ * Created: 2026-04-26
+ * Dependencies:
+ * - axios
+ * - notify 工具（用于错误提示）
+ */
 
+import axios from 'axios'
+import { notify } from '@/utils/notify'
+
+/**
+ * 后端统一响应包装结构。
+ *
+ * code/message 由后端返回；data 为具体业务数据。
+ */
 export type ApiEnvelope<T> = {
   code: number
   message: string
@@ -10,7 +30,10 @@ export type ApiEnvelope<T> = {
 const http = axios.create()
 
 http.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token') || localStorage.getItem('admin_access_token')
+  const url = String(config?.url || '')
+  const isAdminApi = url.startsWith('/api/admin')
+  // 管理端 API 只能携带 admin_access_token，避免普通用户 token 被误用到后台接口
+  const token = isAdminApi ? localStorage.getItem('admin_access_token') : localStorage.getItem('access_token')
   if (token) {
     config.headers = config.headers ?? {}
     config.headers.Authorization = `Bearer ${token}`
@@ -43,6 +66,15 @@ http.interceptors.response.use(
 )
 
 export function unwrap<T>(resp: { data: ApiEnvelope<T> }): T {
+  /**
+   * 解包 ApiEnvelope，返回 data 字段。
+   *
+   * Args:
+   *   resp: Axios 响应对象（形如 { data: { code, message, data } }）
+   *
+   * Returns:
+   *   业务数据（若后端 data 缺失则返回 null 并强转为 T）
+   */
   return (resp?.data?.data ?? null) as T
 }
 

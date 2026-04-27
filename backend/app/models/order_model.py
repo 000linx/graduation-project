@@ -1,3 +1,17 @@
+"""
+订单模型（MongoDB）。
+
+职责：
+- 订单创建与状态流转
+- 记录支付信息与售后状态
+
+Author: Graduation Project Team
+Created: 2026-04-26
+Dependencies:
+- MongoDB collection: orders
+- bson.ObjectId / datetime
+"""
+
 from ..extensions import mongo
 from bson import ObjectId
 from datetime import datetime
@@ -97,6 +111,21 @@ class Order:
         return mongo.db.orders.update_one(
             {"_id": ObjectId(order_id)},
             {"$set": update}
+        )
+
+    @staticmethod
+    def mark_paid(order_id, payment_method, paid_at=None):
+        update = {
+            "status": "paid",
+            "payment.status": "paid",
+            "payment.method": payment_method,
+            "updated_at": datetime.now(),
+        }
+        if paid_at is not None:
+            update["payment.paid_at"] = paid_at
+        return mongo.db.orders.update_one(
+            {"_id": ObjectId(order_id), "status": "pending"},
+            {"$set": update},
         )
 
     @staticmethod

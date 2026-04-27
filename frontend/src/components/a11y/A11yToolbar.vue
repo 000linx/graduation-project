@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useA11yStore } from '../../stores/a11y'
 import { useSpeechStore } from '../../stores/speech'
+import { notify } from '../../utils/notify'
 
 const a11y = useA11yStore()
 const speech = useSpeechStore()
+const open = ref(false)
+const popRef = ref<HTMLElement | null>(null)
 const scalePercent = computed({
   get: () => Number((a11y.fontScale * 100).toFixed(1)),
   set: (v: number) => a11y.setFontScale(Number(v) / 100)
@@ -15,7 +17,7 @@ function onToggleVoice(v: boolean) {
   a11y.setVoiceEnabled(v)
   if (v) {
     const ok = typeof window !== 'undefined' && ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition)
-    if (!ok) ElMessage.warning('当前浏览器不支持语音输入（Web Speech API）')
+    if (!ok) notify('当前浏览器不支持语音输入（Web Speech API）', { tone: 'warning', flash: true })
   } else {
     speech.stop()
     speech.reset()
@@ -34,54 +36,76 @@ watch(
 
 function toggleSpeech() {
   if (!speech.supported) {
-    ElMessage.warning('当前浏览器不支持语音输入（Web Speech API）')
+    notify('当前浏览器不支持语音输入（Web Speech API）', { tone: 'warning', flash: true })
     return
   }
   if (!a11y.voiceEnabled) a11y.setVoiceEnabled(true)
   if (speech.listening) speech.stop()
   else speech.start('zh-CN')
 }
+
+function onDocPointerDown(e: PointerEvent) {
+  if (!open.value) return
+  const el = popRef.value
+  if (!el) return
+  const t = e.target as Node | null
+  if (t && el.contains(t)) return
+  open.value = false
+}
+
+onMounted(() => {
+  document.addEventListener('pointerdown', onDocPointerDown)
+})
+onUnmounted(() => {
+  document.removeEventListener('pointerdown', onDocPointerDown)
+})
 </script>
 
 <template>
-  <el-popover placement="bottom-end" trigger="click" :width="a11y.largeTextEnabled ? 360 : 320">
-    <template #reference>
+  <div class="relative" ref="popRef">
       <button
         type="button"
         class="a11y-toolbtn"
         aria-label="无障碍与适老化设置"
         v-feedback
+        :aria-expanded="open"
+        @click="open = !open"
       >
         无障碍
       </button>
-    </template>
-
-    <div class="space-y-4">
+    <div
+      v-if="open"
+      class="absolute right-0 mt-3 z-50 rounded-2xl border-2 border-[var(--c-border)] bg-[var(--c-surface)] p-4 shadow-lg"
+      :style="{ width: a11y.largeTextEnabled ? '360px' : '320px' }"
+      role="dialog"
+      aria-label="无障碍与适老化设置面板"
+    >
+      <div class="space-y-4">
       <div class="text-base font-bold" style="color: var(--c-text)">无障碍与适老化</div>
 
       <div class="grid grid-cols-1 gap-3">
         <div class="a11y-row">
           <div class="a11y-row__label">高对比度</div>
-          <el-switch data-testid="a11y-hc" :model-value="a11y.highContrast" @change="(v: any) => a11y.setHighContrast(Boolean(v))" />
+          <input data-testid="a11y-hc" type="checkbox" class="a11y-switch" :checked="a11y.highContrast" @change="(e: any) => a11y.setHighContrast(Boolean(e.target?.checked))" />
         </div>
 
         <div class="a11y-row">
           <div class="a11y-row__label">大字体</div>
-          <el-switch data-testid="a11y-large" :model-value="a11y.largeTextEnabled" @change="() => a11y.toggleLargeText()" />
+          <input data-testid="a11y-large" type="checkbox" class="a11y-switch" :checked="a11y.largeTextEnabled" @change="() => a11y.toggleLargeText()" />
         </div>
 
         <div class="a11y-row">
           <div class="a11y-row__label">语音输入</div>
-          <el-switch data-testid="a11y-voice" :model-value="a11y.voiceEnabled" @change="(v: any) => onToggleVoice(Boolean(v))" />
+          <input data-testid="a11y-voice" type="checkbox" class="a11y-switch" :checked="a11y.voiceEnabled" @change="(e: any) => onToggleVoice(Boolean(e.target?.checked))" />
         </div>
 
         <div v-if="a11y.voiceEnabled" class="space-y-2">
           <div class="text-sm font-semibold" style="color: var(--c-text)">语音输入控制</div>
           <div class="flex items-center gap-2">
-            <el-button type="primary" v-feedback class="a11y-hit" @click="toggleSpeech">
+            <button type="button" v-feedback class="a11y-hit px-4 rounded-xl border-2 border-[var(--c-border)] bg-[var(--c-primary)] text-[var(--c-on-primary)] font-extrabold" @click="toggleSpeech">
               {{ speech.listening ? '停止语音输入' : '开始语音输入' }}
-            </el-button>
-            <el-button v-if="speech.hasText" v-feedback class="a11y-hit" @click="speech.reset">清空</el-button>
+            </button>
+            <button v-if="speech.hasText" type="button" v-feedback class="a11y-hit px-4 rounded-xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] text-[var(--c-text)] font-extrabold" @click="speech.reset">清空</button>
           </div>
           <div v-if="speech.error" class="text-xs font-bold" style="color: #E02020">{{ speech.error }}</div>
           <div v-else class="text-xs" style="color: var(--c-muted)">
@@ -91,35 +115,53 @@ function toggleSpeech() {
 
         <div class="a11y-row">
           <div class="a11y-row__label">语音播报</div>
-          <el-switch data-testid="a11y-tts" :model-value="a11y.ttsEnabled" @change="(v: any) => a11y.setTtsEnabled(Boolean(v))" />
+          <input data-testid="a11y-tts" type="checkbox" class="a11y-switch" :checked="a11y.ttsEnabled" @change="(e: any) => a11y.setTtsEnabled(Boolean(e.target?.checked))" />
         </div>
 
         <div class="a11y-row">
           <div class="a11y-row__label">字幕叠加</div>
-          <el-switch data-testid="a11y-captions" :model-value="a11y.captionsOverlay" @change="(v: any) => a11y.setCaptionsOverlay(Boolean(v))" />
+          <input data-testid="a11y-captions" type="checkbox" class="a11y-switch" :checked="a11y.captionsOverlay" @change="(e: any) => a11y.setCaptionsOverlay(Boolean(e.target?.checked))" />
         </div>
       </div>
 
       <div class="space-y-2">
         <div class="text-sm font-semibold" style="color: var(--c-text)">字号（100% - 200%）</div>
-        <el-slider v-model="scalePercent" :min="100" :max="200" :step="12.5" />
+        <input v-model="scalePercent" type="range" min="100" max="200" step="12.5" class="w-full" aria-label="字号" />
         <div class="text-sm" style="color: var(--c-muted)">{{ scalePercent }}%</div>
       </div>
 
       <div class="space-y-2">
         <div class="text-sm font-semibold" style="color: var(--c-text)">交互反馈</div>
-        <el-radio-group
-          v-model="a11y.interactionFeedback"
-          @change="(v: any) => a11y.setInteractionFeedback(v)"
-          class="a11y-radio"
-        >
-          <el-radio-button label="focus">高亮</el-radio-button>
-          <el-radio-button label="haptic">震动</el-radio-button>
-          <el-radio-button label="sound">音效</el-radio-button>
-        </el-radio-group>
+        <div class="flex flex-wrap gap-2">
+          <button
+            type="button"
+            class="a11y-hit px-3 rounded-xl border-2 border-[var(--c-border)] font-extrabold"
+            :class="a11y.interactionFeedback === 'focus' ? 'bg-[var(--c-primary)] text-[var(--c-on-primary)]' : 'bg-[var(--c-bg)] text-[var(--c-text)]'"
+            @click="a11y.setInteractionFeedback('focus')"
+          >
+            高亮
+          </button>
+          <button
+            type="button"
+            class="a11y-hit px-3 rounded-xl border-2 border-[var(--c-border)] font-extrabold"
+            :class="a11y.interactionFeedback === 'haptic' ? 'bg-[var(--c-primary)] text-[var(--c-on-primary)]' : 'bg-[var(--c-bg)] text-[var(--c-text)]'"
+            @click="a11y.setInteractionFeedback('haptic')"
+          >
+            震动
+          </button>
+          <button
+            type="button"
+            class="a11y-hit px-3 rounded-xl border-2 border-[var(--c-border)] font-extrabold"
+            :class="a11y.interactionFeedback === 'sound' ? 'bg-[var(--c-primary)] text-[var(--c-on-primary)]' : 'bg-[var(--c-bg)] text-[var(--c-text)]'"
+            @click="a11y.setInteractionFeedback('sound')"
+          >
+            音效
+          </button>
+        </div>
       </div>
     </div>
-  </el-popover>
+    </div>
+  </div>
 </template>
 
 <style scoped>
@@ -153,9 +195,9 @@ function toggleSpeech() {
   color: var(--c-text);
 }
 
-.a11y-radio :deep(.el-radio-button__inner) {
-  min-height: 3rem;
-  display: inline-flex;
-  align-items: center;
+.a11y-switch {
+  width: 3.25rem;
+  height: 1.75rem;
+  accent-color: var(--c-primary);
 }
 </style>

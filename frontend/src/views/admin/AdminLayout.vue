@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAdminAuthStore } from '../../stores/adminAuth'
@@ -13,13 +13,26 @@ const a11y = useA11yStore()
 
 const mobileNavOpen = ref(false)
 
-const navItems = [
-  { index: '/admin', label: '概览' },
-  { index: '/admin/users', label: '用户管理' },
-  { index: '/admin/products', label: '商品管理' },
-  { index: '/admin/orders', label: '订单管理' },
-  { index: '/admin/sales', label: '销售报表' }
-]
+const allNavItems = [
+  { index: '/admin', label: '概览', perm: 'admin.stats.read' },
+  { index: '/admin/users', label: '用户管理', perm: 'admin.users.read' },
+  { index: '/admin/products', label: '商品管理', perm: 'admin.products.update' },
+  { index: '/admin/orders', label: '订单管理', perm: 'admin.orders.read' },
+  { index: '/admin/sales', label: '销售报表', perm: 'admin.stats.read' },
+  { index: '/admin/audit', label: '审计日志', perm: 'admin.audit.read' }
+] as const
+
+function hasPermission(required: string) {
+  const granted = new Set((auth.permissions || []).map(String))
+  if (granted.has('*')) return true
+  if (granted.has(required)) return true
+  for (const p of granted) {
+    if (p.endsWith('.*') && required.startsWith(p.slice(0, -1))) return true
+  }
+  return false
+}
+
+const navItems = computed(() => allNavItems.filter((it) => hasPermission(it.perm)))
 
 const active = computed(() => {
   const p = route.path
@@ -27,6 +40,7 @@ const active = computed(() => {
   if (p.startsWith('/admin/products')) return '/admin/products'
   if (p.startsWith('/admin/orders')) return '/admin/orders'
   if (p.startsWith('/admin/sales')) return '/admin/sales'
+  if (p.startsWith('/admin/audit')) return '/admin/audit'
   return '/admin'
 })
 
@@ -43,6 +57,27 @@ async function logout() {
 
 onMounted(() => {
   auth.syncFromStorage()
+  if (auth.accessToken && !auth.verified) {
+    auth.verifyAdmin().finally(() => {
+      const items = navItems.value
+      if (!items.length) {
+        router.replace('/admin/forbidden')
+        return
+      }
+      if (route.path === '/admin' && active.value === '/admin' && !hasPermission('admin.stats.read')) {
+        router.replace(items[0].index)
+      }
+    })
+    return
+  }
+  const items = navItems.value
+  if (!items.length) {
+    router.replace('/admin/forbidden')
+    return
+  }
+  if (route.path === '/admin' && active.value === '/admin' && !hasPermission('admin.stats.read')) {
+    router.replace(items[0].index)
+  }
 })
 </script>
 

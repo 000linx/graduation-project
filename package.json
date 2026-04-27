@@ -1,5 +1,13 @@
 {
+  "private": true,
+  "scripts": {
+    "ci": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/ci.ps1",
+    "dev": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$env:Path = \\\"$env:windir\\\\System32;\\\" + $env:Path; $env:NPM_CONFIG_CACHE = (Join-Path (Get-Location) '.npm-cache'); concurrently -n backend,frontend -c blue,green 'python backend/app/main.py' 'npm --prefix frontend run dev'\"",
+    "dev:backend": "python backend/app/main.py",
+    "dev:frontend": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$env:NPM_CONFIG_CACHE = (Join-Path (Get-Location) '.npm-cache'); npm --prefix frontend run dev\""
+  },
   "devDependencies": {
+    "concurrently": "^9.0.0",
     "@types/node": "^25.6.0"
   }
 }

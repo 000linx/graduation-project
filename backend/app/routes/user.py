@@ -1,3 +1,18 @@
+"""
+用户相关 API 路由（/api/user）。
+
+职责：
+- 用户注册/登录/登出
+- 查询个人信息与修改密码
+
+Author: Graduation Project Team
+Created: 2026-04-26
+Dependencies:
+- Flask Blueprint
+- Flask-JWT-Extended（jwt_required 等）
+- User 模型与 JwtUtil 工具
+"""
+
 from flask import Blueprint, request
 from ..models.user_model import User
 from ..utils.response import ApiResponse

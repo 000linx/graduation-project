@@ -1,3 +1,20 @@
+"""
+后端应用包入口（Flask App Factory）。
+
+职责：
+- 提供 create_app 应用工厂与蓝图注册
+- 统一错误处理与 JWT 处理器注册
+- 可选：在存在 frontend/dist 时提供 SPA 静态资源托管
+
+Author: Graduation Project Team
+Created: 2026-04-26
+Dependencies:
+- Flask
+- Flask-JWT-Extended
+- MongoDB (PyMongo)
+- Redis（用于 token blocklist 与缓存）
+"""
+
 import os
 from flask import Flask, abort, request, send_from_directory
 from werkzeug.exceptions import HTTPException
@@ -14,9 +31,16 @@ from .utils.errors import AppError
 
 def create_app(config_name='default'):
     """
-    应用工厂函数，用于创建和配置 Flask 应用实例
-    :param config_name: 配置名称 (development, production, default)
-    :return: 配置好的 Flask 应用实例
+    应用工厂函数：创建并配置 Flask 应用实例。
+
+    Args:
+        config_name: 配置名称（development/production/default）。
+
+    Returns:
+        Flask: 配置完成的 Flask 应用实例。
+
+    Raises:
+        KeyError: 当 config_name 不存在于配置映射中时可能抛出。
     """
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
     frontend_dist_dir = os.path.join(project_root, "frontend", "dist")
@@ -34,6 +58,14 @@ def create_app(config_name='default'):
     
     # 加载配置
     app.config.from_object(config[config_name])
+
+    if config_name == "production":
+        if app.config.get("SECRET_KEY") in (None, "", "dev-secret-key"):
+            raise RuntimeError("SECRET_KEY must be set in production")
+        if app.config.get("JWT_SECRET_KEY") in (None, "", "jwt-secret-key"):
+            raise RuntimeError("JWT_SECRET_KEY must be set in production")
+        if str(app.config.get("CORS_ORIGINS", "*")).strip() == "*":
+            raise RuntimeError("CORS_ORIGINS must be restricted in production")
     
     # 配置日志记录
     setup_logger(app)

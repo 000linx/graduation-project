@@ -1,10 +1,15 @@
-from __future__ import annotations
-
 """
 管理员模块请求参数校验（Schemas）。
 
 使用 Marshmallow 对管理端接口的 Body 与 Query 参数进行结构化校验。
+
+Author: Graduation Project Team
+Created: 2026-04-26
+Dependencies:
+- marshmallow
 """
+
+from __future__ import annotations
 
 from marshmallow import Schema, fields, validate
 
@@ -14,6 +19,14 @@ class BootstrapAdminSchema(Schema):
     /api/admin/bootstrap 请求体校验。
     """
     username = fields.Str(required=True, validate=validate.Length(min=1, max=50))
+    phone = fields.Str(required=True, validate=validate.Regexp(r"^\d{6,20}$"))
+    password = fields.Str(required=True, validate=validate.Length(min=6, max=128))
+
+
+class AdminLoginSchema(Schema):
+    """
+    /api/admin/login 请求体校验。
+    """
     phone = fields.Str(required=True, validate=validate.Regexp(r"^\d{6,20}$"))
     password = fields.Str(required=True, validate=validate.Length(min=6, max=128))
 

@@ -1,7 +1,7 @@
-import { ElMessage } from 'element-plus'
 import { getActivePinia } from 'pinia'
-import { useA11yStore } from '../stores/a11y'
-import { useAnnouncerStore, type AnnounceTone } from '../stores/announcer'
+import { useA11yStore } from '@/stores/a11y'
+import { useAnnouncerStore, type AnnounceTone } from '@/stores/announcer'
+import { useToastStore } from '@/stores/toast'
 
 type NotifyOptions = {
   tone?: AnnounceTone
@@ -30,10 +30,14 @@ export function notify(text: string, options: NotifyOptions = {}) {
   if (!msg) return
 
   const tone = options.tone ?? 'info'
-  if (tone === 'success') ElMessage.success(msg)
-  else if (tone === 'warning') ElMessage.warning(msg)
-  else if (tone === 'error') ElMessage.error(msg)
-  else ElMessage.info(msg)
+  if (getActivePinia()) {
+    const toast = useToastStore()
+    toast.push(msg, tone, options.flash ? 5200 : 3200)
+  } else {
+    if (tone === 'error') console.error(msg)
+    else if (tone === 'warning') console.warn(msg)
+    else console.info(msg)
+  }
 
   if (getActivePinia()) {
     const announcer = useAnnouncerStore()

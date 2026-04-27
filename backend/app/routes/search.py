@@ -1,6 +1,20 @@
+"""
+搜索相关 API 路由（/api/search）。
+
+职责：
+- 提供简单的商品搜索接口（名称/描述关键字匹配）
+
+Author: Graduation Project Team
+Created: 2026-04-26
+Dependencies:
+- Flask Blueprint
+- MongoDB（products 集合）
+"""
+
 from flask import Blueprint, request
-from ..extensions import mongo
 from ..utils.response import ApiResponse
+from ..models.product_model import Product
+from ..utils.serialize import to_safe_json
 
 search_bp = Blueprint('search', __name__)
 
@@ -12,18 +26,12 @@ def query():
     Query Params: q (搜索关键词)
     """
     q = request.args.get('q', '')
+    q = str(q or '').strip()
     if not q:
         return ApiResponse.success({"results": []})
-        
-    # 基于名称和描述的简单正则搜索
-    results = list(mongo.db.products.find({
-        "$or": [
-            {"name": {"$regex": q, "$options": "i"}},
-            {"description": {"$regex": q, "$options": "i"}}
-        ]
-    }))
-    
-    for r in results:
-        r['_id'] = str(r['_id'])
-        
-    return ApiResponse.success({"results": results})
+
+    if len(q) > 64:
+        q = q[:64]
+
+    items, total, page, page_size = Product.query(q=q, page=1, page_size=20, sort="newest")
+    return ApiResponse.success({"results": to_safe_json(items), "total": total, "page": page, "page_size": page_size})

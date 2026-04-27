@@ -1,3 +1,18 @@
+"""
+用户模型（MongoDB）。
+
+职责：
+- 用户 CRUD（注册/登录所需）
+- 密码哈希与校验
+- 存储用户角色字段（role），用于区分普通用户与管理员
+
+Author: Graduation Project Team
+Created: 2026-04-26
+Dependencies:
+- MongoDB collection: users
+- werkzeug.security（密码哈希）
+"""
+
 from ..extensions import mongo
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson import ObjectId

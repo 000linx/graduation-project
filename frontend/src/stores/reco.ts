@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, reactive, ref } from 'vue'
-import http, { unwrap } from '../api/http'
+import http, { unwrap } from '@/api/http'
 
 export type HearingLevel = '' | '轻度' | '中度' | '重度' | '极重度'
 

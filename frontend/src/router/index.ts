@@ -1,6 +1,28 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../views/Home.vue'
+/**
+ * 前端路由配置与访问控制（Vue Router）。
+ *
+ * 职责：
+ * - 定义前台与管理后台路由
+ * - 统一处理鉴权/授权跳转（前台登录、后台管理员验证）
+ *
+ * Author: Graduation Project Team
+ * Created: 2026-04-26
+ * Dependencies:
+ * - vue-router@4
+ * - pinia store: adminAuth（用于后台 token 与权限校验）
+ */
 
+import { createRouter, createWebHistory } from 'vue-router'
+import Home from '@/views/Home.vue'
+import { useAdminAuthStore } from '@/stores/adminAuth'
+
+/**
+ * 应用路由表。
+ *
+ * Notes:
+ * - 前台受 meta.requiresAuth 控制（例如结算与个人中心）
+ * - 后台统一挂载在 /admin 下，细粒度权限由页面内的权限列表与后端接口共同约束
+ */
 const routes = [
   {
     path: '/',
@@ -44,6 +66,11 @@ const routes = [
     component: () => import('../views/Login.vue')
   },
   {
+    path: '/admin/forbidden',
+    name: 'AdminForbidden',
+    component: () => import('../views/admin/AdminForbidden.vue')
+  },
+  {
     path: '/profile',
     name: 'UserCenter',
     component: () => import('../views/UserCenter.vue'),
@@ -82,6 +109,12 @@ const routes = [
         name: 'AdminSales',
         component: () => import('../views/admin/AdminSales.vue'),
         meta: { title: '销售报表' }
+      },
+      {
+        path: 'audit',
+        name: 'AdminAudit',
+        component: () => import('../views/admin/AdminAudit.vue'),
+        meta: { title: '审计日志' }
       }
     ]
   }
@@ -95,15 +128,29 @@ const router = createRouter({
   }
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
+  /**
+   * 路由守卫：实现前台与后台的双重保护。
+   *
+   * - 前台：依赖 access_token（普通用户登录）
+   * - 后台：依赖 admin_access_token + 后端 /api/admin/me/permissions 验真
+   *
+   * 返回对象表示重定向；返回 true 允许继续导航。
+   */
   const requiresAuth = Boolean(to.meta?.requiresAuth)
   const isAdmin = to.path === '/admin' || to.path.startsWith('/admin/')
   const isAdminLogin = to.path === '/admin/login'
+  const isAdminForbidden = to.path === '/admin/forbidden'
 
   // Admin routes (excluding /admin/login) require authentication
-  if (isAdmin && !isAdminLogin) {
-    const adminToken = localStorage.getItem('admin_access_token')
-    if (!adminToken) return { path: '/admin/login', query: { redirect: to.fullPath } }
+  if (isAdmin && !isAdminLogin && !isAdminForbidden) {
+    const auth = useAdminAuthStore()
+    auth.syncFromStorage()
+    if (!auth.accessToken) return { path: '/admin/login', query: { redirect: to.fullPath } }
+    if (!auth.verified) {
+      const ok = await auth.verifyAdmin()
+      if (!ok) return { path: '/admin/forbidden' }
+    }
     return true
   }
 

@@ -37,10 +37,18 @@ def _bootstrap_admin(client, phone="18800000001", password="password123"):
 
 
 def _login(client, phone, password):
+    resp = client.post("/api/admin/login", json={"phone": phone, "password": password})
+    assert resp.status_code == 200
+    payload = json.loads(resp.data)
+    return payload["data"]["tokens"]["access_token"]
+
+
+def _login_user(client, phone, password):
     resp = client.post("/api/user/login", json={"phone": phone, "password": password})
     assert resp.status_code == 200
     payload = json.loads(resp.data)
     return payload["data"]["tokens"]["access_token"]
+
 
 
 def test_admin_stats_and_audit(client):
@@ -93,5 +101,57 @@ def test_rbac_denies_without_permission(client):
     limited_token = _login(client, "18800000002", "password123")
 
     denied = client.get("/api/admin/users", headers={"Authorization": f"Bearer {limited_token}"})
+    assert denied.status_code == 403
+
+
+def test_admin_login_rejects_non_admin(client):
+    resp = client.post(
+        "/api/user/register",
+        json={"username": "u1", "phone": "18800000003", "password": "password123"},
+    )
+    assert resp.status_code == 201
+
+    denied = client.post("/api/admin/login", json={"phone": "18800000003", "password": "password123"})
+    assert denied.status_code == 403
+
+    user_token = _login_user(client, "18800000003", "password123")
+    denied2 = client.get("/api/admin/stats", headers={"Authorization": f"Bearer {user_token}"})
+    assert denied2.status_code == 403
+
+
+def test_audit_viewer_can_read_audit_only(client):
+    _, phone, password = _bootstrap_admin(client)
+    super_token = _login(client, phone, password)
+
+    resp = client.post(
+        "/api/user/register",
+        json={"username": "aud1", "phone": "18800000004", "password": "password123"},
+    )
+    assert resp.status_code == 201
+    user_id = json.loads(resp.data)["data"]["user_id"]
+
+    resp = client.put(
+        f"/api/admin/users/{user_id}/role",
+        headers={"Authorization": f"Bearer {super_token}"},
+        json={"role": "admin"},
+    )
+    assert resp.status_code == 200
+
+    role = mongo.db.admin_roles.find_one({"name": "audit_viewer"})
+    assert role is not None
+
+    resp = client.put(
+        f"/api/admin/users/{user_id}/rbac_roles",
+        headers={"Authorization": f"Bearer {super_token}"},
+        json={"role_ids": [str(role["_id"])]},
+    )
+    assert resp.status_code == 200
+
+    audit_token = _login(client, "18800000004", "password123")
+
+    ok = client.get("/api/admin/audit", headers={"Authorization": f"Bearer {audit_token}"})
+    assert ok.status_code == 200
+
+    denied = client.get("/api/admin/stats", headers={"Authorization": f"Bearer {audit_token}"})
     assert denied.status_code == 403
 

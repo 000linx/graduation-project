@@ -17,6 +17,32 @@
       </div>
     </div>
 
+    <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4" aria-label="个人中心概览">
+      <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+        <div class="text-sm text-gray-500">待支付</div>
+        <div class="mt-1 text-2xl font-extrabold text-gray-900">{{ hasToken ? pendingCount : '-' }}</div>
+        <div class="mt-3">
+          <el-button :disabled="!hasToken" type="primary" plain @click="activeTab = 'orders'">查看订单</el-button>
+        </div>
+      </div>
+
+      <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+        <div class="text-sm text-gray-500">售后处理中</div>
+        <div class="mt-1 text-2xl font-extrabold text-gray-900">{{ hasToken ? afterSalePendingCount : '-' }}</div>
+        <div class="mt-3">
+          <el-button :disabled="!hasToken" type="warning" plain @click="activeTab = 'orders'">进入售后</el-button>
+        </div>
+      </div>
+
+      <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+        <div class="text-sm text-gray-500">默认地址</div>
+        <div class="mt-1 text-base font-bold text-gray-900 truncate" :title="defaultAddressText">{{ hasToken ? defaultAddressText : '-' }}</div>
+        <div class="mt-3">
+          <el-button :disabled="!hasToken" type="success" plain @click="activeTab = 'address'">管理地址</el-button>
+        </div>
+      </div>
+    </div>
+
     <div class="mt-6 bg-white border border-gray-100 rounded-2xl shadow-sm">
       <el-tabs v-model="activeTab" class="px-4">
         <el-tab-pane label="我的订单" name="orders">
@@ -378,6 +404,21 @@ type Address = {
 const addressLoading = ref(false)
 const addressError = ref<string | null>(null)
 const addresses = ref<Address[]>([])
+
+const pendingCount = computed(() => {
+  return orders.value.filter((o) => String(o.status) === 'pending').length
+})
+
+const afterSalePendingCount = computed(() => {
+  return orders.value.filter((o) => String(o.status) === 'after_sale_pending').length
+})
+
+const defaultAddressText = computed(() => {
+  const d = addresses.value.find((a) => a.is_default)
+  if (!d) return '暂无默认地址'
+  const label = d.label ? `${d.label} · ` : ''
+  return `${label}${d.province}${d.city}${d.district}${d.detail}`
+})
 
 const addressOpen = ref(false)
 const addressSaving = ref(false)

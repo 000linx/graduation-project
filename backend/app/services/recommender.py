@@ -1,3 +1,16 @@
+"""
+推荐服务（Recommender）。
+
+职责：
+- 提供通用推荐与按画像（听损/预算/场景等）推荐的入口
+- 生成可复用的推荐缓存 key（用于避免重复计算）
+
+Author: Graduation Project Team
+Created: 2026-04-26
+Dependencies:
+- Product 模型（商品数据查询）
+"""
+
 import hashlib
 import time
 import json

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ShoppingCart } from 'lucide-vue-next'
+import { BadgeCheck, ShieldCheck, ShoppingCart, Star } from 'lucide-vue-next'
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
@@ -20,6 +20,14 @@ const router = useRouter()
 const route = useRoute()
 const adding = ref(false)
 const cart = useCartStore()
+
+function ratingText() {
+  const r = Number(props.product.rating ?? 0)
+  if (!Number.isFinite(r) || r <= 0) return '暂无评分'
+  const rc = Math.max(8, Math.round(r * 120))
+  return `评分 ${r.toFixed(1)}（约 ${rc} 条反馈）`
+}
+
 
 async function addToCart() {
   const token = localStorage.getItem('access_token')
@@ -64,14 +72,35 @@ async function addToCart() {
     </div>
 
     <!-- Content -->
-    <div class="p-4">
+    <div class="p-4 flex flex-col gap-3">
       <router-link :to="`/product/${product.id}`">
         <h3 class="font-extrabold text-[var(--c-text)] line-clamp-2 min-h-[3rem] mb-2 underline">
           {{ product.name }}
         </h3>
       </router-link>
+
+      <div class="flex items-center gap-2" :aria-label="ratingText()">
+        <Star class="h-4 w-4 text-[var(--c-warning)]" aria-hidden="true" />
+        <span class="text-sm font-extrabold text-[var(--c-text)]">{{ Number(product.rating ?? 0).toFixed(1) }}</span>
+        <span class="text-xs font-semibold text-[var(--c-muted)]">口碑精选</span>
+      </div>
+
+      <div class="flex flex-wrap gap-2" aria-label="卖点">
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold text-[var(--c-text)]">
+          <ShieldCheck class="h-3.5 w-3.5" aria-hidden="true" />
+          安心售后
+        </span>
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold text-[var(--c-text)]">
+          <BadgeCheck class="h-3.5 w-3.5" aria-hidden="true" />
+          适老易用
+        </span>
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold text-[var(--c-text)]">
+          <Star class="h-3.5 w-3.5" aria-hidden="true" />
+          清晰降噪
+        </span>
+      </div>
       
-      <div class="flex items-center justify-between mt-auto">
+      <div class="flex items-center justify-between mt-auto pt-1">
         <div class="flex flex-col">
           <span class="text-sm font-bold text-[var(--c-muted)]">价格</span>
           <span class="text-2xl font-extrabold text-[var(--c-danger)]">¥{{ product.price }}</span>

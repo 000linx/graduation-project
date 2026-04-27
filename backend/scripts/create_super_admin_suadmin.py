@@ -1,3 +1,18 @@
+"""
+创建/更新超级管理员账号（开发环境脚本）。
+
+职责：
+- 确保存在一个 role=admin 且绑定 super_admin RBAC 角色的用户（默认账号 suadmin）
+- 脚本幂等：重复执行会覆盖用户名/手机号/密码并刷新 RBAC 绑定
+
+Author: Graduation Project Team
+Created: 2026-04-26
+Dependencies:
+- Flask app factory: app.create_app
+- MongoDB collections: users, admin_roles, admin_user_roles
+- RBAC defaults: app.admin_v2.services.rbac_service.RbacService
+"""
+
 import os
 import sys
 from datetime import datetime
@@ -13,6 +28,13 @@ from app.admin_v2.services.rbac_service import RbacService
 
 
 def main():
+    """
+    脚本入口：创建或更新默认超级管理员 suadmin（密码 123456）。
+
+    Raises:
+        RuntimeError: 当 super_admin RBAC 角色不存在时抛出。
+        Exception: 当应用初始化或数据库写入失败时抛出。
+    """
     username = "suadmin"
     phone = "19900000000"
     password = "123456"

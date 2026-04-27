@@ -69,12 +69,6 @@ async function submit() {
   loading.value = true
   try {
     await auth.login(form.phone.trim(), form.password)
-    
-    // We should also set regular access token so the backend recognizes us for regular APIs if needed
-    const at = localStorage.getItem('admin_access_token')
-    const rt = localStorage.getItem('admin_refresh_token')
-    if (at) localStorage.setItem('access_token', at)
-    if (rt) localStorage.setItem('refresh_token', rt)
     try {
       window.dispatchEvent(new Event('auth:admin_login'))
     } catch {

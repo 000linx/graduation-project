@@ -1,5 +1,5 @@
-import type { Directive } from 'vue'
-import { useA11yStore } from '../stores/a11y'
+import type { ObjectDirective } from 'vue'
+import { useA11yStore } from '@/stores/a11y'
 
 let audioCtx: AudioContext | null = null
 
@@ -24,7 +24,7 @@ function beep() {
   }
 }
 
-export const vFeedback: Directive<HTMLElement, void> = {
+export const vFeedback: ObjectDirective<HTMLElement, void> = {
   mounted(el) {
     const onDown = () => {
       const a11y = useA11yStore()
@@ -38,7 +38,7 @@ export const vFeedback: Directive<HTMLElement, void> = {
         beep()
       }
     }
-    ;(el as any).__a11y_onDown = onDown
+      ; (el as any).__a11y_onDown = onDown
     el.addEventListener('pointerdown', onDown, { passive: true })
   },
   unmounted(el) {

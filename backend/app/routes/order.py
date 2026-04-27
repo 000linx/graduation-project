@@ -1,10 +1,26 @@
-from flask import Blueprint, request
+"""
+订单相关 API 路由（/api/order）。
+
+职责：
+- 创建订单（含库存校验与支付流程调用）
+- 查询订单列表/详情、更新订单状态
+
+Author: Graduation Project Team
+Created: 2026-04-26
+Dependencies:
+- Flask Blueprint
+- Flask-JWT-Extended（jwt_required）
+- Order/Cart/Product 模型与 PaymentService
+"""
+
+from flask import Blueprint, request, current_app
 from ..models.order_model import Order
 from ..models.cart_model import Cart
 from ..models.product_model import Product
 from ..services.payment_service import PaymentService
 from ..utils.response import ApiResponse
 from ..utils.jwt_util import JwtUtil
+from ..utils.serialize import to_safe_json
 from flask_jwt_extended import jwt_required
 
 order_bp = Blueprint('order', __name__)
@@ -38,46 +54,66 @@ def create_order():
     if not items or not isinstance(items, list) or not shipping_address:
         return ApiResponse.error("Missing order information")
 
-    normalized_items = []
-    total_amount = 0.0
-
+    merged = {}
     for item in items:
         product_id = item.get("product_id")
-        quantity = item.get("quantity", 1)
         if not product_id:
             return ApiResponse.error("Missing product_id")
+        quantity = item.get("quantity", 1)
         try:
             quantity = int(quantity)
         except Exception:
             return ApiResponse.error("Invalid quantity")
         if quantity <= 0:
             return ApiResponse.error("Invalid quantity")
+        merged[str(product_id)] = merged.get(str(product_id), 0) + quantity
 
-        product = Product.find_by_id(product_id)
-        if not product:
+    product_ids = list(merged.keys())
+    try:
+        products = Product.find_by_ids(product_ids)
+        by_id = {str(p.get("_id")): p for p in products}
+        if len(by_id) != len(product_ids):
             return ApiResponse.error("Product not found")
-        stock = int(product.get("stock", 0) or 0)
-        if stock < quantity:
-            return ApiResponse.error("Insufficient stock")
 
-        unit_price = float(product.get("price", 0) or 0)
-        total_amount += unit_price * quantity
-        normalized_items.append({
-            "product_id": product_id,
-            "quantity": quantity,
-            "unit_price": unit_price,
-            "name": product.get("name")
-        })
+        normalized_items = []
+        total_amount = 0.0
+        for pid in product_ids:
+            p = by_id[pid]
+            qty = merged[pid]
+            stock = int(p.get("stock", 0) or 0)
+            if stock < qty:
+                return ApiResponse.error("Insufficient stock")
+            unit_price = float(p.get("price", 0) or 0)
+            total_amount += unit_price * qty
+            normalized_items.append({"product_id": pid, "quantity": qty, "unit_price": unit_price, "name": p.get("name")})
 
-    for item in normalized_items:
-        Product.update_stock(item["product_id"], item["quantity"])
+        reserved = []
+        for it in normalized_items:
+            res = Product.reserve_stock(it["product_id"], it["quantity"])
+            if not res or res.matched_count == 0:
+                for r in reserved:
+                    Product.release_stock(r["product_id"], r["quantity"])
+                return ApiResponse.error("Insufficient stock")
+            reserved.append({"product_id": it["product_id"], "quantity": it["quantity"]})
 
-    order_id = Order.create(user_id, normalized_items, total_amount, shipping_address)
+        order_id = None
+        try:
+            order_id = Order.create(user_id, normalized_items, total_amount, shipping_address)
+        except Exception:
+            for r in reserved:
+                Product.release_stock(r["product_id"], r["quantity"])
+            raise
 
-    for item in normalized_items:
-        Cart.remove_item(user_id, item["product_id"])
+        for it in normalized_items:
+            try:
+                Cart.remove_item(user_id, it["product_id"])
+            except Exception:
+                current_app.logger.exception("Failed to remove cart item after order created")
 
-    return ApiResponse.success({"order_id": str(order_id), "total_amount": total_amount}, "Order created successfully", 201)
+        return ApiResponse.success({"order_id": str(order_id), "total_amount": total_amount}, "Order created successfully", 201)
+    except Exception:
+        current_app.logger.exception("Failed to create order")
+        return ApiResponse.error("Failed to create order", 500)
 
 @order_bp.route('/history', methods=['GET'])
 @jwt_required()
@@ -94,15 +130,7 @@ def order_history():
     orders = Order.find_by_user_id(user_id)
     if status:
         orders = [o for o in orders if o.get("status") == status]
-    
-    for o in orders:
-        o['_id'] = str(o['_id'])
-        o['user_id'] = str(o['user_id'])
-        for item in o.get('items', []):
-            if item.get('product_id') is not None:
-                item['product_id'] = str(item['product_id'])
-            
-    return ApiResponse.success({"orders": orders})
+    return ApiResponse.success({"orders": to_safe_json(orders)})
 
 @order_bp.route('/<order_id>', methods=['GET'])
 @jwt_required()
@@ -118,12 +146,7 @@ def get_order(order_id):
     if str(order.get("user_id")) != str(user_id):
         return ApiResponse.error("Permission denied", 403)
 
-    order['_id'] = str(order['_id'])
-    order['user_id'] = str(order['user_id'])
-    for item in order.get('items', []):
-        if item.get('product_id') is not None:
-            item['product_id'] = str(item['product_id'])
-    return ApiResponse.success(order)
+    return ApiResponse.success(to_safe_json(order))
 
 @order_bp.route('/<order_id>/cancel', methods=['PUT'])
 @jwt_required()

@@ -1,3 +1,17 @@
+"""
+商品模型（MongoDB）。
+
+职责：
+- 商品 CRUD
+- 商品查询（分类/关键字/价格区间等）
+
+Author: Graduation Project Team
+Created: 2026-04-26
+Dependencies:
+- MongoDB collection: products
+- bson.ObjectId / datetime
+"""
+
 from ..extensions import mongo
 from bson import ObjectId
 from datetime import datetime
@@ -49,6 +63,13 @@ class Product:
         :return: 产品文档或 None
         """
         return mongo.db.products.find_one({"_id": ObjectId(product_id)})
+
+    @staticmethod
+    def find_by_ids(product_ids):
+        ids = [ObjectId(str(x)) for x in (product_ids or [])]
+        if not ids:
+            return []
+        return list(mongo.db.products.find({"_id": {"$in": ids}}))
 
     @staticmethod
     def find_by_category(category):
@@ -135,6 +156,30 @@ class Product:
         return mongo.db.products.update_one(
             {"_id": ObjectId(product_id)},
             {"$inc": {"stock": -quantity}, "$set": {"updated_at": datetime.now()}}
+        )
+
+    @staticmethod
+    def reserve_stock(product_id, quantity):
+        if quantity is None:
+            return None
+        qty = int(quantity)
+        if qty <= 0:
+            return None
+        return mongo.db.products.update_one(
+            {"_id": ObjectId(product_id), "stock": {"$gte": qty}},
+            {"$inc": {"stock": -qty}, "$set": {"updated_at": datetime.now()}},
+        )
+
+    @staticmethod
+    def release_stock(product_id, quantity):
+        if quantity is None:
+            return None
+        qty = int(quantity)
+        if qty <= 0:
+            return None
+        return mongo.db.products.update_one(
+            {"_id": ObjectId(product_id)},
+            {"$inc": {"stock": qty}, "$set": {"updated_at": datetime.now()}},
         )
 
     @staticmethod

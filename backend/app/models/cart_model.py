@@ -1,3 +1,17 @@
+"""
+购物车模型（MongoDB）。
+
+职责：
+- 管理用户购物车（单文档 + items 数组）
+- 提供增删改查与清空等操作
+
+Author: Graduation Project Team
+Created: 2026-04-26
+Dependencies:
+- MongoDB collection: cart
+- bson.ObjectId / datetime
+"""
+
 from ..extensions import mongo
 from bson import ObjectId
 from datetime import datetime

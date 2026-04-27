@@ -1,3 +1,19 @@
+"""
+商品相关 API 路由（/api/product）。
+
+职责：
+- 商品列表/详情查询
+- 商品实时更新（SSE）与版本控制
+- 推荐与行为事件记录（部分接口会调用推荐/事件服务）
+
+Author: Graduation Project Team
+Created: 2026-04-26
+Dependencies:
+- Flask Blueprint / Response
+- Product 模型
+- ProductStreamService / RecommenderService / RecoEventService
+"""
+
 import json
 import time
 
@@ -5,6 +21,7 @@ from flask import Blueprint, request, Response
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 from ..models.product_model import Product
 from ..utils.response import ApiResponse
+from ..utils.serialize import to_safe_json
 from ..services.product_stream_service import ProductStreamService
 from ..services.recommender import RecommenderService
 from ..services.reco_event_service import RecoEventService
@@ -51,12 +68,9 @@ def list_products():
         page_size=page_size_val
     )
 
-    for p in products:
-        p['_id'] = str(p['_id'])
-
     total_pages = (total + page_size_val - 1) // page_size_val if page_size_val else 1
     return ApiResponse.success({
-        "products": products,
+        "products": to_safe_json(products),
         "pagination": {
             "page": page_val,
             "page_size": page_size_val,
@@ -75,8 +89,7 @@ def get_product(product_id):
     if not product:
         return ApiResponse.not_found("Product not found")
         
-    product['_id'] = str(product['_id'])
-    return ApiResponse.success(product)
+    return ApiResponse.success(to_safe_json(product))
 
 @product_bp.route('/recommend', methods=['GET'])
 def recommend():
@@ -91,10 +104,7 @@ def recommend():
     else:
         products = RecommenderService.get_recommendations()
         
-    for p in products:
-        p['_id'] = str(p['_id'])
-        
-    return ApiResponse.success({"products": products})
+    return ApiResponse.success({"products": to_safe_json(products)})
 
 
 @product_bp.route('/recommendations', methods=['GET'])

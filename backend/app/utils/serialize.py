@@ -1,11 +1,17 @@
-from __future__ import annotations
-
 """
 安全序列化工具。
 
 将 MongoDB 常见类型（ObjectId、datetime）递归转换为可 JSON 序列化的结构，
 用于 API 输出与审计日志落库，避免出现 “ObjectId/datetime 无法序列化” 的问题。
+
+Author: Graduation Project Team
+Created: 2026-04-26
+Dependencies:
+- bson.ObjectId
+- datetime.datetime
 """
+
+from __future__ import annotations
 
 from datetime import datetime
 from bson import ObjectId

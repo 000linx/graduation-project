@@ -17,27 +17,11 @@
   --c-success: #0a5c2c;
   --focus-ring: #0a3d91;
 
-  color-scheme: light dark;
+  color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --c-bg: #0b0b0b;
-    --c-surface: #111111;
-    --c-text: #ffffff;
-    --c-muted: #e5e7eb;
-    --c-border: #ffffff;
-    --c-primary: #78a6ff;
-    --c-on-primary: #0b0b0b;
-    --c-danger: #ff4d4f;
-    --c-warning: #ffb020;
-    --c-success: #34d399;
-    --focus-ring: #78a6ff;
-  }
 }
 
 html {
@@ -125,6 +109,17 @@ html.hc .el-table,
 html.hc .el-alert {
   background-color: var(--c-surface);
   color: var(--c-text);
+  border-color: var(--c-border);
+}
+
+.el-popover.el-popper {
+  background-color: var(--c-surface);
+  color: var(--c-text);
+  border-color: var(--c-border);
+}
+
+.el-popover.el-popper .el-popper__arrow::before {
+  background: var(--c-surface);
   border-color: var(--c-border);
 }
 

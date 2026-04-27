@@ -1,3 +1,15 @@
+"""
+听力评估服务（简化实现）。
+
+职责：
+- 根据听力测试结果给出听损分级与建议
+
+Author: Graduation Project Team
+Created: 2026-04-26
+Dependencies:
+- 无外部依赖（纯计算）
+"""
+
 class HearingEvalService:
     """
     听力评估服务，分析听力测试结果
@@ -5,9 +17,16 @@ class HearingEvalService:
     @staticmethod
     def evaluate(test_results):
         """
-        评估听力测试结果并给出建议
-        :param test_results: 测试结果字典 {频率: 分贝数}
-        :return: 评估报告字典
+        评估听力测试结果并给出建议。
+
+        Args:
+            test_results: 测试结果字典（示例：{频率: 分贝数}）。
+
+        Returns:
+            dict: 评估报告，包括 average_loss_db、degree 与 recommendation。
+
+        Notes:
+            当前实现为简化规则：使用平均听阈(dB HL)做分级。
         """
         # 复杂听力测试分析占位符
         # 目前基于平均分贝数 (dB HL) 进行简单分类

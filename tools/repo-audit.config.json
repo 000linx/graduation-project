@@ -115,9 +115,9 @@
         "build"
       ],
       "test": [
-        "npx",
-        "vitest",
-        "run"
+        "npm",
+        "run",
+        "test"
       ]
     },
     "backend": {

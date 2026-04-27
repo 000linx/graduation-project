@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """
 RBAC 业务服务（Service）。
 
@@ -8,7 +6,15 @@ RBAC 业务服务（Service）。
 - 计算用户的权限集合（角色 -> 权限）
 - 将权限集合缓存到 Redis（基于 rbac_version 做版本化失效）
 - 提供 Controller 使用的 require(permission) 校验入口
+
+Author: Graduation Project Team
+Created: 2026-04-26
+Dependencies:
+- Redis cache（utils.cache）
+- MongoDB RBAC DAO（admin_v2.daos）
 """
+
+from __future__ import annotations
 
 from ...utils.cache import get_json, set_json
 from ...utils.errors import ForbiddenError, NotFoundError, ValidationError

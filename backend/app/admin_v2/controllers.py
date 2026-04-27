@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """
 管理员模块 Controller 层（路由注册与请求处理）。
 
@@ -8,6 +6,8 @@ from __future__ import annotations
 - Controller 负责：参数解析/校验、权限装饰器、调用 Service/DAO、统一返回 ApiResponse
 - Service/DAO 负责：业务与数据访问细节
 """
+
+from __future__ import annotations
 
 import time
 from functools import wraps
@@ -20,8 +20,10 @@ from werkzeug.security import generate_password_hash
 from .. import extensions
 from ..extensions import mongo
 from ..models.order_model import Order
+from ..models.user_model import User
 from ..services.product_stream_service import ProductStreamService
 from ..utils.errors import ConflictError, ValidationError
+from ..utils.jwt_util import JwtUtil
 from ..utils.response import ApiResponse
 from ..utils.serialize import to_safe_json
 from .daos.audit_dao import AuditDao
@@ -30,6 +32,7 @@ from .daos.product_dao import AdminProductDao
 from .daos.rbac_dao import RbacDao
 from .daos.user_dao import AdminUserDao
 from .schemas import (
+    AdminLoginSchema,
     BootstrapAdminSchema,
     CreateProductBatchSchema,
     CreateProductSchema,
@@ -58,6 +61,16 @@ from .services.reco_metrics_service import RecoMetricsService
 def _load_json(schema, payload):
     """
     使用 Marshmallow 校验并加载 JSON 请求体，失败时抛出业务 ValidationError。
+
+    Args:
+        schema: Marshmallow Schema 实例。
+        payload: 原始请求体（dict 或 None）。
+
+    Returns:
+        dict: 校验并加载后的数据字典。
+
+    Raises:
+        ValidationError: 当请求体字段缺失、类型不符或校验失败时抛出。
     """
     try:
         return schema.load(payload or {})
@@ -68,6 +81,15 @@ def _load_json(schema, payload):
 def _load_query(schema):
     """
     使用 Marshmallow 校验并加载 Query 参数，失败时抛出业务 ValidationError。
+
+    Args:
+        schema: Marshmallow Schema 实例。
+
+    Returns:
+        dict: 校验并加载后的查询参数字典。
+
+    Raises:
+        ValidationError: 当查询参数不合法时抛出。
     """
     try:
         return schema.load(request.args.to_dict())
@@ -78,6 +100,12 @@ def _load_query(schema):
 def _extract_status_code(resp):
     """
     从 Flask 返回值中提取 status_code（兼容 (json, code) 与 Response）。
+
+    Args:
+        resp: 路由函数返回值，可能是 Response，或 (payload, status_code) 元组。
+
+    Returns:
+        int: HTTP status code，解析失败时默认 200。
     """
     if isinstance(resp, tuple) and len(resp) >= 2:
         return int(resp[1] or 200)
@@ -94,6 +122,12 @@ def audit(action: str, resource_type: str | None = None, resource_id_kw: str | N
     :param action: 动作标识
     :param resource_type: 资源类型（可选）
     :param resource_id_kw: 从路由参数 kwargs 中取资源ID的字段名（可选）
+
+    Returns:
+        Callable: 装饰器函数。被装饰的路由执行后将写入审计日志。
+
+    Raises:
+        Exception: 被装饰函数抛出的异常会被原样向上抛出（同时记录失败审计日志）。
     """
     def decorator(fn):
         @wraps(fn)
@@ -140,6 +174,16 @@ def admin_required(fn):
     - 要求携带有效 JWT
     - 要求 user.role == admin
     - 自动初始化该管理员的 RBAC 默认绑定（若未绑定角色）
+
+    Args:
+        fn: 被装饰的 Flask view 函数。
+
+    Returns:
+        Callable: 包装后的 view 函数。
+
+    Raises:
+        UnauthorizedError: token 缺失/无效或用户不存在。
+        ForbiddenError: 当前用户非管理员（user.role != admin）。
     """
     @wraps(fn)
     @jwt_required()
@@ -155,6 +199,15 @@ def admin_required(fn):
 def require_permission(permission: str):
     """
     RBAC 权限装饰器：在 admin_required 基础上进一步校验指定 permission。
+
+    Args:
+        permission: 需要的权限名（如 admin.users.read）。
+
+    Returns:
+        Callable: 装饰器函数。被装饰 view 在执行前会进行权限校验。
+
+    Raises:
+        ForbiddenError: 用户不具备对应权限时抛出。
     """
     def decorator(fn):
         @wraps(fn)
@@ -207,6 +260,49 @@ def register_admin_routes(admin_bp):
 
         RbacService.ensure_admin_user_initialized(str(user_id))
         return ApiResponse.success({"user_id": str(user_id)}, "Admin created", 201)
+
+    @admin_bp.route("/login", methods=["POST"])
+    @audit(action="admin.login", resource_type="auth")
+    def admin_login():
+        """
+        管理员登录（仅允许 role=admin 的用户获取后台会话）。
+
+        Body:
+            - phone: 管理员手机号
+            - password: 密码
+
+        Returns:
+            200: tokens + user + permissions + rbac_version
+            401: 账号或密码错误
+            403: 非管理员用户
+
+        Notes:
+            - 使用统一的“Invalid credentials”响应，避免泄露手机号是否存在。
+        """
+        data = _load_json(AdminLoginSchema(), request.get_json(silent=True))
+        phone = data["phone"]
+        password = data["password"]
+
+        user = User.find_by_phone(phone)
+        if not user or not User.verify_password(user.get("password_hash"), password):
+            return ApiResponse.error("Invalid credentials", 401)
+
+        if user.get("role") != "admin":
+            return ApiResponse.forbidden("Admin only")
+
+        user_id = str(user["_id"])
+        RbacService.ensure_admin_user_initialized(user_id)
+        perms, version = RbacService.get_user_permissions(user_id)
+        tokens = JwtUtil.create_tokens(user["_id"])
+        return ApiResponse.success(
+            {
+                "tokens": tokens,
+                "user": {"username": user.get("username"), "phone": user.get("phone")},
+                "permissions": sorted(list(perms)),
+                "rbac_version": version,
+            },
+            "Login successful",
+        )
 
     @admin_bp.route("/stats", methods=["GET"])
     @require_permission("admin.stats.read")

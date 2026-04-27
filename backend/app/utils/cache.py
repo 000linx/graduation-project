@@ -1,12 +1,17 @@
-from __future__ import annotations
-
 """
 轻量缓存工具（Redis）。
 
 提供 JSON 值的 get/set 与稳定的 cache key 生成方式：
 - 当 Redis 不可用时，函数会自动降级返回 None/False
 - 所有异常都会被吞掉，避免缓存影响主流程
+
+Author: Graduation Project Team
+Created: 2026-04-26
+Dependencies:
+- redis_client（app.extensions）
 """
+
+from __future__ import annotations
 
 import json
 import hashlib

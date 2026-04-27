@@ -1,7 +1,23 @@
+"""
+购物车相关 API 路由（/api/cart）。
+
+职责：
+- 购物车增删改查
+- 下单前库存校验（以商品库存为准）
+
+Author: Graduation Project Team
+Created: 2026-04-26
+Dependencies:
+- Flask Blueprint
+- Flask-JWT-Extended（jwt_required）
+- Cart/Product 模型与 JwtUtil
+"""
+
 from flask import Blueprint, request
 from ..models.cart_model import Cart
 from ..utils.response import ApiResponse
 from ..utils.jwt_util import JwtUtil
+from ..utils.serialize import to_safe_json
 from flask_jwt_extended import jwt_required
 from ..models.product_model import Product
 
@@ -52,13 +68,7 @@ def get_cart():
     """
     user_id = JwtUtil.get_current_user_id()
     items = Cart.find_by_user_id(user_id)
-    
-    for item in items:
-        item['_id'] = str(item['_id'])
-        item['user_id'] = str(item['user_id'])
-        item['product_id'] = str(item['product_id'])
-        
-    return ApiResponse.success({"items": items})
+    return ApiResponse.success({"items": to_safe_json(items)})
 
 @cart_bp.route('/remove/<product_id>', methods=['DELETE'])
 @jwt_required()
@@ -86,7 +96,11 @@ def update_cart():
 
     if not product_id:
         return ApiResponse.error("Missing product_id")
-    if quantity is None or quantity < 0:
+    try:
+        quantity = int(quantity)
+    except Exception:
+        return ApiResponse.error("Invalid quantity")
+    if quantity < 0:
         return ApiResponse.error("Invalid quantity")
 
     # 检查商品是否存在

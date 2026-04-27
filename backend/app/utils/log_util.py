@@ -1,11 +1,33 @@
+"""
+日志配置工具。
+
+职责：
+- 为 Flask app 配置 RotatingFileHandler
+- 统一日志格式与等级
+
+Author: Graduation Project Team
+Created: 2026-04-26
+Dependencies:
+- logging
+- logging.handlers.RotatingFileHandler
+"""
+
 import logging
 import os
 from logging.handlers import RotatingFileHandler
 
 def setup_logger(app):
     """
-    配置应用日志记录
-    :param app: Flask 应用实例
+    配置应用日志记录。
+
+    Args:
+        app: Flask 应用实例。
+
+    Returns:
+        None
+
+    Raises:
+        OSError: 创建 logs 目录失败时可能抛出。
     """
     if not os.path.exists('logs'):
         os.mkdir('logs')
