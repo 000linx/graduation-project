@@ -11,7 +11,12 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "lint:css": "stylelint \"src/**/*.{vue,scss}\" --max-warnings 0",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,vue,scss,css,md,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,vue,scss,css,md,json}\"",
+    "vrtest:reference": "backstop reference",
+    "vrtest:test": "backstop test"
   },
   "dependencies": {
     "@vueuse/core": "^11.3.0",
@@ -21,6 +26,7 @@
     "lucide-vue-next": "^0.468.0",
     "pinia": "^2.3.0",
     "vue": "^3.5.13",
+    "vue-i18n": "^10.0.8",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
@@ -29,9 +35,16 @@
     "@vitest/coverage-v8": "^4.1.4",
     "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.4.20",
+    "backstopjs": "^6.3.25",
     "jsdom": "^29.0.2",
     "lighthouse": "^12.8.2",
     "postcss": "^8.4.49",
+    "postcss-html": "^1.7.0",
+    "prettier": "^3.5.3",
+    "sass": "^1.87.0",
+    "stylelint": "^16.16.0",
+    "stylelint-config-standard-scss": "^14.0.0",
+    "stylelint-scss": "^6.11.0",
     "tailwindcss": "^3.4.16",
     "http-server": "^14.1.1",
     "typescript": "~5.6.2",

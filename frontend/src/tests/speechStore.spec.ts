@@ -54,8 +54,8 @@ describe('speech store', () => {
       resultIndex: 0,
       results: [
         { 0: { transcript: '你好' }, isFinal: true },
-        { 0: { transcript: '世界' }, isFinal: false },
-      ],
+        { 0: { transcript: '世界' }, isFinal: false }
+      ]
     })
     expect(store.transcript).toBe('你好')
     expect(store.partial).toBe('世界')
@@ -74,4 +74,3 @@ describe('speech store', () => {
     expect(dispatchSpy).toHaveBeenCalled()
   })
 })
-

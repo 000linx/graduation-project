@@ -50,4 +50,3 @@ describe('a11y store', () => {
     expect(document.documentElement.getAttribute('data-a11y-large')).toBe('0')
   })
 })
-

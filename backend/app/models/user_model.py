@@ -22,6 +22,12 @@ class User:
     """
     用户数据模型，负责用户数据的 CRUD 操作
     """
+    DEFAULT_NOTIFICATION_SETTINGS = {
+        "email_notifications": True,
+        "in_app_notifications": True,
+        "activity_reminders": True,
+    }
+
     @staticmethod
     def create(username, phone, password, role="user"):
         """
@@ -38,6 +44,7 @@ class User:
             "role": role,
             "addresses": [],
             "hearing_profile": None,
+            "notification_settings": dict(User.DEFAULT_NOTIFICATION_SETTINGS),
             "created_at": datetime.now()
         }
         
@@ -238,4 +245,31 @@ class User:
         return mongo.db.users.update_one(
             {"_id": ObjectId(user_id)},
             {"$set": {"hearing_profile": payload}}
+        )
+
+    @staticmethod
+    def get_notification_settings(user_id):
+        user = mongo.db.users.find_one(
+            {"_id": ObjectId(user_id)},
+            projection={"notification_settings": 1}
+        )
+        s = (user or {}).get("notification_settings")
+        if not isinstance(s, dict):
+            return dict(User.DEFAULT_NOTIFICATION_SETTINGS)
+        merged = dict(User.DEFAULT_NOTIFICATION_SETTINGS)
+        for k in merged.keys():
+            if k in s:
+                merged[k] = bool(s.get(k))
+        return merged
+
+    @staticmethod
+    def set_notification_settings(user_id, settings: dict):
+        payload = dict(User.DEFAULT_NOTIFICATION_SETTINGS)
+        for k in payload.keys():
+            if k in (settings or {}):
+                payload[k] = bool(settings.get(k))
+        payload["updated_at"] = datetime.now()
+        return mongo.db.users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"notification_settings": payload}}
         )

@@ -11,4 +11,3 @@ import SalesBarChart from '../../components/admin/SalesBarChart.vue'
     <SalesBarChart />
   </div>
 </template>
-

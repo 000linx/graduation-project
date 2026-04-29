@@ -1,0 +1,60 @@
+.glow-hover {
+  position: relative;
+  transition: transform var(--motion-fast) var(--motion-ease);
+  will-change: transform;
+}
+
+.glow-hover:hover {
+  transform: translateY(-2px);
+}
+
+.glow-hover::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(0, 245, 255, 0.12),
+    0 0 28px rgba(0, 245, 255, 0.14);
+  opacity: 0;
+  transition: opacity var(--motion-fast) var(--motion-ease);
+  pointer-events: none;
+}
+
+.glow-hover:hover::after {
+  opacity: 1;
+}
+
+.tech-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.tech-bg::before {
+  content: '';
+  position: absolute;
+  inset: -40% -40% auto -40%;
+  height: 140%;
+  background:
+    radial-gradient(closest-side, rgba(0, 245, 255, 0.1), rgba(0, 245, 255, 0)),
+    radial-gradient(closest-side, rgba(138, 43, 226, 0.1), rgba(138, 43, 226, 0));
+  transform: translate3d(-8%, -6%, 0);
+  animation: techFloat 10s var(--motion-ease) infinite;
+  pointer-events: none;
+}
+
+@keyframes techFloat {
+  0% {
+    transform: translate3d(-8%, -6%, 0);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate3d(6%, 4%, 0);
+    opacity: 0.75;
+  }
+  100% {
+    transform: translate3d(-8%, -6%, 0);
+    opacity: 0.9;
+  }
+}

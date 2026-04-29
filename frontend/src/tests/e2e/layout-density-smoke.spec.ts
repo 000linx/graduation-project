@@ -16,4 +16,3 @@ test('首页关键填充模块可用且可键盘访问', async ({ page }) => {
   const activeId = await page.evaluate(() => (document.activeElement as HTMLElement | null)?.id ?? '')
   expect(activeId).toBe('main-content')
 })
-

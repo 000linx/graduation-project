@@ -61,9 +61,9 @@
 
 ## 自动化测试与结果
 
-- 单元测试（Vitest）：新增 [a11yStore.spec.ts](file:///e:/%E6%AF%95%E8%AE%BE1/%E5%9F%BA%E4%BA%8EFlask%E7%9A%84%E5%8A%A9%E5%90%AC%E5%99%A8%E8%B4%AD%E7%89%A9%E5%95%86%E5%9F%8E%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/frontend/src/tests/a11yStore.spec.ts)  
+- 单元测试（Vitest）：新增 [a11yStore.spec.ts](file:///e:/%E6%AF%95%E8%AE%BE1/%E5%9F%BA%E4%BA%8EFlask%E7%9A%84%E5%8A%A9%E5%90%AC%E5%99%A8%E8%B4%AD%E7%89%A9%E5%95%86%E5%9F%8E%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/frontend/src/tests/a11yStore.spec.ts)
   - `npx vitest run`：通过
-- 端到端测试（Playwright）：新增 [a11y-modes.spec.ts](file:///e:/%E6%AF%95%E8%AE%BE1/%E5%9F%BA%E4%BA%8EFlask%E7%9A%84%E5%8A%A9%E5%90%AC%E5%99%A8%E8%B4%AD%E7%89%A9%E5%95%86%E5%9F%8E%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/frontend/src/tests/e2e/a11y-modes.spec.ts)  
+- 端到端测试（Playwright）：新增 [a11y-modes.spec.ts](file:///e:/%E6%AF%95%E8%AE%BE1/%E5%9F%BA%E4%BA%8EFlask%E7%9A%84%E5%8A%A9%E5%90%AC%E5%99%A8%E8%B4%AD%E7%89%A9%E5%95%86%E5%9F%8E%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/frontend/src/tests/e2e/a11y-modes.spec.ts)
   - `npx playwright test`：通过
 - 去重策略：为避免 `.spec.js/.spec.ts` 重复执行
   - Playwright 仅匹配 `.spec.ts`（[playwright.config.ts](file:///e:/%E6%AF%95%E8%AE%BE1/%E5%9F%BA%E4%BA%8EFlask%E7%9A%84%E5%8A%A9%E5%90%AC%E5%99%A8%E8%B4%AD%E7%89%A9%E5%95%86%E5%9F%8E%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0/frontend/playwright.config.ts)）

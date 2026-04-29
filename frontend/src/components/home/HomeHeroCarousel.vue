@@ -60,11 +60,10 @@ onUnmounted(() => stopAutoplay())
 
 <template>
   <section
-    id="campaign"
-    class="relative rounded-3xl overflow-hidden bg-[var(--c-primary)] border-2 border-[var(--c-border)]"
+    class="relative rounded-3xl overflow-hidden bg-[var(--c-primary)] border-2 border-[var(--c-border)] tech-bg"
     aria-label="主视觉轮播"
   >
-    <div class="relative h-[400px] home-hero-carousel">
+    <div class="relative h-[340px] sm:h-[360px] lg:h-[400px]">
       <div
         v-for="(s, idx) in props.slides"
         :key="idx"
@@ -83,10 +82,15 @@ onUnmounted(() => stopAutoplay())
             :fetchpriority="idx === 0 ? 'high' : 'low'"
             :loading="idx === 0 ? 'eager' : 'lazy'"
           />
-          <div class="absolute inset-0 bg-gradient-to-r from-black/35 via-black/10 to-black/0" aria-hidden="true" />
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-black/35 via-black/10 to-black/0"
+            aria-hidden="true"
+          />
 
           <div class="relative container mx-auto px-6 lg:px-12 text-[var(--c-on-primary)] space-y-5">
-            <h1 class="text-4xl lg:text-5xl font-extrabold leading-tight whitespace-pre-line">{{ s.title }}</h1>
+            <h1 class="text-4xl lg:text-5xl font-extrabold leading-tight whitespace-pre-line">
+              {{ s.title }}
+            </h1>
             <p class="text-base lg:text-xl opacity-95 max-w-xl">{{ s.subtitle }}</p>
             <router-link
               :to="s.to"
@@ -132,11 +136,3 @@ onUnmounted(() => stopAutoplay())
     </div>
   </section>
 </template>
-
-<style scoped>
-@media (max-width: 640px) {
-  .home-hero-carousel {
-    height: 360px;
-  }
-}
-</style>

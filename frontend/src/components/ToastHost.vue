@@ -14,7 +14,11 @@ function toneClass(tone: string) {
 </script>
 
 <template>
-  <div class="fixed top-4 right-4 z-[1000] w-[min(92vw,360px)] space-y-2" aria-label="提示" aria-live="polite">
+  <div
+    class="fixed top-4 right-4 z-[1000] w-[min(92vw,360px)] space-y-2"
+    aria-label="提示"
+    aria-live="polite"
+  >
     <div
       v-for="t in items"
       :key="t.id"
@@ -34,4 +38,3 @@ function toneClass(tone: string) {
     </div>
   </div>
 </template>
-

@@ -12,7 +12,10 @@ export function useSpeechRecognition(options: { lang?: string } = {}) {
   const partial = ref('')
   const error = ref<string | null>(null)
 
-  const Ctor: any = typeof window !== 'undefined' ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition : null
+  const Ctor: any =
+    typeof window !== 'undefined'
+      ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+      : null
   supported.value = Boolean(Ctor)
 
   let rec: any = null
@@ -44,8 +47,14 @@ export function useSpeechRecognition(options: { lang?: string } = {}) {
         if (!t) continue
         results.push({ transcript: t, isFinal: Boolean(r?.isFinal) })
       }
-      const finals = results.filter((r) => r.isFinal).map((r) => r.transcript).join(' ')
-      const interims = results.filter((r) => !r.isFinal).map((r) => r.transcript).join(' ')
+      const finals = results
+        .filter((r) => r.isFinal)
+        .map((r) => r.transcript)
+        .join(' ')
+      const interims = results
+        .filter((r) => !r.isFinal)
+        .map((r) => r.transcript)
+        .join(' ')
       if (finals) transcript.value = [transcript.value, finals].filter(Boolean).join(' ').trim()
       partial.value = interims
     }
@@ -70,8 +79,7 @@ export function useSpeechRecognition(options: { lang?: string } = {}) {
     if (!rec) return
     try {
       rec.stop()
-    } catch {
-    }
+    } catch {}
   }
 
   onBeforeUnmount(() => {
@@ -81,4 +89,3 @@ export function useSpeechRecognition(options: { lang?: string } = {}) {
 
   return { supported, listening, transcript, partial, error, start, stop }
 }
-

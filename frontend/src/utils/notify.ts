@@ -21,8 +21,7 @@ function speakIfEnabled(text: string) {
   try {
     synth.cancel()
     synth.speak(utter)
-  } catch {
-  }
+  } catch {}
 }
 
 export function notify(text: string, options: NotifyOptions = {}) {

@@ -161,10 +161,22 @@ onMounted(fetchProducts)
       </div>
     </div>
 
-    <el-alert v-if="forbidden" type="error" show-icon title="无权限" description="当前账号不是管理员，无法访问商品管理。" />
+    <el-alert
+      v-if="forbidden"
+      type="error"
+      show-icon
+      title="无权限"
+      description="当前账号不是管理员，无法访问商品管理。"
+    />
     <el-alert v-else-if="error" type="error" show-icon :title="error" />
 
-    <el-table v-loading="loading" :data="filteredItems" stripe size="small" class="bg-white rounded-2xl border">
+    <el-table
+      v-loading="loading"
+      :data="filteredItems"
+      stripe
+      size="small"
+      class="bg-white rounded-2xl border"
+    >
       <el-table-column prop="name" label="名称" min-width="220" show-overflow-tooltip />
       <el-table-column prop="category" label="分类" width="120" />
       <el-table-column prop="price" label="价格" width="120">
@@ -179,7 +191,12 @@ onMounted(fetchProducts)
       </el-table-column>
     </el-table>
 
-    <el-drawer v-model="editorOpen" :title="isEdit ? '编辑商品' : '新增商品'" size="520px" @closed="resetForm">
+    <el-drawer
+      v-model="editorOpen"
+      :title="isEdit ? '编辑商品' : '新增商品'"
+      size="520px"
+      @closed="resetForm"
+    >
       <el-form ref="formRef" :model="form" label-width="84px" class="mt-2">
         <el-form-item label="名称" prop="name" :rules="[{ required: true, message: '请输入名称' }]">
           <el-input v-model="form.name" />

@@ -70,6 +70,35 @@ def test_cart_add_success(client, app, monkeypatch):
     assert add_called["ok"] is True
 
 
+def test_cart_add_accepts_numeric_string_quantity(client, app, monkeypatch):
+    import app.routes.cart as cart_routes
+
+    add_called = {"qty": None}
+
+    monkeypatch.setattr(cart_routes.Product, "find_by_id", staticmethod(lambda _pid: {"_id": "p1", "stock": 99}))
+    monkeypatch.setattr(cart_routes.Cart, "get_cart", staticmethod(lambda _uid: {"items": []}))
+
+    def _add(_uid, _pid, qty):
+        add_called["qty"] = qty
+
+    monkeypatch.setattr(cart_routes.Cart, "add_item", staticmethod(_add))
+
+    resp = client.post("/api/cart/add", json={"product_id": "p1", "quantity": "1"}, headers=auth_headers(app))
+    assert resp.status_code == 200
+    assert add_called["qty"] == 1
+
+
+def test_cart_add_rejects_non_numeric_quantity(client, app, monkeypatch):
+    import app.routes.cart as cart_routes
+
+    monkeypatch.setattr(cart_routes.Product, "find_by_id", staticmethod(lambda _pid: {"_id": "p1", "stock": 99}))
+    monkeypatch.setattr(cart_routes.Cart, "get_cart", staticmethod(lambda _uid: {"items": []}))
+    monkeypatch.setattr(cart_routes.Cart, "add_item", staticmethod(lambda *_a, **_kw: None))
+
+    resp = client.post("/api/cart/add", json={"product_id": "p1", "quantity": "x"}, headers=auth_headers(app))
+    assert resp.status_code == 400
+
+
 def test_cart_update_invalid_quantity(client, app):
     resp = client.put("/api/cart/update", json={"product_id": "p1", "quantity": "x"}, headers=auth_headers(app))
     assert resp.status_code == 400

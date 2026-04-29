@@ -112,9 +112,21 @@ onMounted(() => {
       <div class="text-base font-bold text-[var(--c-text)]">预算区间（元）</div>
       <el-slider v-model="budget" range :min="0" :max="20000" :step="100" @change="reco.persistProfile()" />
       <div class="flex items-center gap-2">
-        <el-input-number v-model="reco.profile.budget_min" :min="0" :max="20000" :step="100" @change="reco.persistProfile()" />
+        <el-input-number
+          v-model="reco.profile.budget_min"
+          :min="0"
+          :max="20000"
+          :step="100"
+          @change="reco.persistProfile()"
+        />
         <div class="text-sm font-bold text-[var(--c-muted)]">到</div>
-        <el-input-number v-model="reco.profile.budget_max" :min="0" :max="20000" :step="100" @change="reco.persistProfile()" />
+        <el-input-number
+          v-model="reco.profile.budget_max"
+          :min="0"
+          :max="20000"
+          :step="100"
+          @change="reco.persistProfile()"
+        />
       </div>
     </div>
 
@@ -135,13 +147,31 @@ onMounted(() => {
     </div>
 
     <div class="flex flex-wrap items-center gap-3 pt-2">
-      <el-button type="primary" v-feedback class="a11y-hit" :disabled="!reco.profile.hearing_level" @click="recommendNow">
+      <el-button
+        type="primary"
+        v-feedback
+        class="a11y-hit"
+        :disabled="!reco.profile.hearing_level"
+        @click="recommendNow"
+      >
         立即推荐
       </el-button>
-      <el-button v-feedback class="a11y-hit" :loading="saving" :disabled="!reco.profile.hearing_level || !hasToken" @click="saveToAccount">
+      <el-button
+        v-feedback
+        class="a11y-hit"
+        :loading="saving"
+        :disabled="!reco.profile.hearing_level || !hasToken"
+        @click="saveToAccount"
+      >
         保存到账号
       </el-button>
-      <el-button v-feedback class="a11y-hit" :loading="loadingAccount" :disabled="!hasToken" @click="loadFromAccount">
+      <el-button
+        v-feedback
+        class="a11y-hit"
+        :loading="loadingAccount"
+        :disabled="!hasToken"
+        @click="loadFromAccount"
+      >
         从账号同步
       </el-button>
       <el-button v-feedback class="a11y-hit" @click="resetPrefs(true)">清空筛选</el-button>

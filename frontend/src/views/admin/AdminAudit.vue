@@ -35,7 +35,9 @@ async function fetchLogs() {
   forbidden.value = false
   error.value = null
   try {
-    const resp = await http.get('/api/admin/audit', { params: { page: page.value, page_size: pageSize.value } })
+    const resp = await http.get('/api/admin/audit', {
+      params: { page: page.value, page_size: pageSize.value }
+    })
     const data = unwrap<{ logs: AuditLog[]; pagination?: { total?: number } }>(resp)
     logs.value = Array.isArray(data?.logs) ? data.logs : []
     total.value = Number(data?.pagination?.total ?? 0) || 0
@@ -75,7 +77,13 @@ onMounted(fetchLogs)
       </div>
     </div>
 
-    <el-alert v-if="forbidden" type="error" show-icon title="无权限" description="当前账号无审计查看权限（admin.audit.read）。" />
+    <el-alert
+      v-if="forbidden"
+      type="error"
+      show-icon
+      title="无权限"
+      description="当前账号无审计查看权限（admin.audit.read）。"
+    />
     <el-alert v-else-if="error" type="error" show-icon :title="error" />
 
     <el-table v-loading="loading" :data="logs" stripe size="small" class="bg-white rounded-2xl border">
@@ -106,4 +114,3 @@ onMounted(fetchLogs)
     </div>
   </div>
 </template>
-

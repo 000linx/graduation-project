@@ -85,7 +85,10 @@ onMounted(() => {
   <div class="min-h-screen bg-gray-50">
     <div class="min-h-screen flex">
       <aside v-if="auth.isAuthed" class="hidden md:flex md:w-60 bg-white border-r flex-col">
-        <div class="flex items-center px-5 border-b" :class="a11y.largeTextEnabled ? 'min-h-16 py-3' : 'h-16'">
+        <div
+          class="flex items-center px-5 border-b"
+          :class="a11y.largeTextEnabled ? 'min-h-16 py-3' : 'h-16'"
+        >
           <div class="text-base font-semibold text-gray-900">管理后台</div>
         </div>
         <el-menu :default-active="active" router class="border-0 flex-1">
@@ -103,7 +106,9 @@ onMounted(() => {
           <div class="flex items-center gap-3 min-w-0">
             <el-button v-if="auth.isAuthed" class="md:hidden" @click="mobileNavOpen = true">菜单</el-button>
             <div class="min-w-0">
-              <div class="text-sm font-medium text-gray-900 truncate">{{ String(route.meta?.title ?? '后台管理') }}</div>
+              <div class="text-sm font-medium text-gray-900 truncate">
+                {{ String(route.meta?.title ?? '后台管理') }}
+              </div>
               <div class="text-xs text-gray-500 truncate">/admin</div>
             </div>
           </div>

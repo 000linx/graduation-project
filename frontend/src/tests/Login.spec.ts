@@ -14,8 +14,12 @@ const router = createRouter({
   ]
 })
 
-vi.mock('@/components/auth/UserLogin.vue', () => ({ default: { name: 'UserLogin', template: '<div class="user-login-stub"></div>' } }))
-vi.mock('@/components/auth/AdminLogin.vue', () => ({ default: { name: 'AdminLogin', template: '<div class="admin-login-stub"></div>' } }))
+vi.mock('@/components/auth/UserLogin.vue', () => ({
+  default: { name: 'UserLogin', template: '<div class="user-login-stub"></div>' }
+}))
+vi.mock('@/components/auth/AdminLogin.vue', () => ({
+  default: { name: 'AdminLogin', template: '<div class="admin-login-stub"></div>' }
+}))
 
 const AppWrapper = defineComponent({
   template: '<router-view />'
@@ -35,16 +39,16 @@ describe('Login.vue', () => {
     // Initial state: user mode
     expect(wrapper.text()).toContain('欢迎回来')
     expect(wrapper.text()).toContain('用户登录')
-    
+
     // Switch button should display text to switch to admin
     const switchBtn = wrapper.find('.switch-mode-btn')
     expect(switchBtn.exists()).toBe(true)
     expect(switchBtn.text()).toContain('后台登录')
-    
+
     // Test toggle via click
     await switchBtn.trigger('click')
     await flushPromises()
-    
+
     // Router should be pushed to /admin/login
     expect(router.currentRoute.value.path).toBe('/admin/login')
 

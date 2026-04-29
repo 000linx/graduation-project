@@ -5,6 +5,7 @@ type InteractionFeedback = 'focus' | 'haptic' | 'sound'
 
 type A11yPrefs = {
   high_contrast: boolean
+  theme_mode?: 'system' | 'light' | 'dark'
   font_scale: number
   voice_enabled: boolean
   tts_enabled: boolean
@@ -34,6 +35,7 @@ function safeParse(raw: string | null): Partial<A11yPrefs> | null {
 
 export const useA11yStore = defineStore('a11y', () => {
   const highContrast = ref(false)
+  const themeMode = ref<'system' | 'light' | 'dark'>('system')
   const fontScale = ref(DEFAULT_SCALE)
   const voiceEnabled = ref(false)
   const ttsEnabled = ref(false)
@@ -51,11 +53,21 @@ export const useA11yStore = defineStore('a11y', () => {
     el.dataset.a11yTts = ttsEnabled.value ? '1' : '0'
     el.dataset.a11yCaptions = captionsOverlay.value ? '1' : '0'
     el.dataset.a11yFeedback = interactionFeedback.value
+
+    try {
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+      const mode = themeMode.value
+      const isDark = mode === 'dark' || (mode === 'system' && prefersDark)
+      el.dataset.theme = isDark ? 'dark' : 'light'
+    } catch {
+      el.dataset.theme = themeMode.value === 'dark' ? 'dark' : 'light'
+    }
   }
 
   function _save() {
     const payload: A11yPrefs = {
       high_contrast: highContrast.value,
+      theme_mode: themeMode.value,
       font_scale: fontScale.value,
       voice_enabled: voiceEnabled.value,
       tts_enabled: ttsEnabled.value,
@@ -70,15 +82,28 @@ export const useA11yStore = defineStore('a11y', () => {
     const data = safeParse(raw)
     if (data) {
       if (typeof data.high_contrast === 'boolean') highContrast.value = data.high_contrast
-      if (typeof data.font_scale === 'number') fontScale.value = clamp(data.font_scale, DEFAULT_SCALE, MAX_SCALE)
+      if (data.theme_mode === 'system' || data.theme_mode === 'light' || data.theme_mode === 'dark')
+        themeMode.value = data.theme_mode
+      if (typeof data.font_scale === 'number')
+        fontScale.value = clamp(data.font_scale, DEFAULT_SCALE, MAX_SCALE)
       if (typeof data.voice_enabled === 'boolean') voiceEnabled.value = data.voice_enabled
       if (typeof data.tts_enabled === 'boolean') ttsEnabled.value = data.tts_enabled
       if (typeof data.captions_overlay === 'boolean') captionsOverlay.value = data.captions_overlay
-      if (data.interaction_feedback === 'focus' || data.interaction_feedback === 'haptic' || data.interaction_feedback === 'sound') {
+      if (
+        data.interaction_feedback === 'focus' ||
+        data.interaction_feedback === 'haptic' ||
+        data.interaction_feedback === 'sound'
+      ) {
         interactionFeedback.value = data.interaction_feedback
       }
     }
     _applyDom()
+  }
+
+  function setThemeMode(v: 'system' | 'light' | 'dark') {
+    themeMode.value = v
+    _applyDom()
+    _save()
   }
 
   function setHighContrast(v: boolean) {
@@ -127,6 +152,7 @@ export const useA11yStore = defineStore('a11y', () => {
 
   return {
     highContrast,
+    themeMode,
     fontScale,
     largeTextEnabled,
     voiceEnabled,
@@ -136,6 +162,7 @@ export const useA11yStore = defineStore('a11y', () => {
     init,
     setHighContrast,
     toggleHighContrast,
+    setThemeMode,
     setFontScale,
     toggleLargeText,
     setVoiceEnabled,

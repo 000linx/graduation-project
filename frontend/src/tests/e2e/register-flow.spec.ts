@@ -18,7 +18,11 @@ test.describe('Register Flow', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json; charset=utf-8',
-        body: JSON.stringify({ code: 200, message: 'ok', data: { tokens: { access_token: 'at', refresh_token: 'rt' } } })
+        body: JSON.stringify({
+          code: 200,
+          message: 'ok',
+          data: { tokens: { access_token: 'at', refresh_token: 'rt' } }
+        })
       })
     })
 
@@ -26,7 +30,11 @@ test.describe('Register Flow', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json; charset=utf-8',
-        body: JSON.stringify({ code: 200, message: 'ok', data: { username: '测试用户', phone: '13800138000' } })
+        body: JSON.stringify({
+          code: 200,
+          message: 'ok',
+          data: { username: '测试用户', phone: '13800138000' }
+        })
       })
     })
 
@@ -62,5 +70,3 @@ test.describe('Register Flow', () => {
     expect(token).toBe('at')
   })
 })
-
-

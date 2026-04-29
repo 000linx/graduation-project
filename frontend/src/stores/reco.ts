@@ -46,7 +46,10 @@ function safeParse<T>(raw: string | null): T | null {
 function ensureId(key: string) {
   const existing = localStorage.getItem(key)
   if (existing) return existing
-  const id = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `id_${Date.now()}_${Math.random().toString(16).slice(2)}`
+  const id =
+    typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : `id_${Date.now()}_${Math.random().toString(16).slice(2)}`
   localStorage.setItem(key, id)
   return id
 }
@@ -155,8 +158,7 @@ export const useRecoStore = defineStore('reco', () => {
           }
         }
       )
-    } catch {
-    }
+    } catch {}
   }
 
   async function loadProfileFromAccount() {
@@ -167,14 +169,17 @@ export const useRecoStore = defineStore('reco', () => {
       const hp = data?.hearing_profile
       if (hp && typeof hp === 'object') {
         profile.hearing_level = (hp.hearing_level as HearingLevel) || profile.hearing_level
-        profile.scenes = Array.isArray(hp.scenes) ? hp.scenes.map((x: any) => String(x)).filter(Boolean) : profile.scenes
+        profile.scenes = Array.isArray(hp.scenes)
+          ? hp.scenes.map((x: any) => String(x)).filter(Boolean)
+          : profile.scenes
         profile.budget_min = typeof hp.budget_min === 'number' ? hp.budget_min : profile.budget_min
         profile.budget_max = typeof hp.budget_max === 'number' ? hp.budget_max : profile.budget_max
-        profile.brands = Array.isArray(hp.brands) ? hp.brands.map((x: any) => String(x)).filter(Boolean) : profile.brands
+        profile.brands = Array.isArray(hp.brands)
+          ? hp.brands.map((x: any) => String(x)).filter(Boolean)
+          : profile.brands
         persistProfile()
       }
-    } catch {
-    }
+    } catch {}
   }
 
   async function saveProfileToAccount() {
@@ -200,4 +205,3 @@ export const useRecoStore = defineStore('reco', () => {
     saveProfileToAccount
   }
 })
-

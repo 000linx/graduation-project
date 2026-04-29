@@ -191,3 +191,27 @@ def test_logout_blacklists_tokens_best_effort(client, app, monkeypatch):
     assert resp.status_code == 200
     assert any(k.startswith("bl:") for k, *_ in r.calls)
 
+
+def test_notification_settings_get_update(client, app, monkeypatch):
+    import app.routes.user as user_routes
+
+    monkeypatch.setattr(user_routes.User, "find_by_id", staticmethod(lambda _uid: {"_id": "u1", "username": "u"}))
+    monkeypatch.setattr(
+        user_routes.User,
+        "get_notification_settings",
+        staticmethod(lambda _uid: {"email_notifications": True, "in_app_notifications": False, "activity_reminders": True}),
+    )
+    resp = client.get("/api/user/notification_settings", headers=auth_headers(app))
+    assert resp.status_code == 200
+
+    resp = client.put("/api/user/notification_settings", json={"email_notifications": "x"}, headers=auth_headers(app))
+    assert resp.status_code == 400
+
+    monkeypatch.setattr(user_routes.User, "set_notification_settings", staticmethod(lambda _uid, _s: _UpdateRes(matched_count=1)))
+    resp = client.put(
+        "/api/user/notification_settings",
+        json={"email_notifications": False, "in_app_notifications": False, "activity_reminders": False},
+        headers=auth_headers(app),
+    )
+    assert resp.status_code == 200
+

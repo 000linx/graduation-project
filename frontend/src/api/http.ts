@@ -45,21 +45,24 @@ http.interceptors.response.use(
   (resp) => resp,
   (error) => {
     const status = error?.response?.status
+    const url = String(error?.config?.url || '')
     const msg = error?.response?.data?.message || error?.message || '请求失败'
+    const isAuthApi = url.startsWith('/api/user/login') || url.startsWith('/api/user/register') || url.startsWith('/api/admin/login')
     if (status === 401) {
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
-      localStorage.removeItem('admin_access_token')
-      localStorage.removeItem('admin_refresh_token')
-      try {
-        window.dispatchEvent(new Event('auth:logout'))
-      } catch {
+      if (!isAuthApi) {
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('refresh_token')
+        localStorage.removeItem('admin_access_token')
+        localStorage.removeItem('admin_refresh_token')
+        try {
+          window.dispatchEvent(new Event('auth:logout'))
+        } catch {}
+        notify('登录已过期，请重新登录', { tone: 'error', flash: true })
       }
-      notify('登录已过期，请重新登录', { tone: 'error', flash: true })
     } else if (status === 403) {
-      notify('无权限访问', { tone: 'error', flash: true })
+      if (!isAuthApi) notify('无权限访问', { tone: 'error', flash: true })
     } else {
-      notify(String(msg), { tone: 'error' })
+      if (!isAuthApi) notify(String(msg), { tone: 'error' })
     }
     return Promise.reject(error)
   }

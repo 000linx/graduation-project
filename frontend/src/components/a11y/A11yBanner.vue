@@ -42,9 +42,21 @@ onBeforeUnmount(clearTimer)
   <div v-if="visible" class="a11y-banner" :class="[toneClass, announcer.flash ? 'a11y-banner--flash' : '']">
     <div class="a11y-banner__inner">
       <div class="a11y-banner__text">{{ announcer.text }}</div>
-      <button class="a11y-banner__close" type="button" aria-label="关闭提示" v-feedback @click="visible = false">关闭</button>
+      <button
+        class="a11y-banner__close"
+        type="button"
+        aria-label="关闭提示"
+        v-feedback
+        @click="visible = false"
+      >
+        关闭
+      </button>
     </div>
-    <div class="a11y-banner__progress" :key="progressKey" :style="{ animationDuration: announcer.ttlMs + 'ms' }" />
+    <div
+      class="a11y-banner__progress"
+      :key="progressKey"
+      :style="{ animationDuration: announcer.ttlMs + 'ms' }"
+    />
   </div>
 </template>
 
@@ -143,4 +155,3 @@ onBeforeUnmount(clearTimer)
   }
 }
 </style>
-

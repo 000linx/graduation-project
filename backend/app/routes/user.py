@@ -69,11 +69,15 @@ def login():
         
     # 生成 JWT Tokens
     tokens = JwtUtil.create_tokens(user['_id'])
+    notif = user.get("notification_settings")
+    if not isinstance(notif, dict):
+        notif = User.DEFAULT_NOTIFICATION_SETTINGS
     return ApiResponse.success({
         "tokens": tokens,
         "user": {
             "username": user['username'],
-            "phone": user.get('phone')
+            "phone": user.get('phone'),
+            "notification_settings": notif
         }
     })
 
@@ -93,7 +97,8 @@ def profile():
     return ApiResponse.success({
         "username": user['username'],
         "phone": user.get('phone'),
-        "created_at": user['created_at']
+        "created_at": user['created_at'],
+        "notification_settings": User.get_notification_settings(user_id)
     })
 
 @user_bp.route('/logout', methods=['POST'])
@@ -264,3 +269,33 @@ def update_hearing_profile():
         return ApiResponse.error("Failed to update", 500)
 
     return ApiResponse.success({"hearing_profile": payload}, "Updated")
+
+
+@user_bp.route('/notification_settings', methods=['GET'])
+@jwt_required()
+def get_notification_settings():
+    user_id = JwtUtil.get_current_user_id()
+    user = User.find_by_id(user_id)
+    if not user:
+        return ApiResponse.not_found("User not found")
+    return ApiResponse.success({"notification_settings": User.get_notification_settings(user_id)})
+
+
+@user_bp.route('/notification_settings', methods=['PUT'])
+@jwt_required()
+def update_notification_settings():
+    user_id = JwtUtil.get_current_user_id()
+    data = request.get_json(silent=True) or {}
+    if not isinstance(data, dict):
+        return ApiResponse.error("Missing fields")
+
+    allowed = {"email_notifications", "in_app_notifications", "activity_reminders"}
+    updates = {k: data.get(k) for k in allowed if k in data}
+    for k, v in updates.items():
+        if not isinstance(v, bool):
+            return ApiResponse.error("Invalid fields")
+
+    res = User.set_notification_settings(user_id, updates)
+    if not res or getattr(res, "matched_count", 0) == 0:
+        return ApiResponse.not_found("User not found")
+    return ApiResponse.success({"notification_settings": User.get_notification_settings(user_id)}, "Updated")

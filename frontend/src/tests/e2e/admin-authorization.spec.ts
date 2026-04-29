@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Admin Authorization', () => {
-  test('non-admin token stored as admin token is blocked and redirected to /admin/forbidden', async ({ page }) => {
+  test('non-admin token stored as admin token is blocked and redirected to /admin/forbidden', async ({
+    page
+  }) => {
     await page.route('**/api/admin/me/permissions', async (route) => {
       await route.fulfill({
         status: 403,

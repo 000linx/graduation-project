@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
 import { useRecoStore } from '../stores/reco'
 import { useA11yStore } from '../stores/a11y'
 import HearingProfileForm from '../components/reco/HearingProfileForm.vue'
 import { notify } from '../utils/notify'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const cart = useCartStore()
 const reco = useRecoStore()
 const a11y = useA11yStore()
+const { t } = useI18n()
 
 const debTimer = ref<number | null>(null)
 const autoEnabled = ref(false)
@@ -19,6 +21,72 @@ const liveText = ref('')
 
 const topItems = computed(() => reco.items.slice(0, 12))
 const updatedAt = ref<number | null>(null)
+
+const perfEnabled = computed(() => {
+  if (typeof window === 'undefined') return false
+  try {
+    const params = new URLSearchParams(window.location.search)
+    return params.has('perf')
+  } catch {
+    return false
+  }
+})
+
+const firstDataMarked = ref(false)
+
+const filterChips = computed(() => {
+  const chips: Array<{ key: string; label: string }> = []
+  if (reco.profile.hearing_level) chips.push({ key: 'level', label: `听损：${reco.profile.hearing_level}` })
+  if (reco.profile.budget_min != null || reco.profile.budget_max != null) {
+    const min = reco.profile.budget_min != null ? `¥${reco.profile.budget_min}` : '不限'
+    const max = reco.profile.budget_max != null ? `¥${reco.profile.budget_max}` : '不限'
+    chips.push({ key: 'budget', label: `预算：${min} - ${max}` })
+  }
+  if (reco.profile.scenes.length)
+    chips.push({
+      key: 'scenes',
+      label: `场景：${reco.profile.scenes.slice(0, 2).join('、')}${reco.profile.scenes.length > 2 ? '…' : ''}`
+    })
+  if (reco.profile.brands.length)
+    chips.push({
+      key: 'brands',
+      label: `品牌：${reco.profile.brands.slice(0, 2).join('、')}${reco.profile.brands.length > 2 ? '…' : ''}`
+    })
+  return chips
+})
+
+const presets = [
+  {
+    label: '新手入门 · 轻度 · 日常交流',
+    profile: {
+      hearing_level: '轻度',
+      scenes: ['日常交流'],
+      budget_min: 1500,
+      budget_max: 3000,
+      brands: [] as string[]
+    }
+  },
+  {
+    label: '电视/会议 · 中度 · 续航优先',
+    profile: {
+      hearing_level: '中度',
+      scenes: ['看电视', '会议'],
+      budget_min: 2500,
+      budget_max: 4500,
+      brands: [] as string[]
+    }
+  },
+  {
+    label: '户外/通勤 · 中度 · 降噪优先',
+    profile: {
+      hearing_level: '中度',
+      scenes: ['户外', '通勤'],
+      budget_min: 3000,
+      budget_max: 6000,
+      brands: [] as string[]
+    }
+  }
+]
 
 function scheduleFetch() {
   if (!autoEnabled.value) return
@@ -40,8 +108,41 @@ async function refresh() {
   if (sig && sig !== lastSig.value) {
     lastSig.value = sig
     liveText.value = `推荐结果已更新，共 ${reco.items.length} 条`
-    await reco.track('impression', { meta: { items: reco.items.map((x) => ({ product_id: x.product?._id, rank: x.rank })) } })
+    await reco.track('impression', {
+      meta: { items: reco.items.map((x) => ({ product_id: x.product?._id, rank: x.rank })) }
+    })
   }
+
+  if (perfEnabled.value && !firstDataMarked.value && reco.items.length) {
+    firstDataMarked.value = true
+    try {
+      performance.mark('reco:dataReady')
+      await nextTick()
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          try {
+            performance.mark('reco:uiPaint')
+            performance.measure('reco:renderDelay', 'reco:dataReady', 'reco:uiPaint')
+            const entries = performance.getEntriesByName('reco:renderDelay')
+            const last = entries[entries.length - 1] as PerformanceMeasure | undefined
+            const ms = Math.round(Number(last?.duration ?? 0))
+            console.info('[perf] reco:renderDelayMs', ms)
+          } catch {}
+        })
+      })
+    } catch {}
+  }
+}
+
+async function applyPreset(p: (typeof presets)[number]) {
+  reco.profile.hearing_level = p.profile.hearing_level as any
+  reco.profile.scenes = [...p.profile.scenes]
+  reco.profile.budget_min = p.profile.budget_min
+  reco.profile.budget_max = p.profile.budget_max
+  reco.profile.brands = [...p.profile.brands]
+  reco.persistProfile()
+  autoEnabled.value = true
+  await refresh()
 }
 
 async function openProduct(item: any) {
@@ -79,7 +180,13 @@ onMounted(async () => {
 })
 
 watch(
-  () => [reco.profile.hearing_level, reco.profile.scenes.join(','), reco.profile.budget_min, reco.profile.budget_max, reco.profile.brands.join(',')],
+  () => [
+    reco.profile.hearing_level,
+    reco.profile.scenes.join(','),
+    reco.profile.budget_min,
+    reco.profile.budget_max,
+    reco.profile.brands.join(',')
+  ],
   () => scheduleFetch()
 )
 </script>
@@ -88,24 +195,69 @@ watch(
   <div class="max-w-6xl mx-auto px-4 py-8">
     <div class="flex items-start md:items-center justify-between mb-6 gap-4">
       <div>
-        <h1 class="text-3xl font-extrabold text-[var(--c-text)]">个性化推荐</h1>
-        <div class="text-base font-bold text-[var(--c-muted)] mt-1">基于听力损失等级、场景、预算与偏好生成，并提供可解释理由。</div>
+        <h1 class="text-3xl font-extrabold text-[var(--c-text)]">{{ t('reco.title') }}</h1>
+        <div class="text-base font-bold text-[var(--c-muted)] mt-1">{{ t('reco.subtitle') }}</div>
+        <div v-if="filterChips.length" class="mt-3 flex flex-wrap gap-2" aria-label="筛选摘要">
+          <span
+            v-for="c in filterChips"
+            :key="c.key"
+            class="px-3 py-1 rounded-full border-2 border-[var(--c-border)] bg-[var(--c-surface)] text-xs font-extrabold text-[var(--c-text)]"
+          >
+            {{ c.label }}
+          </span>
+        </div>
       </div>
       <div class="flex items-center gap-2">
         <el-button v-feedback class="a11y-hit" @click="router.push('/')">返回首页</el-button>
-        <el-button v-feedback class="a11y-hit" :disabled="!reco.profile.hearing_level" @click="autoEnabled = true; refresh()">
+        <el-button
+          v-feedback
+          class="a11y-hit"
+          :disabled="!reco.profile.hearing_level"
+          @click="
+            autoEnabled = true,
+            refresh()
+          "
+        >
           刷新推荐
         </el-button>
       </div>
     </div>
 
     <div class="grid grid-cols-1 gap-6" :class="a11y.largeTextEnabled ? 'lg:grid-cols-1' : 'lg:grid-cols-3'">
-      <div class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-6 lg:sticky lg:top-24 h-fit">
-        <HearingProfileForm @recommended="autoEnabled = true; refresh()" />
+      <div
+        class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-6 lg:sticky lg:top-24 h-fit"
+      >
+        <HearingProfileForm
+          @recommended="
+            autoEnabled = true,
+            refresh()
+          "
+        />
       </div>
 
       <div class="lg:col-span-2">
-        <el-alert v-if="!reco.profile.hearing_level" type="info" show-icon title="请先选择听力损失等级" class="mb-4" />
+        <div v-if="!reco.profile.hearing_level" class="mb-4 space-y-3">
+          <el-alert
+            type="info"
+            show-icon
+            :title="t('reco.needLevel')"
+            :description="t('reco.needLevelDesc')"
+          />
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" :aria-label="t('reco.presetAria')">
+            <button
+              v-for="p in presets"
+              :key="p.label"
+              v-feedback
+              type="button"
+              class="a11y-hit justify-start text-left rounded-2xl border-2 border-[var(--c-border)] bg-[var(--c-surface)] px-4 py-3"
+              :aria-label="`应用示例配置：${p.label}`"
+              @click="applyPreset(p)"
+            >
+              <div class="text-sm font-extrabold text-[var(--c-text)]">{{ p.label }}</div>
+              <div class="mt-1 text-xs font-semibold text-[var(--c-muted)]">{{ t('reco.presetHint') }}</div>
+            </button>
+          </div>
+        </div>
         <el-alert v-else-if="reco.error" type="error" show-icon :title="reco.error" class="mb-4" />
 
         <div class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-6">
@@ -150,21 +302,34 @@ watch(
                       decoding="async"
                       class="w-full h-full object-cover"
                     />
-                    <div v-else class="w-full h-full flex items-center justify-center text-sm font-extrabold text-[var(--c-muted)]">暂无图片</div>
+                    <div
+                      v-else
+                      class="w-full h-full flex items-center justify-center text-sm font-extrabold text-[var(--c-muted)]"
+                    >
+                      暂无图片
+                    </div>
                   </button>
 
                   <div class="flex-1 space-y-2">
                     <div class="flex items-start justify-between gap-3">
                       <div>
-                        <div class="text-base font-extrabold text-[var(--c-text)]">#{{ item.rank }} {{ item.product?.name }}</div>
+                        <div class="text-base font-extrabold text-[var(--c-text)]">
+                          #{{ item.rank }} {{ item.product?.name }}
+                        </div>
                         <div class="text-sm font-bold text-[var(--c-muted)]">
-                          分类：{{ item.product?.category || '-' }} · 价格：¥{{ Number(item.product?.price ?? 0).toFixed(0) }}
-                          <span v-if="item.product?.stock != null"> · 库存：{{ Number(item.product?.stock ?? 0) }}</span>
+                          分类：{{ item.product?.category || '-' }} · 价格：¥{{
+                            Number(item.product?.price ?? 0).toFixed(0)
+                          }}
+                          <span v-if="item.product?.stock != null">
+                            · 库存：{{ Number(item.product?.stock ?? 0) }}</span
+                          >
                         </div>
                       </div>
                       <div class="flex items-center gap-2">
                         <el-button v-feedback class="a11y-hit" @click="openProduct(item)">查看详情</el-button>
-                        <el-button type="primary" v-feedback class="a11y-hit" @click="addFromReco(item)">加入购物车</el-button>
+                        <el-button type="primary" v-feedback class="a11y-hit" @click="addFromReco(item)"
+                          >加入购物车</el-button
+                        >
                       </div>
                     </div>
                     <div v-if="Array.isArray(item.reasons) && item.reasons.length" class="pt-1">

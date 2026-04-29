@@ -70,7 +70,10 @@ describe('cart store', () => {
 
   it('clears cache on auth:logout event', async () => {
     const store = useCartStore()
-    localStorage.setItem('cart_cache_v1', JSON.stringify({ items: [{ product_id: 'p1', quantity: 2 }], products: {}, updated_at: Date.now() }))
+    localStorage.setItem(
+      'cart_cache_v1',
+      JSON.stringify({ items: [{ product_id: 'p1', quantity: 2 }], products: {}, updated_at: Date.now() })
+    )
     localStorage.removeItem('access_token')
     expect(localStorage.getItem('access_token')).toBeNull()
     await store.init()
@@ -92,7 +95,10 @@ describe('cart store', () => {
   })
 
   it('fetchCart clears cache when no user token', async () => {
-    localStorage.setItem('cart_cache_v1', JSON.stringify({ items: [{ product_id: 'p1', quantity: 2 }], products: {}, updated_at: Date.now() }))
+    localStorage.setItem(
+      'cart_cache_v1',
+      JSON.stringify({ items: [{ product_id: 'p1', quantity: 2 }], products: {}, updated_at: Date.now() })
+    )
     localStorage.removeItem('access_token')
 
     const store = useCartStore()
@@ -135,7 +141,10 @@ describe('cart store', () => {
   it('clears cache when access_token removed in storage event', async () => {
     const http = (await import('@/api/http')).default as any
     const store = useCartStore()
-    localStorage.setItem('cart_cache_v1', JSON.stringify({ items: [{ product_id: 'p1', quantity: 2 }], products: {}, updated_at: Date.now() }))
+    localStorage.setItem(
+      'cart_cache_v1',
+      JSON.stringify({ items: [{ product_id: 'p1', quantity: 2 }], products: {}, updated_at: Date.now() })
+    )
     localStorage.setItem('access_token', 't')
     http.get.mockResolvedValueOnce({ data: { data: { items: [] } } })
     await store.init()

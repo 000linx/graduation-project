@@ -31,4 +31,3 @@ function goAdminLogin() {
     </div>
   </div>
 </template>
-

@@ -10,16 +10,14 @@ describe('perfMonitor', () => {
     window.history.pushState({}, '', '/?perf=1')
 
     vi.spyOn(performance, 'getEntriesByType').mockReturnValue([
-      { domContentLoadedEventEnd: 120, loadEventEnd: 300 } as any,
+      { domContentLoadedEventEnd: 120, loadEventEnd: 300 } as any
     ])
-
     ;(globalThis as any).PerformanceObserver = class {
       cb: any
       constructor(cb: any) {
         this.cb = cb
       }
-      observe() {
-      }
+      observe() {}
     }
 
     const info = vi.spyOn(console, 'info').mockImplementation(() => {})
@@ -46,4 +44,3 @@ describe('perfMonitor', () => {
     vi.useRealTimers()
   })
 })
-

@@ -4,11 +4,12 @@ import ElementPlus from 'element-plus'
 import UserRegister from '@/components/auth/UserRegister.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
-vi.mock('axios', () => {
+vi.mock('@/api/http', () => {
   return {
     default: {
       post: vi.fn()
-    }
+    },
+    unwrap: (resp: any) => (resp?.data?.data ?? null)
   }
 })
 
@@ -29,11 +30,12 @@ describe('UserRegister', () => {
   })
 
   it('registers then auto logs in and redirects', async () => {
-    const axios = (await import('axios')).default as any
-    axios.post
-      .mockResolvedValueOnce({ status: 201, data: { code: 201, message: 'Registration successful', data: { user_id: 'u1' } } })
+    const api = (await import('@/api/http')).default as any
+    api.post
       .mockResolvedValueOnce({
-        status: 200,
+        data: { code: 201, message: 'Registration successful', data: { user_id: 'u1' } }
+      })
+      .mockResolvedValueOnce({
         data: { code: 200, message: 'ok', data: { tokens: { access_token: 'at', refresh_token: 'rt' } } }
       })
 
@@ -61,4 +63,3 @@ describe('UserRegister', () => {
     expect(localStorage.getItem('refresh_token')).toBe('rt')
   })
 })
-

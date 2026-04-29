@@ -22,7 +22,7 @@ const changePage = (page: number) => {
     >
       上一页
     </button>
-    
+
     <button
       v-for="page in totalPages"
       :key="page"

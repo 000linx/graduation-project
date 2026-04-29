@@ -109,6 +109,13 @@ function renderChart() {
   if (!chartEl.value) return
   if (!echartsMod || !chart) return
 
+  const vars = typeof window !== 'undefined' ? getComputedStyle(document.documentElement) : (null as any)
+  const axisText = vars?.getPropertyValue('--c-muted')?.trim() || '#9aa4b2'
+  const axisLine = vars?.getPropertyValue('--c-border')?.trim() || '#203154'
+  const gridLine = vars?.getPropertyValue('--c-grid')?.trim() || 'rgba(17, 24, 39, 0.15)'
+  const primary = vars?.getPropertyValue('--c-primary')?.trim() || '#00f5ff'
+  const neon = vars?.getPropertyValue('--c-neon')?.trim() || '#00f5ff'
+
   const x = series.value.map((s) => s.bucket)
   const y = series.value.map((s) => Number(s.total_sales || 0))
 
@@ -131,21 +138,22 @@ function renderChart() {
       xAxis: {
         type: 'category',
         data: x,
-        axisLabel: { color: '#6B7280' },
-        axisLine: { lineStyle: { color: '#E5E7EB' } }
+        axisLabel: { color: axisText },
+        axisLine: { lineStyle: { color: axisLine, opacity: 0.6 } }
       },
       yAxis: {
         type: 'value',
-        axisLabel: { color: '#6B7280' },
-        splitLine: { lineStyle: { color: '#F3F4F6' } }
+        axisLabel: { color: axisText },
+        splitLine: { lineStyle: { color: gridLine } },
+        axisLine: { show: false }
       },
       series: [
         {
           type: 'bar',
           data: y,
           barMaxWidth: 42,
-          itemStyle: { color: '#2563EB', borderRadius: [6, 6, 0, 0] },
-          emphasis: { itemStyle: { color: '#1D4ED8' } }
+          itemStyle: { color: primary, borderRadius: [8, 8, 0, 0] },
+          emphasis: { itemStyle: { color: neon } }
         }
       ]
     },
@@ -156,8 +164,7 @@ function renderChart() {
 function resizeChart() {
   try {
     chart?.resize()
-  } catch {
-  }
+  } catch {}
 }
 
 useResizeObserver(chartEl, () => resizeChart())
@@ -170,8 +177,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   try {
     chart?.dispose()
-  } catch {
-  }
+  } catch {}
   chart = null
 })
 
@@ -248,7 +254,10 @@ function exportPng() {
 }
 
 function exportCsv() {
-  const rows = [['bucket', 'total_sales', 'count'], ...series.value.map((s) => [s.bucket, String(s.total_sales), String(s.count)])]
+  const rows = [
+    ['bucket', 'total_sales', 'count'],
+    ...series.value.map((s) => [s.bucket, String(s.total_sales), String(s.count)])
+  ]
   const csv = rows.map((r) => r.map((x) => `"${String(x).replaceAll('"', '""')}"`).join(',')).join('\n')
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
@@ -306,7 +315,10 @@ function exportCsv() {
       </div>
       <div v-else class="relative">
         <div ref="chartEl" class="w-full h-[360px]" />
-        <div v-if="loading" class="absolute inset-0 bg-white/60 flex items-center justify-center text-sm text-gray-600">
+        <div
+          v-if="loading"
+          class="absolute inset-0 bg-white/60 flex items-center justify-center text-sm text-gray-600"
+        >
           正在加载...
         </div>
       </div>

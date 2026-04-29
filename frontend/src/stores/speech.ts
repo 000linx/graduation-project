@@ -15,7 +15,10 @@ export const useSpeechStore = defineStore('speech', () => {
 
   const hasText = computed(() => Boolean((partial.value || transcript.value).trim()))
 
-  const Ctor: any = typeof window !== 'undefined' ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition : null
+  const Ctor: any =
+    typeof window !== 'undefined'
+      ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+      : null
   supported.value = Boolean(Ctor)
 
   let rec: any = null
@@ -51,8 +54,14 @@ export const useSpeechStore = defineStore('speech', () => {
         results.push({ transcript: t, isFinal: Boolean(r?.isFinal) })
       }
 
-      const finals = results.filter((r) => r.isFinal).map((r) => r.transcript).join(' ')
-      const interims = results.filter((r) => !r.isFinal).map((r) => r.transcript).join(' ')
+      const finals = results
+        .filter((r) => r.isFinal)
+        .map((r) => r.transcript)
+        .join(' ')
+      const interims = results
+        .filter((r) => !r.isFinal)
+        .map((r) => r.transcript)
+        .join(' ')
       if (finals) transcript.value = [transcript.value, finals].filter(Boolean).join(' ').trim()
       partial.value = interims
 
@@ -60,7 +69,7 @@ export const useSpeechStore = defineStore('speech', () => {
         new CustomEvent('a11y:speech_text', {
           detail: {
             transcript: transcript.value,
-            partial: partial.value,
+            partial: partial.value
           }
         })
       )
@@ -86,8 +95,7 @@ export const useSpeechStore = defineStore('speech', () => {
     if (!rec) return
     try {
       rec.stop()
-    } catch {
-    }
+    } catch {}
   }
 
   function reset() {
@@ -106,7 +114,6 @@ export const useSpeechStore = defineStore('speech', () => {
     hasText,
     start,
     stop,
-    reset,
+    reset
   }
 })
-

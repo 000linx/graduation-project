@@ -41,7 +41,11 @@ test.describe('Product Detail Add To Cart', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json; charset=utf-8',
-        body: JSON.stringify({ code: 200, message: 'ok', data: { items: [{ product_id: 'p1', quantity: cartQty }] } })
+        body: JSON.stringify({
+          code: 200,
+          message: 'ok',
+          data: { items: [{ product_id: 'p1', quantity: cartQty }] }
+        })
       })
     })
 
@@ -55,4 +59,3 @@ test.describe('Product Detail Add To Cart', () => {
     await expect(badge).toHaveText('1')
   })
 })
-

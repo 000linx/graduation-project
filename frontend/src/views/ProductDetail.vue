@@ -36,11 +36,7 @@ function mapToCard(p: any): ProductCardItem {
     id: String(p._id ?? p.id ?? ''),
     name: String(p.name ?? '未命名产品'),
     price: Number(p.price ?? 0),
-    image: String(
-      p.image_url ??
-        p.image ??
-        productPlaceholder
-    ),
+    image: String(p.image_url ?? p.image ?? productPlaceholder),
     category: String(p.category ?? '未分类'),
     rating: Number(p.rating ?? 4.6)
   }
@@ -122,8 +118,14 @@ async function addToCart() {
 <template>
   <div class="max-w-6xl mx-auto py-10 px-4">
     <nav class="flex flex-wrap items-center gap-2 text-sm" aria-label="面包屑">
-      <router-link to="/" class="font-extrabold text-[var(--c-primary)] no-underline" v-feedback aria-label="返回首页">首页</router-link>
-      <ChevronRight class="h-4 w-4 text-[var(--c-muted)]" aria-hidden="true" />
+      <router-link
+        to="/"
+        class="font-extrabold text-[var(--c-primary)] no-underline"
+        v-feedback
+        aria-label="返回首页"
+        >首页</router-link
+      >
+      <ChevronRight class="h-4 w-4 icon-tone--muted" aria-hidden="true" />
       <router-link
         to="/"
         class="font-extrabold text-[var(--c-primary)] no-underline"
@@ -133,14 +135,19 @@ async function addToCart() {
         商品
       </router-link>
       <template v-if="product?.category">
-        <ChevronRight class="h-4 w-4 text-[var(--c-muted)]" aria-hidden="true" />
+        <ChevronRight class="h-4 w-4 icon-tone--muted" aria-hidden="true" />
         <span class="font-semibold text-[var(--c-muted)]">{{ product.category }}</span>
       </template>
     </nav>
 
     <div class="flex items-center justify-between mt-5 mb-6">
       <h1 class="text-2xl lg:text-3xl font-extrabold text-[var(--c-text)]">商品详情</h1>
-      <router-link to="/" class="a11y-hit px-3 rounded-full border-2 border-[var(--c-border)] bg-[var(--c-surface)] text-[var(--c-text)] font-extrabold no-underline" v-feedback aria-label="返回首页">
+      <router-link
+        to="/"
+        class="a11y-hit px-3 rounded-full border-2 border-[var(--c-border)] bg-[var(--c-surface)] text-[var(--c-text)] font-extrabold no-underline"
+        v-feedback
+        aria-label="返回首页"
+      >
         返回首页
       </router-link>
     </div>
@@ -148,8 +155,13 @@ async function addToCart() {
     <div v-if="loading" class="text-[var(--c-muted)] font-semibold">正在加载...</div>
     <div v-else-if="errorMessage" class="text-[var(--c-danger)] font-bold">接口错误：{{ errorMessage }}</div>
 
-    <div v-else-if="product" class="bg-[var(--c-surface)] rounded-3xl p-6 lg:p-8 shadow-sm border-2 border-[var(--c-border)] grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <div class="aspect-square bg-[var(--c-bg)] rounded-2xl overflow-hidden border-2 border-[var(--c-border)]">
+    <div
+      v-else-if="product"
+      class="bg-[var(--c-surface)] rounded-3xl p-6 lg:p-8 shadow-sm border-2 border-[var(--c-border)] grid grid-cols-1 lg:grid-cols-2 gap-8"
+    >
+      <div
+        class="aspect-square bg-[var(--c-bg)] rounded-2xl overflow-hidden border-2 border-[var(--c-border)]"
+      >
         <img
           :src="product.image_url ?? productPlaceholder"
           :alt="product.name ?? '商品图片'"
@@ -161,9 +173,14 @@ async function addToCart() {
         <div class="text-2xl font-extrabold text-[var(--c-text)]">{{ product.name ?? '未命名产品' }}</div>
         <div class="flex flex-wrap items-center gap-3">
           <div class="text-[var(--c-danger)] text-3xl font-extrabold">¥{{ Number(product.price ?? 0) }}</div>
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border-2 border-[var(--c-border)] bg-[var(--c-bg)]" :aria-label="`评分 ${Number(product.rating ?? 4.6).toFixed(1)}`">
-            <Star class="h-4 w-4 text-[var(--c-warning)]" aria-hidden="true" />
-            <span class="text-sm font-extrabold text-[var(--c-text)]">{{ Number(product.rating ?? 4.6).toFixed(1) }}</span>
+          <div
+            class="inline-flex items-center gap-2 px-3 py-1 rounded-full border-2 border-[var(--c-border)] bg-[var(--c-bg)]"
+            :aria-label="`评分 ${Number(product.rating ?? 4.6).toFixed(1)}`"
+          >
+            <Star class="h-4 w-4 icon-tone--warning" aria-hidden="true" />
+            <span class="text-sm font-extrabold text-[var(--c-text)]">{{
+              Number(product.rating ?? 4.6).toFixed(1)
+            }}</span>
             <span class="text-xs font-semibold text-[var(--c-muted)]">口碑精选</span>
           </div>
         </div>
@@ -173,16 +190,22 @@ async function addToCart() {
         </div>
 
         <div class="flex flex-wrap gap-2" aria-label="卖点">
-          <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold">
-            <ShieldCheck class="h-3.5 w-3.5" aria-hidden="true" />
+          <span
+            class="inline-flex items-center gap-1 px-2 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold"
+          >
+            <ShieldCheck class="h-3.5 w-3.5 icon-tone--success icon--micro" aria-hidden="true" />
             安心售后
           </span>
-          <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold">
-            <BadgeCheck class="h-3.5 w-3.5" aria-hidden="true" />
+          <span
+            class="inline-flex items-center gap-1 px-2 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold"
+          >
+            <BadgeCheck class="h-3.5 w-3.5 icon-tone--success icon--micro" aria-hidden="true" />
             适配建议
           </span>
-          <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold">
-            <Truck class="h-3.5 w-3.5" aria-hidden="true" />
+          <span
+            class="inline-flex items-center gap-1 px-2 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold"
+          >
+            <Truck class="h-3.5 w-3.5 icon-tone--info icon--micro" aria-hidden="true" />
             可追踪配送
           </span>
         </div>
@@ -192,7 +215,9 @@ async function addToCart() {
           <div>库存：{{ product.stock ?? '-' }}</div>
         </div>
 
-        <div class="pt-4 border-t border-[var(--c-border)]/30 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div
+          class="pt-4 border-t border-[var(--c-border)]/30 flex flex-col gap-3 sm:flex-row sm:items-center"
+        >
           <div class="flex items-center gap-3">
             <div class="text-sm font-semibold text-[var(--c-muted)]">数量</div>
             <el-input-number
@@ -242,7 +267,7 @@ async function addToCart() {
           class="a11y-hit text-[var(--c-primary)] font-extrabold underline flex items-center no-underline"
           aria-label="去个性化推荐"
         >
-          去推荐 <ChevronRight class="h-4 w-4 ml-1" aria-hidden="true" />
+          去推荐 <ChevronRight class="h-4 w-4 ml-1 icon-tone--muted" aria-hidden="true" />
         </router-link>
       </div>
       <div v-loading="relatedLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

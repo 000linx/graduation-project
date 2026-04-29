@@ -83,15 +83,29 @@ onMounted(fetchUsers)
       </div>
     </div>
 
-    <el-alert v-if="forbidden" type="error" show-icon title="无权限" description="当前账号不是管理员，无法访问用户管理。" />
+    <el-alert
+      v-if="forbidden"
+      type="error"
+      show-icon
+      title="无权限"
+      description="当前账号不是管理员，无法访问用户管理。"
+    />
     <el-alert v-else-if="error" type="error" show-icon :title="error" />
 
-    <el-table v-loading="loading" :data="filteredUsers" stripe size="small" class="bg-white rounded-2xl border">
+    <el-table
+      v-loading="loading"
+      :data="filteredUsers"
+      stripe
+      size="small"
+      class="bg-white rounded-2xl border"
+    >
       <el-table-column prop="username" label="用户名" min-width="140" show-overflow-tooltip />
       <el-table-column prop="phone" label="手机号" min-width="180" show-overflow-tooltip />
       <el-table-column label="角色" width="120">
         <template #default="{ row }">
-          <el-tag :type="row.role === 'admin' ? 'danger' : 'info'">{{ row.role === 'admin' ? '管理员' : '用户' }}</el-tag>
+          <el-tag :type="row.role === 'admin' ? 'danger' : 'info'">{{
+            row.role === 'admin' ? '管理员' : '用户'
+          }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="160" fixed="right">
@@ -111,7 +125,9 @@ onMounted(fetchUsers)
         <el-descriptions-item label="用户ID">{{ activeUser._id }}</el-descriptions-item>
         <el-descriptions-item label="用户名">{{ activeUser.username || '-' }}</el-descriptions-item>
         <el-descriptions-item label="手机号">{{ activeUser.phone || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="角色">{{ activeUser.role === 'admin' ? '管理员' : '用户' }}</el-descriptions-item>
+        <el-descriptions-item label="角色">{{
+          activeUser.role === 'admin' ? '管理员' : '用户'
+        }}</el-descriptions-item>
         <el-descriptions-item label="创建时间">{{ activeUser.created_at || '-' }}</el-descriptions-item>
       </el-descriptions>
     </div>

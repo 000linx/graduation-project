@@ -11,7 +11,11 @@ test.describe('Admin Return From Home', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json; charset=utf-8',
-        body: JSON.stringify({ code: 200, message: 'ok', data: { products: [], pagination: { total_pages: 1 } } })
+        body: JSON.stringify({
+          code: 200,
+          message: 'ok',
+          data: { products: [], pagination: { total_pages: 1 } }
+        })
       })
     })
     await page.route('**/api/product/stream', async (route) => {
@@ -26,7 +30,11 @@ test.describe('Admin Return From Home', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json; charset=utf-8',
-        body: JSON.stringify({ code: 200, message: 'ok', data: { users: 0, products: 0, orders: 0, total_sales: 0 } })
+        body: JSON.stringify({
+          code: 200,
+          message: 'ok',
+          data: { users: 0, products: 0, orders: 0, total_sales: 0 }
+        })
       })
     })
 
@@ -34,7 +42,11 @@ test.describe('Admin Return From Home', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json; charset=utf-8',
-        body: JSON.stringify({ code: 200, message: 'ok', data: { items: [], page: 1, page_size: 50, has_more: false } })
+        body: JSON.stringify({
+          code: 200,
+          message: 'ok',
+          data: { items: [], page: 1, page_size: 50, has_more: false }
+        })
       })
     })
 

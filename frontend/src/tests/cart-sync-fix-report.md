@@ -77,4 +77,3 @@
 - 加购成功后，购物车角标与购物车列表均能实时刷新
 - localStorage 的 `cart_cache_v1` 与后端 `/api/cart/items` 保持一致（以服务端结果为准刷新）
 - 未登录加购会提示并跳转登录页，且支持 redirect 回跳
-

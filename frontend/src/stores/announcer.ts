@@ -38,4 +38,3 @@ export const useAnnouncerStore = defineStore('announcer', () => {
 
   return { text, politeness, tone, flash, ttlMs, seq, announce, clear }
 })
-

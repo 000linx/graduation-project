@@ -10,7 +10,11 @@ test.describe('Logout Cart Badge', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json; charset=utf-8',
-        body: JSON.stringify({ code: 200, message: 'ok', data: { products: [], pagination: { total_pages: 1 } } })
+        body: JSON.stringify({
+          code: 200,
+          message: 'ok',
+          data: { products: [], pagination: { total_pages: 1 } }
+        })
       })
     })
     await page.route('**/api/product/stream', async (route) => {
@@ -50,7 +54,11 @@ test.describe('Logout Cart Badge', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json; charset=utf-8',
-        body: JSON.stringify({ code: 200, message: 'ok', data: { username: '测试用户', phone: '13800138000' } })
+        body: JSON.stringify({
+          code: 200,
+          message: 'ok',
+          data: { username: '测试用户', phone: '13800138000' }
+        })
       })
     })
     await page.route('**/api/order/history**', async (route) => {

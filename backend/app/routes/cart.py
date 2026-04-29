@@ -38,6 +38,13 @@ def add_to_cart():
     
     if not product_id:
         return ApiResponse.error("Missing product_id")
+
+    try:
+        quantity = int(quantity)
+    except Exception:
+        return ApiResponse.error("Invalid quantity")
+    if quantity <= 0:
+        return ApiResponse.error("Invalid quantity")
         
     # 检查库存是否足够
     product = Product.find_by_id(product_id)

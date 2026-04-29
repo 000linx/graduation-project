@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/stores/a11y', () => {
   return {
-    useA11yStore: vi.fn(() => ({ interactionFeedback: 'haptic' })),
+    useA11yStore: vi.fn(() => ({ interactionFeedback: 'haptic' }))
   }
 })
 
@@ -26,4 +26,3 @@ describe('vFeedback directive', () => {
     vFeedback.unmounted?.(el as any, undefined as any, undefined as any, undefined as any)
   })
 })
-

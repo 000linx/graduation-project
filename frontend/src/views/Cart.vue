@@ -1,34 +1,58 @@
 <template>
   <div class="max-w-6xl mx-auto py-10 px-4">
-    <h1 class="text-3xl font-bold mb-8">您的购物车</h1>
-    <el-alert v-if="!hasToken" type="warning" show-icon title="未登录" description="请先登录后查看购物车。" class="mb-6" />
+    <h1 class="text-3xl font-extrabold mb-8 text-[var(--c-text)]">您的购物车</h1>
+    <el-alert
+      v-if="!hasToken"
+      type="warning"
+      show-icon
+      title="未登录"
+      description="请先登录后查看购物车。"
+      class="mb-6"
+    />
 
-    <div v-else-if="cart.totalQty === 0" class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 text-center">
-      <div class="text-gray-400 mb-6">
-        <ShoppingCart class="h-16 w-16 mx-auto" />
+    <div
+      v-else-if="cart.totalQty === 0"
+      class="bg-[var(--c-surface)] rounded-3xl p-8 shadow-sm border-2 border-[var(--c-border)] text-center"
+    >
+      <div class="text-[var(--c-muted)] mb-6">
+        <ShoppingCart class="h-16 w-16 mx-auto icon-tone--info" />
       </div>
-      <p class="text-xl font-medium text-gray-900 mb-2">购物车还是空的</p>
-      <p class="text-gray-500 mb-8">赶紧去选购您心仪的助听器吧！</p>
+      <p class="text-xl font-extrabold text-[var(--c-text)] mb-2">购物车还是空的</p>
+      <p class="text-[var(--c-muted)] font-semibold mb-8">赶紧去选购你心仪的助听器吧！</p>
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-        <router-link to="/" class="bg-blue-600 text-white px-8 py-3 rounded-full font-bold hover:bg-blue-700 transition-all">
+        <router-link
+          to="/"
+          v-feedback
+          class="a11y-hit px-8 rounded-full font-extrabold bg-[var(--c-primary)] text-[var(--c-on-primary)] no-underline"
+        >
           去逛逛
         </router-link>
-        <router-link to="/recommendations" class="px-8 py-3 rounded-full font-bold border border-gray-200 hover:bg-gray-50 transition-all">
+        <router-link
+          to="/recommendations"
+          v-feedback
+          class="a11y-hit px-8 rounded-full font-extrabold border-2 border-[var(--c-border)] bg-[var(--c-bg)] text-[var(--c-text)] no-underline"
+        >
           去个性化推荐
         </router-link>
       </div>
     </div>
 
     <div v-else class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      <div class="lg:col-span-8 bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
+      <div
+        class="lg:col-span-8 bg-[var(--c-surface)] rounded-3xl p-6 shadow-sm border-2 border-[var(--c-border)] space-y-4"
+      >
         <el-table :data="tableRows" stripe size="small" class="border rounded-xl" v-loading="cart.loading">
           <el-table-column label="商品" min-width="260">
             <template #default="{ row }">
               <div class="flex items-center gap-3">
-                <img :src="row.image" :alt="row.name" class="w-12 h-12 rounded object-cover bg-gray-50 border" />
+                <img
+                  :src="row.image"
+                  :alt="row.name"
+                  class="w-12 h-12 rounded object-cover bg-[var(--c-bg)] border-2 border-[var(--c-border)]"
+                />
                 <div class="min-w-0">
-                  <div class="font-medium text-gray-900 truncate">{{ row.name }}</div>
-                  <div class="text-xs text-gray-500 truncate">{{ row.category }}</div>
+                  <div class="font-extrabold text-[var(--c-text)] truncate">{{ row.name }}</div>
+                  <div class="text-xs font-semibold text-[var(--c-muted)] truncate">{{ row.category }}</div>
                 </div>
               </div>
             </template>
@@ -59,34 +83,39 @@
       </div>
 
       <aside class="lg:col-span-4 space-y-4" aria-label="结算摘要">
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div class="text-lg font-bold text-gray-900">订单摘要</div>
-          <div class="mt-4 space-y-2 text-sm text-gray-600">
+        <div class="bg-[var(--c-surface)] rounded-3xl p-6 shadow-sm border-2 border-[var(--c-border)]">
+          <div class="text-lg font-extrabold text-[var(--c-text)]">订单摘要</div>
+          <div class="mt-4 space-y-2 text-sm font-semibold text-[var(--c-muted)]">
             <div class="flex items-center justify-between">
               <span>商品件数</span>
-              <span class="font-semibold text-gray-900">{{ cart.totalQty }} 件</span>
+              <span class="font-extrabold text-[var(--c-text)]">{{ cart.totalQty }} 件</span>
             </div>
             <div class="flex items-center justify-between">
               <span>商品金额</span>
-              <span class="font-semibold text-gray-900">¥{{ totalAmount.toFixed(2) }}</span>
+              <span class="font-extrabold text-[var(--c-text)]">¥{{ totalAmount.toFixed(2) }}</span>
             </div>
             <div class="flex items-center justify-between">
               <span>运费</span>
-              <span class="font-semibold text-gray-900">¥0.00</span>
+              <span class="font-extrabold text-[var(--c-text)]">¥0.00</span>
             </div>
           </div>
-          <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-            <span class="text-sm text-gray-500">应付</span>
-            <span class="text-2xl font-extrabold text-gray-900">¥{{ totalAmount.toFixed(2) }}</span>
+          <div class="mt-4 pt-4 border-t border-[var(--c-border)]/30 flex items-center justify-between">
+            <span class="text-sm font-semibold text-[var(--c-muted)]">应付</span>
+            <span class="text-2xl font-extrabold text-[var(--c-text)]">¥{{ totalAmount.toFixed(2) }}</span>
           </div>
           <router-link to="/checkout" class="block mt-4">
             <el-button type="primary" class="w-full">去结算</el-button>
           </router-link>
-          <div class="mt-3 text-xs text-gray-500">支持键盘操作与读屏提示，结算页可选择地址与支付方式。</div>
+          <div class="mt-3 text-xs font-semibold text-[var(--c-muted)]">
+            支持键盘操作与读屏提示，结算页可选择地址与支付方式。
+          </div>
         </div>
 
-        <div v-if="recommended.length" class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div class="text-lg font-bold text-gray-900 mb-4">你可能还需要</div>
+        <div
+          v-if="recommended.length"
+          class="bg-[var(--c-surface)] rounded-3xl p-6 shadow-sm border-2 border-[var(--c-border)]"
+        >
+          <div class="text-lg font-extrabold text-[var(--c-text)] mb-4">你可能还需要</div>
           <div v-loading="recoLoading" class="grid grid-cols-1 gap-4">
             <ProductCard v-for="p in recommended" :key="p.id" :product="p" />
           </div>
@@ -127,10 +156,7 @@ const tableRows = computed<Row[]>(() => {
       quantity: it.quantity,
       name: String(p?.name ?? '商品'),
       price: Number(p?.price ?? 0),
-      image: String(
-        p?.image_url ??
-          productPlaceholder
-      ),
+      image: String(p?.image_url ?? productPlaceholder),
       category: String(p?.category ?? '')
     }
   })
@@ -156,11 +182,7 @@ function mapToCard(p: any): ProductCardItem {
     id: String(p._id ?? p.id ?? ''),
     name: String(p.name ?? '未命名产品'),
     price: Number(p.price ?? 0),
-    image: String(
-      p.image_url ??
-        p.image ??
-        productPlaceholder
-    ),
+    image: String(p.image_url ?? p.image ?? productPlaceholder),
     category: String(p.category ?? '未分类'),
     rating: Number(p.rating ?? 4.6)
   }

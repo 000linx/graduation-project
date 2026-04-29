@@ -91,4 +91,3 @@ test.describe('Cart Sync', () => {
     await expect(page.locator('text=助听器A（测试）')).toHaveCount(1)
   })
 })
-

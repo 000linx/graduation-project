@@ -49,8 +49,7 @@ export const useCartStore = defineStore('cart', () => {
       const data = JSON.parse(raw) as CartCache
       if (Array.isArray(data?.items)) items.value = data.items
       if (data?.products && typeof data.products === 'object') products.value = data.products
-    } catch {
-    }
+    } catch {}
   }
 
   function clearCache() {
@@ -92,8 +91,7 @@ export const useCartStore = defineStore('cart', () => {
             category: p?.category,
             stock: p?.stock
           }
-        } catch {
-        }
+        } catch {}
       })
     )
     products.value = { ...products.value, ...fetched }
@@ -148,5 +146,17 @@ export const useCartStore = defineStore('cart', () => {
     await fetchCart()
   }
 
-  return { items, products, totalQty, loading, init, fetchCart, addToCart, updateQty, removeItem, loadFromCache, clearCache }
+  return {
+    items,
+    products,
+    totalQty,
+    loading,
+    init,
+    fetchCart,
+    addToCart,
+    updateQty,
+    removeItem,
+    loadFromCache,
+    clearCache
+  }
 })

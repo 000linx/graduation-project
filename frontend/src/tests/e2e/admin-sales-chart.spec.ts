@@ -11,7 +11,11 @@ test.describe('Admin Sales Chart', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json; charset=utf-8',
-        body: JSON.stringify({ code: 200, message: 'ok', data: { users: 0, products: 0, orders: 0, total_sales: 0 } })
+        body: JSON.stringify({
+          code: 200,
+          message: 'ok',
+          data: { users: 0, products: 0, orders: 0, total_sales: 0 }
+        })
       })
     })
 
@@ -22,7 +26,12 @@ test.describe('Admin Sales Chart', () => {
         body: JSON.stringify({
           code: 200,
           message: 'ok',
-          data: { items: [{ bucket: '2026-04-01', total_sales: 100, count: 2 }], page: 1, page_size: 50, has_more: false }
+          data: {
+            items: [{ bucket: '2026-04-01', total_sales: 100, count: 2 }],
+            page: 1,
+            page_size: 50,
+            has_more: false
+          }
         })
       })
     })
@@ -34,4 +43,3 @@ test.describe('Admin Sales Chart', () => {
     await expect(page.locator('div.h-\\[360px\\]')).toHaveCount(1)
   })
 })
-

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import ProductCard from '@/components/ProductCard.vue'
 import Pagination from '@/components/Pagination.vue'
@@ -148,6 +148,18 @@ const loading = ref(false)
 const errorMessage = ref<string | null>(null)
 const skeletonCount = 12
 
+const perfEnabled = computed(() => {
+  if (typeof window === 'undefined') return false
+  try {
+    const params = new URLSearchParams(window.location.search)
+    return params.has('perf')
+  } catch {
+    return false
+  }
+})
+
+const firstDataMarked = ref(false)
+
 let es: EventSource | null = null
 let sseTimer: number | null = null
 
@@ -181,11 +193,7 @@ const fetchProducts = async () => {
       id: String(p._id ?? p.id ?? ''),
       name: String(p.name ?? '未命名产品'),
       price: Number(p.price ?? 0),
-      image: String(
-        p.image_url ??
-          p.image ??
-          productPlaceholder
-      ),
+      image: String(p.image_url ?? p.image ?? productPlaceholder),
       category: String(p.category ?? '未分类'),
       rating: Number(p.rating ?? 4.6)
     }))
@@ -195,6 +203,26 @@ const fetchProducts = async () => {
     errorMessage.value = e?.message ?? '获取产品失败'
   } finally {
     loading.value = false
+
+    if (perfEnabled.value && !firstDataMarked.value) {
+      firstDataMarked.value = true
+      try {
+        performance.mark('home:dataReady')
+        await nextTick()
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            try {
+              performance.mark('home:uiPaint')
+              performance.measure('home:renderDelay', 'home:dataReady', 'home:uiPaint')
+              const entries = performance.getEntriesByName('home:renderDelay')
+              const last = entries[entries.length - 1] as PerformanceMeasure | undefined
+              const ms = Math.round(Number(last?.duration ?? 0))
+              console.info('[perf] home:renderDelayMs', ms)
+            } catch {}
+          })
+        })
+      } catch {}
+    }
   }
 }
 
@@ -219,7 +247,9 @@ function setupSse() {
 onMounted(() => {
   fetchProducts()
   const idle = (cb: () => void) => {
-    const ric = (window as any).requestIdleCallback as undefined | ((fn: () => void, opts?: { timeout?: number }) => void)
+    const ric = (window as any).requestIdleCallback as
+      | undefined
+      | ((fn: () => void, opts?: { timeout?: number }) => void)
     if (typeof ric === 'function') {
       ric(cb, { timeout: 2500 })
       return
@@ -250,7 +280,82 @@ watch([activeCategory, currentPage, keyword], () => {
   <div class="space-y-8 lg:space-y-10">
     <HomeHeroCarousel :slides="heroSlides" />
 
-    <HomeLiveStats :productCount="products.length" />
+    <section id="campaign" class="scroll-mt-24" aria-label="限时活动">
+      <HomeLiveStats :productCount="products.length" />
+
+      <div class="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div
+          class="lg:col-span-8 bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-3xl p-6 lg:p-8"
+        >
+          <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div class="min-w-0">
+              <div
+                class="text-xs font-extrabold px-3 py-1 rounded-full border-2 border-[var(--c-border)] bg-[var(--c-bg)] w-fit"
+              >
+                今日限时
+              </div>
+              <h2 class="mt-3 text-2xl font-extrabold text-[var(--c-text)]">适老友好 · 热门爆款专区</h2>
+              <div class="mt-2 text-sm font-semibold text-[var(--c-muted)] leading-relaxed">
+                倒计时与实时数据在上方同步更新；你可以直接进入推荐页快速匹配，也可以在本页继续筛选并对比。
+              </div>
+              <div class="mt-4 flex flex-wrap gap-2" aria-label="活动卖点">
+                <span class="px-3 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold"
+                  >30 天无忧试戴</span
+                >
+                <span class="px-3 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold"
+                  >配送可追踪</span
+                >
+                <span class="px-3 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold"
+                  >支持键盘与读屏</span
+                >
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <router-link
+                to="/recommendations"
+                v-feedback
+                class="a11y-hit px-5 rounded-2xl bg-[var(--c-primary)] text-[var(--c-on-primary)] font-extrabold no-underline"
+                aria-label="进入个性化推荐"
+              >
+                快速匹配
+              </router-link>
+              <a
+                href="#support"
+                v-feedback
+                class="a11y-hit px-5 rounded-2xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] text-[var(--c-text)] font-extrabold no-underline"
+                aria-label="查看售后与无障碍支持"
+              >
+                查看保障
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="lg:col-span-4 bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-3xl p-6 lg:p-8"
+          aria-label="用户动态"
+        >
+          <div class="text-base font-extrabold text-[var(--c-text)]">最新动态</div>
+          <div class="mt-2 text-sm font-semibold text-[var(--c-muted)]">模拟数据用于增强信息密度</div>
+          <ul class="mt-4 space-y-3" role="list">
+            <li class="flex items-start justify-between gap-3">
+              <div class="text-sm font-extrabold text-[var(--c-text)]">刚刚有人加入购物车</div>
+              <div class="text-xs font-semibold text-[var(--c-muted)]">1 分钟前</div>
+            </li>
+            <li class="flex items-start justify-between gap-3">
+              <div class="text-sm font-extrabold text-[var(--c-text)]">推荐页完成画像并刷新结果</div>
+              <div class="text-xs font-semibold text-[var(--c-muted)]">3 分钟前</div>
+            </li>
+            <li class="flex items-start justify-between gap-3">
+              <div class="text-sm font-extrabold text-[var(--c-text)]">同类推荐被查看详情</div>
+              <div class="text-xs font-semibold text-[var(--c-muted)]">5 分钟前</div>
+            </li>
+          </ul>
+          <div class="mt-4 text-xs font-semibold text-[var(--c-muted)]">动态不含个人信息，仅用于演示</div>
+        </div>
+      </div>
+    </section>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <div class="lg:col-span-9 space-y-8">
@@ -259,7 +364,9 @@ watch([activeCategory, currentPage, keyword], () => {
           <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
             <div class="flex items-center gap-3">
               <h2 class="text-2xl font-extrabold text-[var(--c-text)]">产品分类</h2>
-              <span class="text-xs font-extrabold px-3 py-1 rounded-full border-2 border-[var(--c-border)] bg-[var(--c-surface)] text-[var(--c-muted)]">
+              <span
+                class="text-xs font-extrabold px-3 py-1 rounded-full border-2 border-[var(--c-border)] bg-[var(--c-surface)] text-[var(--c-muted)]"
+              >
                 {{ activeFilterText }}
               </span>
             </div>
@@ -300,7 +407,9 @@ watch([activeCategory, currentPage, keyword], () => {
           <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-5">
             <div>
               <h2 class="text-2xl font-extrabold text-[var(--c-text)]">推荐产品</h2>
-              <div class="text-sm font-semibold text-[var(--c-muted)] mt-1">覆盖不同佩戴方式与预算区间，支持对比与快速加购。</div>
+              <div class="text-sm font-semibold text-[var(--c-muted)] mt-1">
+                覆盖不同佩戴方式与预算区间，支持对比与快速加购。
+              </div>
             </div>
             <button
               v-feedback
@@ -313,13 +422,19 @@ watch([activeCategory, currentPage, keyword], () => {
             </button>
           </div>
 
-          <div v-if="errorMessage" class="text-[var(--c-danger)] text-base font-bold mb-4">接口错误：{{ errorMessage }}</div>
+          <div v-if="errorMessage" class="text-[var(--c-danger)] text-base font-bold mb-4">
+            接口错误：{{ errorMessage }}
+          </div>
           <div
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
             :aria-busy="loading ? 'true' : 'false'"
           >
             <template v-if="loading">
-              <div v-for="i in skeletonCount" :key="i" class="bg-[var(--c-surface)] rounded-2xl p-4 border-2 border-[var(--c-border)] shadow-sm">
+              <div
+                v-for="i in skeletonCount"
+                :key="i"
+                class="bg-[var(--c-surface)] rounded-2xl p-4 border-2 border-[var(--c-border)] shadow-sm"
+              >
                 <div class="animate-pulse">
                   <div class="w-full h-40 rounded-xl bg-[var(--c-border)]/10" />
                   <div class="mt-4 space-y-2">
@@ -359,9 +474,15 @@ watch([activeCategory, currentPage, keyword], () => {
                 全站支持键盘操作、清晰焦点、高对比与大字号；关键状态会读屏播报。购买相关规则用更明确的语言表达，减少误解。
               </div>
               <div class="mt-4 flex flex-wrap gap-2">
-                <span class="px-3 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold">命中区 ≥ 48px</span>
-                <span class="px-3 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold">WCAG 2.1 AA</span>
-                <span class="px-3 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold">减少动效支持</span>
+                <span class="px-3 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold"
+                  >命中区 ≥ 48px</span
+                >
+                <span class="px-3 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold"
+                  >WCAG 2.1 AA</span
+                >
+                <span class="px-3 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold"
+                  >减少动效支持</span
+                >
               </div>
             </div>
             <div class="lg:col-span-4 flex flex-col gap-3">

@@ -7,9 +7,9 @@ vi.mock('@/api/http', () => {
     default: {
       get: vi.fn(),
       post: vi.fn(),
-      put: vi.fn(),
+      put: vi.fn()
     },
-    unwrap: (resp: any) => resp.data.data,
+    unwrap: (resp: any) => resp.data.data
   }
 })
 
@@ -22,7 +22,13 @@ describe('reco store', () => {
   it('init creates anon/session ids and loads cached profile', () => {
     localStorage.setItem(
       'hearing_profile_v1',
-      JSON.stringify({ hearing_level: '中度', scenes: ['会议'], budget_min: 1000, budget_max: 3000, brands: ['A'] })
+      JSON.stringify({
+        hearing_level: '中度',
+        scenes: ['会议'],
+        budget_min: 1000,
+        budget_max: 3000,
+        brands: ['A']
+      })
     )
 
     const store = useRecoStore()
@@ -47,7 +53,7 @@ describe('reco store', () => {
   it('fetchRecommendations calls api and sets variant/items', async () => {
     const http = (await import('@/api/http')).default as any
     http.get.mockResolvedValueOnce({
-      data: { data: { variant: 'B', items: [{ rank: 1, score: 0.9, reasons: [], product: { _id: 'p1' } }] } },
+      data: { data: { variant: 'B', items: [{ rank: 1, score: 0.9, reasons: [], product: { _id: 'p1' } }] } }
     })
 
     const store = useRecoStore()
@@ -86,7 +92,17 @@ describe('reco store', () => {
   it('loadProfileFromAccount merges and persists', async () => {
     const http = (await import('@/api/http')).default as any
     http.get.mockResolvedValueOnce({
-      data: { data: { hearing_profile: { hearing_level: '重度', scenes: ['电视'], budget_min: 2000, budget_max: 4000, brands: ['B'] } } },
+      data: {
+        data: {
+          hearing_profile: {
+            hearing_level: '重度',
+            scenes: ['电视'],
+            budget_min: 2000,
+            budget_max: 4000,
+            brands: ['B']
+          }
+        }
+      }
     })
 
     const store = useRecoStore()
@@ -109,4 +125,3 @@ describe('reco store', () => {
     expect(http.put).toHaveBeenCalled()
   })
 })
-

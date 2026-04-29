@@ -40,4 +40,3 @@ function stop() {
     </div>
   </div>
 </template>
-

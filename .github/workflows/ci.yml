@@ -41,6 +41,12 @@ jobs:
       - name: Install dependencies
         working-directory: frontend
         run: npm ci
+      - name: Format check
+        working-directory: frontend
+        run: npm run format:check
+      - name: Stylelint
+        working-directory: frontend
+        run: npm run lint:css
       - name: Test + coverage
         working-directory: frontend
         run: npm run test:coverage

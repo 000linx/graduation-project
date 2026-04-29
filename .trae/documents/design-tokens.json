@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "name": "hearing-aid-mall",
+    "version": "1.0.0",
+    "format": "custom",
+    "notes": "对应 frontend/src/styles/abstracts/_tokens.scss 的 CSS 变量。"
+  },
+  "typography": {
+    "fontFamily": {
+      "sans": "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, Noto Sans, Helvetica Neue, sans-serif"
+    },
+    "scale": {
+      "xs": 12,
+      "sm": 14,
+      "md": 16,
+      "lg": 20
+    },
+    "lineHeight": {
+      "base": 1.65
+    }
+  },
+  "spacing": {
+    "grid": 8,
+    "steps": [0, 8, 16, 24, 32, 40, 48, 56, 64]
+  },
+  "radius": {
+    "sm": 12,
+    "md": 16,
+    "lg": 24
+  },
+  "shadow": {
+    "shadow1": "0 6px 18px rgba(0,0,0,0.08)",
+    "glow": "0 10px 28px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,245,255,0.12), 0 0 28px rgba(0,245,255,0.14)"
+  },
+  "motion": {
+    "fast": "160ms",
+    "base": "240ms",
+    "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+    "hoverOffsetPx": 2,
+    "glowOpacityRange": [0.12, 0.18]
+  },
+  "colors": {
+    "light": {
+      "bg": "#ffffff",
+      "surface": "#ffffff",
+      "text": "#0b0b0b",
+      "muted": "#374151",
+      "border": "#111827",
+      "primary": "#0a3d91",
+      "onPrimary": "#ffffff",
+      "success": "#0a5c2c",
+      "warning": "#8a4b00",
+      "danger": "#b00020",
+      "neon": "#00f5ff",
+      "electric": "#8a2be2",
+      "grid": "rgba(17,24,39,0.15)",
+      "skeleton": "#e0e0e0",
+      "focusRing": "#0a3d91"
+    },
+    "dark": {
+      "bg": "#070a12",
+      "surface": "#0b1020",
+      "text": "#eef2ff",
+      "muted": "#b6c0da",
+      "border": "#203154",
+      "primary": "#00f5ff",
+      "onPrimary": "#001014",
+      "success": "#2ee59d",
+      "warning": "#ffd166",
+      "danger": "#ff4d6d",
+      "neon": "#00f5ff",
+      "electric": "#8a2be2",
+      "grid": "rgba(238,242,255,0.15)",
+      "skeleton": "#e0e0e0",
+      "focusRing": "#00f5ff"
+    },
+    "highContrast": {
+      "bg": "#000000",
+      "surface": "#000000",
+      "text": "#ffffff",
+      "muted": "#ffffff",
+      "border": "#ffffff",
+      "primary": "#ffd400",
+      "onPrimary": "#000000",
+      "success": "#00ff7f",
+      "warning": "#ffd400",
+      "danger": "#ff4d4f",
+      "focusRing": "#00ffff"
+    }
+  }
+}
+

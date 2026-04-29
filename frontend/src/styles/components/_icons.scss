@@ -1,0 +1,134 @@
+:where(svg.lucide, svg[class*='lucide-']) {
+    color: var(--icon-fg);
+    stroke: currentColor;
+    fill: none;
+    stroke-width: var(--icon-stroke);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition:
+        color var(--motion-fast) var(--motion-ease),
+        transform var(--motion-fast) var(--motion-ease),
+        filter var(--motion-fast) var(--motion-ease),
+        opacity var(--motion-fast) var(--motion-ease);
+    will-change: transform, filter;
+}
+
+.icon-tone--info {
+    --icon-fg: var(--icon-info);
+    --icon-accent: var(--icon-info-hover);
+    --icon-accent-2: var(--icon-info-active);
+}
+
+.icon-tone--success {
+    --icon-fg: var(--icon-success);
+    --icon-accent: var(--icon-success-hover);
+    --icon-accent-2: var(--icon-success-active);
+}
+
+.icon-tone--warning {
+    --icon-fg: var(--icon-warning);
+    --icon-accent: var(--icon-warning-hover);
+    --icon-accent-2: var(--icon-warning-active);
+    --icon-glow-neon: rgba(245, 158, 11, 0.26);
+    --icon-glow-electric: rgba(245, 158, 11, 0.18);
+}
+
+.icon-tone--danger {
+    --icon-fg: var(--icon-danger);
+    --icon-accent: var(--icon-danger-hover);
+    --icon-accent-2: var(--icon-danger-active);
+    --icon-glow-neon: rgba(239, 68, 68, 0.26);
+    --icon-glow-electric: rgba(239, 68, 68, 0.18);
+}
+
+.icon-tone--muted {
+    --icon-fg: var(--icon-muted);
+    --icon-accent: var(--icon-muted);
+    --icon-accent-2: var(--icon-muted);
+    --icon-glow-neon: rgba(0, 0, 0, 0);
+    --icon-glow-electric: rgba(0, 0, 0, 0);
+}
+
+.icon-tone--flame {
+    --icon-glow-neon: rgba(255, 165, 0, 0.26);
+    --icon-glow-electric: rgba(255, 69, 0, 0.22);
+}
+
+:where(a, button, [role='button'], .a11y-hit):hover :where(svg.lucide, svg[class*='lucide-']) {
+    color: var(--icon-accent);
+    filter: drop-shadow(0 0 10px var(--icon-glow-neon)) drop-shadow(0 0 18px var(--icon-glow-electric));
+    transform: translateY(-1px);
+    stroke-width: calc(var(--icon-stroke) + 0.2);
+}
+
+:where(a, button, [role='button'], .a11y-hit):active :where(svg.lucide, svg[class*='lucide-']) {
+    color: var(--icon-accent-2);
+    transform: translateY(0);
+    filter: drop-shadow(0 0 8px var(--icon-glow-neon));
+}
+
+:where(button:disabled, [aria-disabled='true'], [data-disabled='true']) :where(svg.lucide, svg[class*='lucide-']) {
+    color: var(--icon-muted);
+    filter: none;
+    transform: none;
+    opacity: 0.55;
+}
+
+.app-icon {
+    width: var(--icon-size, 24px);
+    height: var(--icon-size, 24px);
+}
+
+.icon-s16 {
+    --icon-size: 16px;
+}
+
+.icon-s24 {
+    --icon-size: 24px;
+}
+
+.icon-s32 {
+    --icon-size: 32px;
+}
+
+.icon-s48 {
+    --icon-size: 48px;
+}
+
+.icon-s64 {
+    --icon-size: 64px;
+}
+
+.icon-wrap {
+    position: relative;
+    isolation: isolate;
+}
+
+.icon-wrap--duotone {
+    background:
+        radial-gradient(65% 65% at 30% 25%, rgba(0, 245, 255, 0.22), rgba(0, 245, 255, 0) 70%),
+        radial-gradient(75% 75% at 75% 75%, rgba(138, 43, 226, 0.18), rgba(138, 43, 226, 0) 70%),
+        var(--c-bg);
+}
+
+.icon-wrap--duotone :where(svg.lucide, svg[class*='lucide-']) {
+    color: var(--icon-fg);
+    filter: drop-shadow(0 0 14px rgba(0, 0, 0, 0.08));
+}
+
+:where(a, button, [role='button']):hover .icon-wrap--duotone :where(svg.lucide, svg[class*='lucide-']) {
+    color: var(--icon-accent);
+    filter: drop-shadow(0 0 12px var(--icon-glow-neon)) drop-shadow(0 0 18px var(--icon-glow-electric));
+}
+
+.icon--muted :where(svg.lucide, svg[class*='lucide-']) {
+    color: var(--icon-muted);
+}
+
+.icon--bold :where(svg.lucide, svg[class*='lucide-']) {
+    stroke-width: calc(var(--icon-stroke) + 0.6);
+}
+
+.icon--micro :where(svg.lucide, svg[class*='lucide-']) {
+    stroke-width: calc(var(--icon-stroke) - 0.4);
+}

@@ -2,7 +2,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 
 vi.mock('@/utils/notify', () => {
   return {
-    notify: vi.fn(),
+    notify: vi.fn()
   }
 })
 
@@ -56,7 +56,9 @@ describe('api/http', () => {
     const http = httpMod.default as any
     const rejHandler = http.interceptors.response.handlers[0].rejected as (e: any) => Promise<never>
 
-    await expect(rejHandler({ response: { status: 403, data: { message: 'forbidden' } } })).rejects.toBeTruthy()
+    await expect(
+      rejHandler({ response: { status: 403, data: { message: 'forbidden' } } })
+    ).rejects.toBeTruthy()
     expect((notify as any).mock.calls.at(-1)[0]).toBe('无权限访问')
   })
 

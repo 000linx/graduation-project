@@ -1,0 +1,8 @@
+dist
+coverage
+node_modules
+auto-imports.d.ts
+components.d.ts
+lh-scores.json
+lighthouse-report.json
+

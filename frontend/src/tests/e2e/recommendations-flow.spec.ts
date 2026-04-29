@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Recommendations Flow', () => {
-  test('select hearing profile -> fetch recommendations -> show reasons -> click add to cart tracks event', async ({ page }) => {
+  test('select hearing profile -> fetch recommendations -> show reasons -> click add to cart tracks event', async ({
+    page
+  }) => {
     await page.addInitScript(() => {
       localStorage.setItem('access_token', 't')
     })
@@ -47,14 +49,22 @@ test.describe('Recommendations Flow', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json; charset=utf-8',
-        body: JSON.stringify({ code: 200, message: 'ok', data: { items: [{ product_id: 'p1', quantity: 1 }] } })
+        body: JSON.stringify({
+          code: 200,
+          message: 'ok',
+          data: { items: [{ product_id: 'p1', quantity: 1 }] }
+        })
       })
     })
     await page.route('**/api/product/p1', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json; charset=utf-8',
-        body: JSON.stringify({ code: 200, message: 'ok', data: { _id: 'p1', name: '隐形助听器A', category: '隐形式', price: 1999 } })
+        body: JSON.stringify({
+          code: 200,
+          message: 'ok',
+          data: { _id: 'p1', name: '隐形助听器A', category: '隐形式', price: 1999 }
+        })
       })
     })
 

@@ -33,4 +33,3 @@ describe('announcer store', () => {
     expect(store.flash).toBe(false)
   })
 })
-

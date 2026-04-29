@@ -3,9 +3,11 @@ import { computed, ref } from 'vue'
 import { Bookmark, Hash, Instagram, Mail, MessageCircle, Send, Twitter } from 'lucide-vue-next'
 import { notify } from '../../utils/notify'
 import { useRouter } from 'vue-router'
+import { validateEmail } from '@/utils/email'
 
 const router = useRouter()
 const email = ref('')
+const touched = ref(false)
 
 const tags = [
   { label: '隐形式', q: '隐形' },
@@ -17,17 +19,38 @@ const tags = [
 ]
 
 const social = [
-  { label: '微信公众号', icon: MessageCircle },
-  { label: '微博', icon: Twitter },
-  { label: '小红书', icon: Instagram }
+  { label: '微信公众号', icon: MessageCircle, tone: 'info' },
+  { label: '微博', icon: Twitter, tone: 'info' },
+  { label: '小红书', icon: Instagram, tone: 'info' }
 ]
 
-const canSubmit = computed(() => email.value.trim().length > 0)
+const emailResult = computed(() => validateEmail(email.value))
+
+const emailErrorText = computed(() => {
+  const r = emailResult.value
+  if (r.ok) return ''
+  if (r.reason === 'empty') return '请输入邮箱地址'
+  if (r.reason === 'missing_at') return '邮箱需要包含 @，例如 name@example.com'
+  if (r.reason === 'bad_local') return '邮箱用户名格式不正确'
+  if (r.reason === 'bad_tld') return '邮箱域名后缀不正确'
+  if (r.reason === 'too_long') return '邮箱地址过长'
+  return '邮箱格式不正确'
+})
+
+const showEmailError = computed(() => touched.value && !emailResult.value.ok)
+
+const canSubmit = computed(() => emailResult.value.ok)
 
 function subscribe() {
+  touched.value = true
   const v = email.value.trim()
   if (!v) return
+  if (!emailResult.value.ok) {
+    notify(emailErrorText.value || '邮箱格式不正确', { tone: 'warning', flash: true })
+    return
+  }
   email.value = ''
+  touched.value = false
   notify('订阅成功：后续活动与选购指南将推送到你的邮箱', { tone: 'success' })
 }
 
@@ -44,8 +67,10 @@ function openSocial(name: string) {
   <aside class="space-y-4" aria-label="侧边栏">
     <section class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-5">
       <div class="flex items-center gap-3">
-        <div class="h-10 w-10 rounded-xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] flex items-center justify-center">
-          <Mail class="h-5 w-5" aria-hidden="true" />
+        <div
+          class="icon-wrap icon-wrap--duotone h-10 w-10 rounded-xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] flex items-center justify-center"
+        >
+          <Mail class="h-5 w-5 icon-tone--info" aria-hidden="true" />
         </div>
         <div class="min-w-0">
           <div class="text-base font-extrabold text-[var(--c-text)]">订阅活动与指南</div>
@@ -60,6 +85,10 @@ function openSocial(name: string) {
           inputmode="email"
           autocomplete="email"
           aria-label="订阅邮箱"
+          :aria-invalid="showEmailError ? 'true' : 'false'"
+          aria-describedby="subscribe-email-help subscribe-email-error"
+          @input="touched = true"
+          @blur="touched = true"
           @keydown.enter.prevent="subscribe"
         />
         <button
@@ -69,18 +98,30 @@ function openSocial(name: string) {
           aria-label="提交订阅"
           @click="subscribe"
         >
-          <Send class="h-4 w-4" aria-hidden="true" />
+          <Send class="h-4 w-4 icon-tone--info" aria-hidden="true" />
         </button>
       </div>
-      <div class="mt-3 text-xs font-semibold text-[var(--c-muted)]">
-        你可以在个人中心随时关闭通知
+      <div id="subscribe-email-help" class="mt-2 text-xs font-semibold text-[var(--c-muted)]">
+        支持国际化域名邮箱；你可以在个人中心随时关闭通知
+      </div>
+      <div
+        id="subscribe-email-error"
+        class="mt-1 text-xs font-extrabold"
+        :class="showEmailError ? 'text-[var(--c-danger)]' : 'text-[var(--c-success)]'"
+        role="status"
+        aria-live="polite"
+      >
+        <span v-if="showEmailError">{{ emailErrorText }}</span>
+        <span v-else-if="touched && emailResult.ok">邮箱格式正确</span>
       </div>
     </section>
 
     <section class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-5">
       <div class="flex items-center gap-3">
-        <div class="h-10 w-10 rounded-xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] flex items-center justify-center">
-          <Bookmark class="h-5 w-5" aria-hidden="true" />
+        <div
+          class="icon-wrap icon-wrap--duotone h-10 w-10 rounded-xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] flex items-center justify-center"
+        >
+          <Bookmark class="h-5 w-5 icon-tone--info" aria-hidden="true" />
         </div>
         <div>
           <div class="text-base font-extrabold text-[var(--c-text)]">辅助导航</div>
@@ -123,10 +164,15 @@ function openSocial(name: string) {
       </div>
     </section>
 
-    <section class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-5" aria-label="热门标签">
+    <section
+      class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-5"
+      aria-label="热门标签"
+    >
       <div class="flex items-center gap-3">
-        <div class="h-10 w-10 rounded-xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] flex items-center justify-center">
-          <Hash class="h-5 w-5" aria-hidden="true" />
+        <div
+          class="icon-wrap icon-wrap--duotone h-10 w-10 rounded-xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] flex items-center justify-center"
+        >
+          <Hash class="h-5 w-5 icon-tone--muted" aria-hidden="true" />
         </div>
         <div>
           <div class="text-base font-extrabold text-[var(--c-text)]">热门标签</div>
@@ -148,10 +194,15 @@ function openSocial(name: string) {
       </div>
     </section>
 
-    <section class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-5" aria-label="社交媒体">
+    <section
+      class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-5"
+      aria-label="社交媒体"
+    >
       <div class="flex items-center gap-3">
-        <div class="h-10 w-10 rounded-xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] flex items-center justify-center">
-          <MessageCircle class="h-5 w-5" aria-hidden="true" />
+        <div
+          class="icon-wrap icon-wrap--duotone h-10 w-10 rounded-xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] flex items-center justify-center"
+        >
+          <MessageCircle class="h-5 w-5 icon-tone--info" aria-hidden="true" />
         </div>
         <div>
           <div class="text-base font-extrabold text-[var(--c-text)]">关注我们</div>
@@ -168,7 +219,7 @@ function openSocial(name: string) {
           :aria-label="`打开${s.label}`"
           @click="openSocial(s.label)"
         >
-          <component :is="s.icon" class="h-5 w-5 mx-auto" aria-hidden="true" />
+          <component :is="s.icon" class="h-5 w-5 mx-auto" :class="`icon-tone--${s.tone}`" aria-hidden="true" />
           <span class="sr-only">{{ s.label }}</span>
         </button>
       </div>

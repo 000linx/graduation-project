@@ -44,7 +44,13 @@ onMounted(fetchStats)
       <el-button :loading="loading" @click="fetchStats">刷新</el-button>
     </div>
 
-    <el-alert v-if="forbidden" type="error" show-icon title="无权限" description="当前账号不是管理员，无法访问后台数据。" />
+    <el-alert
+      v-if="forbidden"
+      type="error"
+      show-icon
+      title="无权限"
+      description="当前账号不是管理员，无法访问后台数据。"
+    />
     <el-alert v-else-if="error" type="error" show-icon :title="error" />
 
     <div v-if="stats" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">

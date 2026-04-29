@@ -28,7 +28,6 @@ function ratingText() {
   return `评分 ${r.toFixed(1)}（约 ${rc} 条反馈）`
 }
 
-
 async function addToCart() {
   const token = localStorage.getItem('access_token')
   if (!token) {
@@ -54,7 +53,9 @@ async function addToCart() {
 </script>
 
 <template>
-  <div class="group bg-[var(--c-surface)] rounded-xl overflow-hidden shadow-sm border-2 border-[var(--c-border)]">
+  <div
+    class="group bg-[var(--c-surface)] rounded-xl overflow-hidden shadow-sm border-2 border-[var(--c-border)]"
+  >
     <!-- Image Container -->
     <div class="relative aspect-square overflow-hidden bg-[var(--c-bg)]">
       <router-link :to="`/product/${product.id}`" class="block">
@@ -66,7 +67,9 @@ async function addToCart() {
           class="w-full h-full object-cover"
         />
       </router-link>
-      <div class="absolute top-2 left-2 px-2 py-1 bg-[var(--c-surface)] rounded text-sm font-extrabold text-[var(--c-text)] border-2 border-[var(--c-border)]">
+      <div
+        class="absolute top-2 left-2 px-2 py-1 bg-[var(--c-surface)] rounded text-sm font-extrabold text-[var(--c-text)] border-2 border-[var(--c-border)]"
+      >
         {{ product.category }}
       </div>
     </div>
@@ -80,32 +83,40 @@ async function addToCart() {
       </router-link>
 
       <div class="flex items-center gap-2" :aria-label="ratingText()">
-        <Star class="h-4 w-4 text-[var(--c-warning)]" aria-hidden="true" />
-        <span class="text-sm font-extrabold text-[var(--c-text)]">{{ Number(product.rating ?? 0).toFixed(1) }}</span>
+        <Star class="h-4 w-4 icon-tone--warning" aria-hidden="true" />
+        <span class="text-sm font-extrabold text-[var(--c-text)]">{{
+          Number(product.rating ?? 0).toFixed(1)
+        }}</span>
         <span class="text-xs font-semibold text-[var(--c-muted)]">口碑精选</span>
       </div>
 
       <div class="flex flex-wrap gap-2" aria-label="卖点">
-        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold text-[var(--c-text)]">
-          <ShieldCheck class="h-3.5 w-3.5" aria-hidden="true" />
+        <span
+          class="inline-flex items-center gap-1 px-2 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold text-[var(--c-text)]"
+        >
+          <ShieldCheck class="h-3.5 w-3.5 icon-tone--success icon--micro" aria-hidden="true" />
           安心售后
         </span>
-        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold text-[var(--c-text)]">
-          <BadgeCheck class="h-3.5 w-3.5" aria-hidden="true" />
+        <span
+          class="inline-flex items-center gap-1 px-2 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold text-[var(--c-text)]"
+        >
+          <BadgeCheck class="h-3.5 w-3.5 icon-tone--success icon--micro" aria-hidden="true" />
           适老易用
         </span>
-        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold text-[var(--c-text)]">
-          <Star class="h-3.5 w-3.5" aria-hidden="true" />
+        <span
+          class="inline-flex items-center gap-1 px-2 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold text-[var(--c-text)]"
+        >
+          <Star class="h-3.5 w-3.5 icon-tone--info icon--micro" aria-hidden="true" />
           清晰降噪
         </span>
       </div>
-      
+
       <div class="flex items-center justify-between mt-auto pt-1">
         <div class="flex flex-col">
           <span class="text-sm font-bold text-[var(--c-muted)]">价格</span>
           <span class="text-2xl font-extrabold text-[var(--c-danger)]">¥{{ product.price }}</span>
         </div>
-        
+
         <button
           v-feedback
           class="a11y-hit rounded-full border-2 border-[var(--c-border)] bg-[var(--c-surface)] text-[var(--c-text)]"
@@ -114,7 +125,7 @@ async function addToCart() {
           :disabled="adding"
           @click="addToCart"
         >
-          <ShoppingCart class="h-5 w-5" />
+          <ShoppingCart class="h-5 w-5 icon-tone--info" />
         </button>
       </div>
     </div>

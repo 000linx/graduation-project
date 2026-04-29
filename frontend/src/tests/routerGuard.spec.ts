@@ -11,9 +11,9 @@ vi.mock('vue-router', () => {
       guards = []
       return {
         options: opts,
-        beforeEach: (fn: Guard) => guards.push(fn),
+        beforeEach: (fn: Guard) => guards.push(fn)
       }
-    }),
+    })
   }
 })
 
@@ -23,8 +23,8 @@ vi.mock('@/stores/adminAuth', () => {
       accessToken: null,
       verified: false,
       syncFromStorage: vi.fn(),
-      verifyAdmin: vi.fn(),
-    })),
+      verifyAdmin: vi.fn()
+    }))
   }
 })
 
@@ -38,7 +38,7 @@ describe('router guard', () => {
     await import('@/router')
     const g = guards[0]
     const res = await g({ path: '/', meta: {}, fullPath: '/' })
-    expect(res).toBe(true)
+    expect(res).toEqual({ path: '/cover', query: { redirect: '/' } })
   })
 
   it('redirects user routes requiring auth when missing token', async () => {
@@ -50,12 +50,12 @@ describe('router guard', () => {
 
   it('redirects admin routes to admin login when missing admin token', async () => {
     const { useAdminAuthStore } = await import('@/stores/adminAuth')
-    ;(useAdminAuthStore as any).mockReturnValueOnce({
-      accessToken: null,
-      verified: false,
-      syncFromStorage: vi.fn(),
-      verifyAdmin: vi.fn(),
-    })
+      ; (useAdminAuthStore as any).mockReturnValueOnce({
+        accessToken: null,
+        verified: false,
+        syncFromStorage: vi.fn(),
+        verifyAdmin: vi.fn()
+      })
 
     await import('@/router')
     const g = guards[0]
@@ -66,12 +66,12 @@ describe('router guard', () => {
   it('redirects admin routes to forbidden when verifyAdmin fails', async () => {
     const { useAdminAuthStore } = await import('@/stores/adminAuth')
     const verifyAdmin = vi.fn().mockResolvedValue(false)
-    ;(useAdminAuthStore as any).mockReturnValueOnce({
-      accessToken: 't',
-      verified: false,
-      syncFromStorage: vi.fn(),
-      verifyAdmin,
-    })
+      ; (useAdminAuthStore as any).mockReturnValueOnce({
+        accessToken: 't',
+        verified: false,
+        syncFromStorage: vi.fn(),
+        verifyAdmin
+      })
 
     await import('@/router')
     const g = guards[0]
@@ -82,12 +82,12 @@ describe('router guard', () => {
 
   it('allows admin routes when verified', async () => {
     const { useAdminAuthStore } = await import('@/stores/adminAuth')
-    ;(useAdminAuthStore as any).mockReturnValueOnce({
-      accessToken: 't',
-      verified: true,
-      syncFromStorage: vi.fn(),
-      verifyAdmin: vi.fn(),
-    })
+      ; (useAdminAuthStore as any).mockReturnValueOnce({
+        accessToken: 't',
+        verified: true,
+        syncFromStorage: vi.fn(),
+        verifyAdmin: vi.fn()
+      })
 
     await import('@/router')
     const g = guards[0]
@@ -95,4 +95,3 @@ describe('router guard', () => {
     expect(res).toBe(true)
   })
 })
-

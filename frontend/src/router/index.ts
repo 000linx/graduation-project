@@ -15,6 +15,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
 import { useAdminAuthStore } from '@/stores/adminAuth'
+import Cover from '@/views/Cover.vue'
+import { markCoverSeen, shouldRedirectHomeToCover } from '@/utils/coverEntry'
 
 /**
  * 应用路由表。
@@ -24,6 +26,11 @@ import { useAdminAuthStore } from '@/stores/adminAuth'
  * - 后台统一挂载在 /admin 下，细粒度权限由页面内的权限列表与后端接口共同约束
  */
 const routes = [
+  {
+    path: '/cover',
+    name: 'Cover',
+    component: Cover
+  },
   {
     path: '/',
     name: 'Home',
@@ -123,7 +130,10 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  scrollBehavior() {
+  scrollBehavior(to) {
+    if (to.hash) {
+      return { el: to.hash, top: 96 }
+    }
     return { top: 0 }
   }
 })
@@ -152,6 +162,11 @@ router.beforeEach(async (to) => {
       if (!ok) return { path: '/admin/forbidden' }
     }
     return true
+  }
+
+  if (shouldRedirectHomeToCover(to.path)) {
+    markCoverSeen()
+    return { path: '/cover', query: { redirect: to.fullPath } }
   }
 
   if (!requiresAuth) return true

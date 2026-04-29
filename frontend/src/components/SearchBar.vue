@@ -19,7 +19,7 @@ const handleSearch = () => {
       class="w-full pl-12 pr-24 py-3 rounded-2xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] text-[var(--c-text)] shadow-sm"
       @keyup.enter="handleSearch"
     />
-    <Search class="absolute left-4 top-3.5 h-5 w-5 text-[var(--c-muted)]" />
+    <Search class="absolute left-4 top-3.5 h-5 w-5 icon-tone--muted" />
     <button
       @click="handleSearch"
       v-feedback

@@ -1,12 +1,18 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('A11y Modes', () => {
-  test('can toggle high contrast and large text, and touch targets meet 48px in large mode', async ({ page }) => {
+  test('can toggle high contrast and large text, and touch targets meet 48px in large mode', async ({
+    page
+  }) => {
     await page.route('**/api/product/list**', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json; charset=utf-8',
-        body: JSON.stringify({ code: 200, message: 'ok', data: { products: [], pagination: { total_pages: 1 } } })
+        body: JSON.stringify({
+          code: 200,
+          message: 'ok',
+          data: { products: [], pagination: { total_pages: 1 } }
+        })
       })
     })
     await page.route('**/api/product/stream', async (route) => {

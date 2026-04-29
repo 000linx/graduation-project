@@ -20,8 +20,7 @@ function beep() {
     const t0 = ctx.currentTime
     osc.start(t0)
     osc.stop(t0 + 0.06)
-  } catch {
-  }
+  } catch {}
 }
 
 export const vFeedback: ObjectDirective<HTMLElement, void> = {
@@ -32,13 +31,12 @@ export const vFeedback: ObjectDirective<HTMLElement, void> = {
       if (mode === 'haptic') {
         try {
           if (navigator.vibrate) navigator.vibrate(20)
-        } catch {
-        }
+        } catch {}
       } else if (mode === 'sound') {
         beep()
       }
     }
-      ; (el as any).__a11y_onDown = onDown
+    ;(el as any).__a11y_onDown = onDown
     el.addEventListener('pointerdown', onDown, { passive: true })
   },
   unmounted(el) {

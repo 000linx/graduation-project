@@ -41,7 +41,9 @@ function onKeydown(e: KeyboardEvent) {
               <div class="text-[var(--c-muted)] mt-3 leading-relaxed">
                 一键登录，畅享极速下单与专属会员权益！
               </div>
-              <div class="mt-8 bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-6 shadow-sm">
+              <div
+                class="mt-8 bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-6 shadow-sm"
+              >
                 <div class="text-base text-[var(--c-text)] font-extrabold">提示</div>
                 <ul class="mt-3 text-base text-[var(--c-muted)] space-y-2">
                   <li>· 使用手机号登录</li>
@@ -55,9 +57,11 @@ function onKeydown(e: KeyboardEvent) {
               <div class="text-[var(--c-muted)] mt-3 leading-relaxed">
                 您正在登录系统管理后台，请使用管理员账号授权进入。
               </div>
-              <div class="mt-8 bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-6 shadow-sm">
+              <div
+                class="mt-8 bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-6 shadow-sm"
+              >
                 <div class="text-base text-[var(--c-text)] font-extrabold flex items-center gap-2">
-                  <ShieldAlert class="w-4 h-4" />
+                  <ShieldAlert class="w-4 h-4 icon-tone--danger" />
                   安全提醒
                 </div>
                 <ul class="mt-3 text-base text-[var(--c-muted)] space-y-2">
@@ -71,7 +75,9 @@ function onKeydown(e: KeyboardEvent) {
         </div>
 
         <!-- 右侧登录区 -->
-        <div class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-8 shadow-sm relative transition-all duration-300">
+        <div
+          class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-8 shadow-sm relative transition-all duration-300"
+        >
           <!-- 顶部区域 -->
           <div class="flex items-center justify-between mb-2">
             <transition name="fade-slide" mode="out-in">
@@ -81,13 +87,13 @@ function onKeydown(e: KeyboardEvent) {
               </div>
               <div v-else key="admin-title">
                 <div class="text-2xl font-extrabold text-[var(--c-text)] flex items-center gap-2">
-                  <ShieldAlert class="w-6 h-6 text-[var(--c-danger)]" />
+                  <ShieldAlert class="w-6 h-6 icon-tone--danger" />
                   管理员登录
                 </div>
                 <div class="text-base text-[var(--c-muted)] mt-1">仅授权管理员访问</div>
               </div>
             </transition>
-            
+
             <el-button text @click="goHome" class="hidden sm:inline-flex">返回首页</el-button>
           </div>
 
@@ -98,7 +104,7 @@ function onKeydown(e: KeyboardEvent) {
               <AdminLogin v-else key="admin-form" />
             </transition>
           </div>
-          
+
           <!-- 底部切换区：满足键盘访问性，移动端 ≥48x48，视觉层级低，无刷新切换 -->
           <div class="mt-6 flex justify-center border-t border-[var(--c-border)] pt-6">
             <div
@@ -111,7 +117,7 @@ function onKeydown(e: KeyboardEvent) {
               :aria-label="isUserMode ? '切换到管理员登录' : '切换到用户登录'"
             >
               <span v-if="isUserMode" class="flex items-center gap-1.5 py-3 px-4">
-                <ShieldAlert class="w-4 h-4 opacity-70 group-hover:opacity-100" />
+                <ShieldAlert class="w-4 h-4 opacity-70 group-hover:opacity-100 icon-tone--danger" />
                 后台登录
               </span>
               <span v-else class="flex items-center gap-1.5 py-3 px-4">
@@ -120,7 +126,6 @@ function onKeydown(e: KeyboardEvent) {
               </span>
             </div>
           </div>
-          
         </div>
       </div>
     </div>

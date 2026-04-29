@@ -20,11 +20,12 @@ const props = defineProps<{
           <div class="mt-1 text-base font-extrabold text-[var(--c-text)]">{{ props.title }}</div>
           <div class="mt-2 text-sm font-semibold text-[var(--c-muted)] leading-relaxed">{{ props.desc }}</div>
         </div>
-        <div class="h-10 w-10 rounded-xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] flex items-center justify-center shrink-0">
-          <ArrowRight class="h-5 w-5" aria-hidden="true" />
+        <div
+          class="h-10 w-10 rounded-xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] flex items-center justify-center shrink-0"
+        >
+          <ArrowRight class="h-5 w-5 icon-tone--info" aria-hidden="true" />
         </div>
       </div>
     </div>
   </router-link>
 </template>
-

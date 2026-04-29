@@ -34,7 +34,7 @@ describe('useSpeechRecognition', () => {
       setup() {
         return useSpeechRecognition({ lang: 'zh-CN' })
       },
-      template: '<div />',
+      template: '<div />'
     })
 
     const wrapper = mount(Comp)
@@ -49,7 +49,7 @@ describe('useSpeechRecognition', () => {
 
     lastRec.onresult?.({
       resultIndex: 0,
-      results: [{ 0: { transcript: '你好' }, isFinal: true }],
+      results: [{ 0: { transcript: '你好' }, isFinal: true }]
     })
     expect(vm.transcript).toBe('你好')
 
@@ -59,4 +59,3 @@ describe('useSpeechRecognition', () => {
     wrapper.unmount()
   })
 })
-

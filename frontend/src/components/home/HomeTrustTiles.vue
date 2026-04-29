@@ -5,6 +5,7 @@ type Tile = {
   title: string
   desc: string
   icon: any
+  tone: 'info' | 'success' | 'warning' | 'danger' | 'muted'
   to: string
   ariaLabel: string
 }
@@ -14,6 +15,7 @@ const tiles: Tile[] = [
     title: '选购指南',
     desc: '按听损、预算与场景快速匹配，减少试错成本。',
     icon: BookOpen,
+    tone: 'info',
     to: '/recommendations',
     ariaLabel: '打开选购指南与个性化推荐'
   },
@@ -21,6 +23,7 @@ const tiles: Tile[] = [
     title: '服务保障',
     desc: '支持无忧试戴、透明售后与清晰使用说明。',
     icon: BadgeCheck,
+    tone: 'success',
     to: '/#support',
     ariaLabel: '查看售后保障与服务说明'
   },
@@ -28,6 +31,7 @@ const tiles: Tile[] = [
     title: '专业支持',
     desc: '更清晰的佩戴建议与日常维护提示，适老友好。',
     icon: Headphones,
+    tone: 'info',
     to: '/recommendations',
     ariaLabel: '查看专业建议与个性化推荐'
   },
@@ -35,6 +39,7 @@ const tiles: Tile[] = [
     title: '快速配送',
     desc: '发货进度可追踪，包装更易开封与回收。',
     icon: Truck,
+    tone: 'info',
     to: '/profile',
     ariaLabel: '查看订单与物流'
   }
@@ -52,10 +57,14 @@ const tiles: Tile[] = [
         class="no-underline"
         :aria-label="t.ariaLabel"
       >
-        <div class="h-full bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-5 hover:shadow-md transition-shadow">
+        <div
+          class="h-full bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-5 hover:shadow-md transition-shadow"
+        >
           <div class="flex items-center gap-3">
-            <div class="h-11 w-11 rounded-xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] flex items-center justify-center">
-              <component :is="t.icon" class="h-5 w-5 text-[var(--c-text)]" aria-hidden="true" />
+            <div
+              class="icon-wrap icon-wrap--duotone h-11 w-11 rounded-xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] flex items-center justify-center"
+            >
+              <component :is="t.icon" class="h-5 w-5" :class="`icon-tone--${t.tone}`" aria-hidden="true" />
             </div>
             <div class="text-base font-extrabold text-[var(--c-text)]">{{ t.title }}</div>
           </div>
@@ -65,4 +74,3 @@ const tiles: Tile[] = [
     </div>
   </section>
 </template>
-

@@ -105,7 +105,8 @@ async function fetchOrders() {
         ? o.items.map((it: any) => ({
             product_id: it.product_id ? String(it.product_id) : undefined,
             quantity: Number(it.quantity ?? 0),
-            unit_price: it.unit_price != null ? Number(it.unit_price) : it.price != null ? Number(it.price) : undefined,
+            unit_price:
+              it.unit_price != null ? Number(it.unit_price) : it.price != null ? Number(it.price) : undefined,
             name: it.name ? String(it.name) : undefined
           }))
         : [],
@@ -201,10 +202,22 @@ onMounted(fetchOrders)
       </div>
     </div>
 
-    <el-alert v-if="forbidden" type="error" show-icon title="无权限" description="当前账号不是管理员，无法访问订单管理。" />
+    <el-alert
+      v-if="forbidden"
+      type="error"
+      show-icon
+      title="无权限"
+      description="当前账号不是管理员，无法访问订单管理。"
+    />
     <el-alert v-else-if="error" type="error" show-icon :title="error" />
 
-    <el-table v-loading="loading" :data="filteredOrders" stripe size="small" class="bg-white rounded-2xl border">
+    <el-table
+      v-loading="loading"
+      :data="filteredOrders"
+      stripe
+      size="small"
+      class="bg-white rounded-2xl border"
+    >
       <el-table-column prop="_id" label="订单号" min-width="240" show-overflow-tooltip />
       <el-table-column prop="total_amount" label="金额" width="140">
         <template #default="{ row }">¥{{ Number(row.total_amount || 0).toFixed(2) }}</template>
@@ -223,7 +236,9 @@ onMounted(fetchOrders)
         <template #default="{ row }">
           <el-button type="primary" link @click="openDetail(row)">明细</el-button>
           <el-button type="primary" link @click="openStatus(row)">改状态</el-button>
-          <el-button v-if="row.status === 'after_sale_pending'" type="danger" link @click="openAfterSale(row)">处理售后</el-button>
+          <el-button v-if="row.status === 'after_sale_pending'" type="danger" link @click="openAfterSale(row)"
+            >处理售后</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -240,14 +255,22 @@ onMounted(fetchOrders)
             <el-tag :type="statusTagType(activeOrder.status)">{{ statusLabel(activeOrder.status) }}</el-tag>
           </div>
           <div class="text-sm text-gray-500 mt-3">金额</div>
-          <div class="text-sm text-gray-700 mt-1">¥{{ Number(activeOrder.total_amount || 0).toFixed(2) }}</div>
+          <div class="text-sm text-gray-700 mt-1">
+            ¥{{ Number(activeOrder.total_amount || 0).toFixed(2) }}
+          </div>
           <div class="text-sm text-gray-500 mt-3">收货地址</div>
           <div class="text-sm text-gray-700 mt-1">{{ activeOrder.shipping_address || '-' }}</div>
           <div class="text-sm text-gray-500 mt-3">支付</div>
-          <div class="text-sm text-gray-700 mt-1">{{ activeOrder.payment?.status || '-' }}{{ activeOrder.payment?.method ? `(${activeOrder.payment.method})` : '' }}</div>
-          <div v-if="activeOrder.cancel_request" class="text-sm text-gray-600 mt-3">取消原因：{{ activeOrder.cancel_request.reason }}</div>
+          <div class="text-sm text-gray-700 mt-1">
+            {{ activeOrder.payment?.status || '-'
+            }}{{ activeOrder.payment?.method ? `(${activeOrder.payment.method})` : '' }}
+          </div>
+          <div v-if="activeOrder.cancel_request" class="text-sm text-gray-600 mt-3">
+            取消原因：{{ activeOrder.cancel_request.reason }}
+          </div>
           <div v-if="activeOrder.after_sale" class="text-sm text-gray-600 mt-3">
-            售后：{{ activeOrder.after_sale.type }} / {{ activeOrder.after_sale.status }} / {{ activeOrder.after_sale.reason }}
+            售后：{{ activeOrder.after_sale.type }} / {{ activeOrder.after_sale.status }} /
+            {{ activeOrder.after_sale.reason }}
           </div>
         </div>
 
@@ -255,7 +278,9 @@ onMounted(fetchOrders)
           <el-table-column prop="product_id" label="商品ID" min-width="220" />
           <el-table-column prop="quantity" label="数量" width="100" />
           <el-table-column prop="unit_price" label="单价" width="120">
-            <template #default="{ row }">{{ row.unit_price != null ? `¥${Number(row.unit_price).toFixed(2)}` : '-' }}</template>
+            <template #default="{ row }">{{
+              row.unit_price != null ? `¥${Number(row.unit_price).toFixed(2)}` : '-'
+            }}</template>
           </el-table-column>
         </el-table>
       </div>
@@ -281,7 +306,12 @@ onMounted(fetchOrders)
       </div>
       <template #footer>
         <el-button @click="afterSaleDialogOpen = false">取消</el-button>
-        <el-button type="primary" :loading="afterSaleLoading" :disabled="!afterSaleForm.status" @click="submitAfterSale">
+        <el-button
+          type="primary"
+          :loading="afterSaleLoading"
+          :disabled="!afterSaleForm.status"
+          @click="submitAfterSale"
+        >
           保存
         </el-button>
       </template>

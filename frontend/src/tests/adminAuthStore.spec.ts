@@ -5,17 +5,17 @@ import { useAdminAuthStore } from '@/stores/adminAuth'
 vi.mock('axios', () => {
   return {
     default: {
-      post: vi.fn(),
-    },
+      post: vi.fn()
+    }
   }
 })
 
 vi.mock('@/api/http', () => {
   return {
     default: {
-      get: vi.fn(),
+      get: vi.fn()
     },
-    unwrap: (resp: any) => resp.data.data,
+    unwrap: (resp: any) => resp.data.data
   }
 })
 
@@ -30,8 +30,12 @@ describe('adminAuth store', () => {
     axios.post.mockResolvedValueOnce({
       data: {
         message: 'ok',
-        data: { tokens: { access_token: 'at', refresh_token: 'rt' }, user: { phone: '1', username: 'u' }, permissions: ['p1'] },
-      },
+        data: {
+          tokens: { access_token: 'at', refresh_token: 'rt' },
+          user: { phone: '1', username: 'u' },
+          permissions: ['p1']
+        }
+      }
     })
 
     const store = useAdminAuthStore()
@@ -48,8 +52,8 @@ describe('adminAuth store', () => {
     axios.post.mockResolvedValueOnce({
       data: {
         message: 'bad',
-        data: { tokens: { refresh_token: 'rt' } },
-      },
+        data: { tokens: { refresh_token: 'rt' } }
+      }
     })
 
     const store = useAdminAuthStore()
@@ -89,4 +93,3 @@ describe('adminAuth store', () => {
     expect(store.isAuthed).toBe(false)
   })
 })
-

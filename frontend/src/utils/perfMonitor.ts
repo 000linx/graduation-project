@@ -33,8 +33,7 @@ export function maybeStartPerfMonitor() {
       report.cls = Number(cls.toFixed(4))
     })
     clsObserver.observe({ type: 'layout-shift', buffered: true as any })
-  } catch {
-  }
+  } catch {}
 
   try {
     const lcpObserver = new PerformanceObserver((list) => {
@@ -44,19 +43,18 @@ export function maybeStartPerfMonitor() {
       if (start > 0) report.lcpMs = Math.round(start)
     })
     lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true as any })
-  } catch {
-  }
+  } catch {}
 
   try {
     const onFirstInput = (e: Event) => {
       const ts = (e as any).timeStamp
       const delay = typeof ts === 'number' ? performance.now() - ts : undefined
-      if (typeof delay === 'number' && Number.isFinite(delay)) report.firstInputDelayMs = Math.max(0, Math.round(delay))
+      if (typeof delay === 'number' && Number.isFinite(delay))
+        report.firstInputDelayMs = Math.max(0, Math.round(delay))
     }
     window.addEventListener('pointerdown', onFirstInput, { once: true, passive: true })
     window.addEventListener('keydown', onFirstInput, { once: true, passive: true })
-  } catch {
-  }
+  } catch {}
 
   const emit = () => {
     const snapshot = {
@@ -75,4 +73,3 @@ export function maybeStartPerfMonitor() {
 
   window.setInterval(emit, 5000)
 }
-

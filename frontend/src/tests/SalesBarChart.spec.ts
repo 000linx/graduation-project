@@ -34,7 +34,14 @@ describe('SalesBarChart', () => {
   it('renders and loads series', async () => {
     const http = (await import('@/api/http')).default as any
     http.get.mockResolvedValueOnce({
-      data: { data: { items: [{ bucket: '2026-04-01', total_sales: 100, count: 2 }], page: 1, page_size: 50, has_more: false } }
+      data: {
+        data: {
+          items: [{ bucket: '2026-04-01', total_sales: 100, count: 2 }],
+          page: 1,
+          page_size: 50,
+          has_more: false
+        }
+      }
     })
 
     const wrapper = mount(SalesBarChart, {
@@ -61,4 +68,3 @@ describe('SalesBarChart', () => {
     expect(wrapper.text()).toContain('暂无销售数据')
   })
 })
-
