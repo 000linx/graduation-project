@@ -28,6 +28,8 @@ playwright-report/
 **/playwright-report/
 test-results/
 **/test-results/
+test-reports/
+**/test-reports/
 
 .trash/
 audit/

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ExternalLink, Search, Shield, ShoppingCart, Sparkles, User } from 'lucide-vue-next'
 import { useCartStore } from '../stores/cart'
@@ -7,12 +7,14 @@ import { useA11yStore } from '../stores/a11y'
 import { useSpeechStore } from '../stores/speech'
 import A11yToolbar from './a11y/A11yToolbar.vue'
 import { useTransitionStore } from '@/stores/transition'
+import { useAdminAuthStore } from '@/stores/adminAuth'
 
 const router = useRouter()
 const route = useRoute()
 const searchQuery = ref('')
 const cart = useCartStore()
-const adminAuthed = ref(Boolean(localStorage.getItem('admin_access_token')))
+const adminAuth = useAdminAuthStore()
+const adminAuthed = computed(() => adminAuth.verified)
 const a11y = useA11yStore()
 const speech = useSpeechStore()
 const transition = useTransitionStore()
@@ -35,23 +37,14 @@ function goToCampaign() {
   router.push({ path: '/', hash: '#campaign' })
 }
 
-function syncAdminToken() {
-  adminAuthed.value = Boolean(localStorage.getItem('admin_access_token'))
-}
-
 onMounted(() => {
   cart.init()
-  syncAdminToken()
-  window.addEventListener('auth:admin_login', syncAdminToken)
-  window.addEventListener('auth:logout', syncAdminToken)
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'admin_access_token') syncAdminToken()
-  })
+  adminAuth.verifyAdmin()
+  window.addEventListener('auth:logout', adminAuth.logout)
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('auth:admin_login', syncAdminToken)
-  window.removeEventListener('auth:logout', syncAdminToken)
+  window.removeEventListener('auth:logout', adminAuth.logout)
 })
 
 watch(
@@ -138,6 +131,7 @@ watch(
           <input
             v-model="searchQuery"
             type="text"
+            data-testid="header-search"
             :placeholder="$t('nav.searchPlaceholder')"
             :aria-label="$t('nav.searchLabel')"
             autocomplete="off"
@@ -170,6 +164,15 @@ watch(
         </button>
 
         <router-link
+          to="/activities"
+          class="a11y-hit px-3 rounded-full border-2 border-[var(--c-border)] bg-[var(--c-surface)] text-[var(--c-text)] font-extrabold"
+          v-feedback
+          aria-label="活动列表"
+        >
+          活动
+        </router-link>
+
+        <router-link
           to="/recommendations"
           class="a11y-hit px-3 rounded-full border-2 border-[var(--c-border)] bg-[var(--c-surface)] text-[var(--c-text)] font-extrabold"
           v-feedback
@@ -178,7 +181,13 @@ watch(
           {{ $t('nav.reco') }}
         </router-link>
 
-        <router-link to="/cart" class="relative a11y-hit text-[var(--c-text)]" v-feedback aria-label="购物车">
+        <router-link
+          to="/cart"
+          data-testid="header-cart-link"
+          class="relative a11y-hit text-[var(--c-text)]"
+          v-feedback
+          aria-label="购物车"
+        >
           <ShoppingCart class="h-6 w-6 icon-tone--info" />
           <span
             v-if="cart.totalQty > 0"

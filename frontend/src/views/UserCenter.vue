@@ -103,38 +103,185 @@
               class="bg-[var(--c-surface)] rounded-2xl border"
               :empty-text="hasToken ? '暂无订单' : '未登录'"
             >
-              <el-table-column prop="_id" label="订单号" min-width="220" show-overflow-tooltip />
+              <el-table-column prop="_id" label="订单号" min-width="220" show-overflow-tooltip>
+                <template #default="{ row }">
+                  <span data-testid="order-id" :data-order-id="row._id">{{ row._id }}</span>
+                </template>
+              </el-table-column>
               <el-table-column prop="total_amount" label="金额" width="140">
                 <template #default="{ row }">¥{{ Number(row.total_amount ?? 0).toFixed(2) }}</template>
               </el-table-column>
               <el-table-column label="状态" width="140">
                 <template #default="{ row }">
-                  <el-tag :type="statusTagType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+                  <el-tag :type="statusTagType(row.status)" data-testid="order-status">{{ statusLabel(row.status) }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column prop="created_at" label="创建时间" min-width="180" show-overflow-tooltip />
               <el-table-column label="操作" width="260" fixed="right">
                 <template #default="{ row }">
-                  <el-button link type="primary" @click="openDetail(row._id)">详情</el-button>
-                  <el-button v-if="row.status === 'pending'" link type="success" @click="openPay(row._id)"
+                  <el-button data-testid="order-action-detail" link type="primary" @click="openDetail(row._id)">详情</el-button>
+                  <el-button v-if="row.status === 'pending'" data-testid="order-action-pay" link type="success" @click="openPay(row._id)"
                     >支付</el-button
                   >
-                  <el-button v-if="canCancel(row.status)" link type="warning" @click="cancelOrder(row._id)"
+                  <el-button v-if="canCancel(row.status)" data-testid="order-action-cancel" link type="warning" @click="cancelOrder(row._id)"
                     >取消</el-button
                   >
                   <el-button
                     v-if="row.status === 'delivered'"
+                    data-testid="order-action-confirm"
+                    link
+                    type="primary"
+                    @click="confirmReceived(row._id)"
+                    >确认收货</el-button
+                  >
+                  <el-button
+                    v-if="row.status === 'delivered' || row.status === 'completed'"
+                    data-testid="order-action-review"
                     link
                     type="primary"
                     @click="openReview(row._id)"
                     >评价</el-button
                   >
-                  <el-button v-if="canAfterSale(row)" link type="danger" @click="openAfterSale(row._id)"
+                  <el-button v-if="canAfterSale(row)" data-testid="order-action-after-sale" link type="danger" @click="openAfterSale(row._id)"
                     >售后</el-button
                   >
                 </template>
               </el-table-column>
             </el-table>
+          </div>
+        </el-tab-pane>
+
+        <el-tab-pane label="保养预约" name="maintenance">
+          <div class="py-6 space-y-6">
+            <el-alert
+              v-if="!hasToken"
+              type="warning"
+              show-icon
+              title="未登录"
+              description="请先登录后提交保养预约。"
+            />
+            <template v-else>
+              <div class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-5">
+                <div class="flex items-center justify-between gap-3 flex-wrap">
+                  <div>
+                    <div class="text-base font-extrabold text-[var(--c-text)]">提交保养预约</div>
+                    <div class="text-sm font-semibold text-[var(--c-muted)] mt-1">
+                      系统将对时间冲突进行检测，并提供可预约时段推荐。
+                    </div>
+                  </div>
+                  <el-button :loading="maintLoading" @click="refreshMaintenance">刷新</el-button>
+                </div>
+
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <el-form label-position="top" class="md:col-span-2">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <el-form-item label="关联订单（已购买）" required>
+                        <el-select v-model="maintForm.order_id" placeholder="请选择订单" filterable @change="onOrderChange">
+                          <el-option
+                            v-for="o in eligibleOrders"
+                            :key="o.order_id"
+                            :label="`${o.order_id}（${o.status}）`"
+                            :value="o.order_id"
+                          />
+                        </el-select>
+                      </el-form-item>
+                      <el-form-item label="保养设备/商品" required>
+                        <el-select v-model="maintForm.product_id" placeholder="请选择商品" filterable>
+                          <el-option
+                            v-for="it in selectedOrderItems"
+                            :key="it.product_id || it.name"
+                            :label="it.name || it.product_id || '未知商品'"
+                            :value="it.product_id || ''"
+                          />
+                        </el-select>
+                      </el-form-item>
+                      <el-form-item label="联系人" required>
+                        <el-input v-model="maintForm.contact_name" placeholder="请输入联系人姓名" />
+                      </el-form-item>
+                      <el-form-item label="联系方式" required>
+                        <el-input v-model="maintForm.contact_phone" placeholder="请输入手机号" />
+                      </el-form-item>
+                      <el-form-item label="预约日期" required>
+                        <el-date-picker
+                          v-model="maintForm.date"
+                          type="date"
+                          value-format="YYYY-MM-DD"
+                          placeholder="请选择日期"
+                          @change="fetchSlots"
+                        />
+                      </el-form-item>
+                      <el-form-item label="推荐时段" required>
+                        <el-select v-model="maintForm.preferred_start" placeholder="请选择时间段" filterable>
+                          <el-option
+                            v-for="s in slots"
+                            :key="s.start"
+                            :label="`${formatSlotLabel(s.start, s.end)}（score:${s.score.toFixed(1)}）`"
+                            :value="s.start"
+                          />
+                        </el-select>
+                      </el-form-item>
+                      <el-form-item label="备注（可选）" class="md:col-span-2">
+                        <el-input v-model="maintForm.notes" type="textarea" :rows="3" placeholder="如：希望更换耳塞/清洁/调试等" />
+                      </el-form-item>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <el-button type="primary" :loading="maintSubmitting" @click="submitAppointment">提交预约</el-button>
+                      <div class="text-sm font-semibold text-[var(--c-muted)]" v-if="slots.length === 0 && maintForm.date">
+                        暂无可预约时段，请更换日期
+                      </div>
+                    </div>
+                  </el-form>
+                </div>
+              </div>
+
+              <div class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-5">
+                <div class="text-base font-extrabold text-[var(--c-text)]">我的预约</div>
+                <div class="mt-4">
+                  <el-table :data="myAppointments" stripe size="small" class="rounded-2xl border">
+                    <el-table-column prop="_id" label="预约号" min-width="220" show-overflow-tooltip />
+                    <el-table-column label="状态" width="120">
+                      <template #default="{ row }">
+                        <el-tag :type="maintenanceStatusTag(row.status)">{{ maintenanceStatusLabel(row.status) }}</el-tag>
+                      </template>
+                    </el-table-column>
+                    <el-table-column prop="scheduled_start" label="预约时间" min-width="180" show-overflow-tooltip />
+                    <el-table-column prop="contact_phone" label="联系方式" width="140" />
+                    <el-table-column label="操作" width="160" fixed="right">
+                      <template #default="{ row }">
+                        <el-button
+                          v-if="['pending', 'confirmed'].includes(String(row.status))"
+                          link
+                          type="danger"
+                          @click="cancelAppointment(row._id)"
+                          >取消</el-button
+                        >
+                      </template>
+                    </el-table-column>
+                  </el-table>
+                </div>
+              </div>
+
+              <div class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-5">
+                <div class="text-base font-extrabold text-[var(--c-text)]">历史保养档案</div>
+                <div class="mt-4">
+                  <el-table :data="myRecords" stripe size="small" class="rounded-2xl border">
+                    <el-table-column prop="_id" label="记录号" min-width="220" show-overflow-tooltip />
+                    <el-table-column prop="created_at" label="时间" min-width="180" show-overflow-tooltip />
+                    <el-table-column label="费用" width="120">
+                      <template #default="{ row }">¥{{ Number(row.total_cost ?? 0).toFixed(2) }}</template>
+                    </el-table-column>
+                    <el-table-column label="技师" width="140">
+                      <template #default="{ row }">{{ row.technician?.name || '-' }}</template>
+                    </el-table-column>
+                    <el-table-column label="操作" width="160" fixed="right">
+                      <template #default="{ row }">
+                        <el-button link type="primary" @click="downloadRecordPdf(row._id)">导出PDF</el-button>
+                      </template>
+                    </el-table-column>
+                  </el-table>
+                </div>
+              </div>
+            </template>
           </div>
         </el-tab-pane>
 
@@ -369,7 +516,14 @@
       <div class="text-sm font-semibold text-[var(--c-muted)]">
         收货地址：{{ orderDetail.shipping_address || '-' }}
       </div>
+      <div v-if="orderDetail.coupon" class="text-sm font-semibold text-[var(--c-muted)]">
+        优惠券：{{ orderDetail.coupon.code }}（-¥{{ Number(orderDetail.coupon.discount_amount ?? 0).toFixed(2) }}）
+      </div>
       <div class="text-sm font-semibold text-[var(--c-muted)]">支付：{{ paymentText }}</div>
+      <div v-if="orderDetail.shipping" class="text-sm font-semibold text-[var(--c-muted)]">
+        物流：{{ orderDetail.shipping.carrier }} / {{ orderDetail.shipping.tracking_no }} /
+        {{ orderDetail.shipping.status }}
+      </div>
       <div v-if="orderDetail.cancel_request" class="text-sm font-semibold text-[var(--c-muted)]">
         取消原因：{{ orderDetail.cancel_request.reason }}
       </div>
@@ -397,6 +551,7 @@
       <el-select v-model="payMethod" placeholder="选择支付方式" style="width: 100%">
         <el-option label="微信支付" value="wechat" />
         <el-option label="支付宝" value="alipay" />
+        <el-option label="银行卡" value="card" />
       </el-select>
     </div>
     <template #footer>
@@ -502,14 +657,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import http, { unwrap } from '../api/http'
+import { useUserAuthStore } from '../stores/userAuth'
 
 const router = useRouter()
-const activeTab = ref<'orders' | 'profile' | 'notifications' | 'security' | 'address'>('orders')
+const userAuth = useUserAuthStore()
+const activeTab = ref<'orders' | 'maintenance' | 'profile' | 'notifications' | 'security' | 'address'>('orders')
 
 const hasToken = ref(false)
 const logoutLoading = ref(false)
@@ -538,6 +695,43 @@ type Order = {
   created_at?: string
   after_sale?: any
 }
+
+type EligibleOrderItem = {
+  product_id: string | null
+  name?: string
+  quantity?: number
+  price?: number
+}
+
+type EligibleOrder = {
+  order_id: string
+  status: string
+  created_at?: string
+  total_amount?: number
+  items: EligibleOrderItem[]
+}
+
+const maintLoading = ref(false)
+const maintSubmitting = ref(false)
+const eligibleOrders = ref<EligibleOrder[]>([])
+const slots = ref<{ start: string; end: string; score: number }[]>([])
+const myAppointments = ref<any[]>([])
+const myRecords = ref<any[]>([])
+
+const maintForm = reactive({
+  order_id: '',
+  product_id: '',
+  contact_name: '',
+  contact_phone: '',
+  date: '',
+  preferred_start: '',
+  notes: ''
+})
+
+const selectedOrderItems = computed<EligibleOrderItem[]>(() => {
+  const o = eligibleOrders.value.find((x) => x.order_id === maintForm.order_id)
+  return (o?.items || []).filter((it) => it && (it.product_id || it.name)) as EligibleOrderItem[]
+})
 
 const orderStatus = ref<string>('')
 const ordersLoading = ref(false)
@@ -697,6 +891,145 @@ function canAfterSale(order: any) {
   if (order?.after_sale) return false
   return ['paid', 'shipped', 'delivered', 'completed'].includes(status)
 }
+
+function maintenanceStatusLabel(status: string) {
+  const map: Record<string, string> = {
+    pending: '待确认',
+    confirmed: '已确认',
+    completed: '已完成',
+    cancelled: '已取消',
+    rejected: '已拒绝'
+  }
+  return map[String(status)] ?? String(status)
+}
+
+function maintenanceStatusTag(status: string) {
+  const s = String(status)
+  if (s === 'confirmed' || s === 'completed') return 'success'
+  if (s === 'pending') return 'warning'
+  if (s === 'rejected') return 'danger'
+  if (s === 'cancelled') return 'info'
+  return 'default'
+}
+
+function formatSlotLabel(start: string, end: string) {
+  const s = String(start).replace('T', ' ')
+  const e = String(end).replace('T', ' ')
+  return `${s} ~ ${e}`
+}
+
+async function fetchEligibleOrders() {
+  const res = await http.get('/api/maintenance/eligible')
+  eligibleOrders.value = unwrap(res) as EligibleOrder[]
+  if (!maintForm.order_id && eligibleOrders.value.length) {
+    maintForm.order_id = eligibleOrders.value[0].order_id
+  }
+  if (!maintForm.product_id) {
+    const it = selectedOrderItems.value[0]
+    maintForm.product_id = String(it?.product_id || '')
+  }
+}
+
+async function fetchSlots() {
+  slots.value = []
+  maintForm.preferred_start = ''
+  const day = String(maintForm.date || '').trim()
+  if (!day) return
+  const res = await http.get('/api/maintenance/slots', { params: { date: day, limit: 16 } })
+  const data = unwrap(res) as any
+  slots.value = (data?.slots || []) as { start: string; end: string; score: number }[]
+}
+
+async function fetchMyAppointments() {
+  const res = await http.get('/api/maintenance/appointments', { params: { page: 1, page_size: 50 } })
+  const data = unwrap(res) as any
+  myAppointments.value = data?.items || []
+}
+
+async function fetchMyRecords() {
+  const res = await http.get('/api/maintenance/records', { params: { page: 1, page_size: 50 } })
+  const data = unwrap(res) as any
+  myRecords.value = data?.items || []
+}
+
+async function refreshMaintenance() {
+  if (!hasToken.value) return
+  maintLoading.value = true
+  try {
+    await Promise.all([fetchEligibleOrders(), fetchMyAppointments(), fetchMyRecords()])
+    if (maintForm.date) await fetchSlots()
+  } catch (e: any) {
+    ElMessage.error(e?.message || '加载保养预约信息失败')
+  } finally {
+    maintLoading.value = false
+  }
+}
+
+function onOrderChange() {
+  const it = selectedOrderItems.value[0]
+  maintForm.product_id = String(it?.product_id || '')
+}
+
+async function submitAppointment() {
+  if (!maintForm.order_id || !maintForm.product_id || !maintForm.contact_name || !maintForm.contact_phone || !maintForm.preferred_start) {
+    ElMessage.warning('请填写完整预约信息')
+    return
+  }
+  maintSubmitting.value = true
+  try {
+    await http.post('/api/maintenance/appointments', {
+      order_id: maintForm.order_id,
+      product_id: maintForm.product_id,
+      contact_name: maintForm.contact_name,
+      contact_phone: maintForm.contact_phone,
+      preferred_start: maintForm.preferred_start,
+      notes: maintForm.notes
+    })
+    ElMessage.success('预约已提交，等待管理员确认')
+    await fetchMyAppointments()
+  } catch (e: any) {
+    ElMessage.error(e?.message || '提交失败')
+  } finally {
+    maintSubmitting.value = false
+  }
+}
+
+async function cancelAppointment(appointmentId: string) {
+  try {
+    await ElMessageBox.confirm('确认取消该预约？', '提示', { type: 'warning' })
+  } catch {
+    return
+  }
+  try {
+    await http.post(`/api/maintenance/appointments/${appointmentId}/cancel`, { reason: '用户取消' })
+    ElMessage.success('已取消')
+    await fetchMyAppointments()
+  } catch (e: any) {
+    ElMessage.error(e?.message || '取消失败')
+  }
+}
+
+async function downloadRecordPdf(recordId: string) {
+  try {
+    const res = await http.get(`/api/maintenance/records/${recordId}/pdf`, { responseType: 'blob' })
+    const blob = new Blob([res.data], { type: 'application/pdf' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `maintenance-record-${recordId}.pdf`
+    a.click()
+    URL.revokeObjectURL(url)
+  } catch (e: any) {
+    ElMessage.error(e?.message || '导出失败')
+  }
+}
+
+watch(
+  () => activeTab.value,
+  (v) => {
+    if (v === 'maintenance') refreshMaintenance()
+  }
+)
 
 async function fetchProfile() {
   if (!hasToken.value) return
@@ -964,6 +1297,23 @@ async function cancelOrder(orderId: string) {
   }
 }
 
+async function confirmReceived(orderId: string) {
+  const ok = await ElMessageBox.confirm('确认已收到商品？', '确认收货', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).catch(() => false)
+  if (!ok) return
+
+  try {
+    await http.post(`/api/order/${encodeURIComponent(orderId)}/confirm_received`)
+    ElMessage.success('已确认收货')
+    await fetchOrders()
+  } catch (e: any) {
+    ElMessage.error(e?.response?.data?.message || e?.message || '确认失败')
+  }
+}
+
 function openReview(orderId: string) {
   reviewOrderId.value = orderId
   reviewForm.rating = 5
@@ -1021,14 +1371,9 @@ function goHome() {
 async function logout() {
   logoutLoading.value = true
   try {
-    await http.post('/api/user/logout', { refresh_token: localStorage.getItem('refresh_token') })
+    await userAuth.logout()
   } catch {
   } finally {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
-    try {
-      window.dispatchEvent(new Event('auth:logout'))
-    } catch {}
     hasToken.value = false
     profile.username = ''
     profile.phone = ''
@@ -1071,7 +1416,7 @@ async function submitChangePassword() {
 }
 
 onMounted(async () => {
-  hasToken.value = Boolean(localStorage.getItem('access_token'))
+  hasToken.value = await userAuth.verifyUser()
   if (hasToken.value) {
     await fetchProfile()
     await fetchOrders()

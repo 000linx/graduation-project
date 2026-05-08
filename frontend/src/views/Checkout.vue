@@ -29,7 +29,13 @@ const addresses = ref<Address[]>([])
 const addressLoading = ref(false)
 const selectedAddressId = ref('')
 
-const payMethod = ref<'wechat' | 'alipay'>('wechat')
+const payMethod = ref<'wechat' | 'alipay' | 'card'>('wechat')
+const couponCode = ref<string>('')
+
+const couponOptions = [
+  { label: 'OFF10 · 9折', value: 'OFF10' },
+  { label: 'OFF50 · 立减50', value: 'OFF50' }
+]
 
 const form = reactive({
   shipping_address: ''
@@ -52,6 +58,14 @@ const orderRows = computed(() => {
 })
 
 const totalAmount = computed(() => orderRows.value.reduce((sum, r) => sum + r.subtotal, 0))
+const couponDiscount = computed(() => {
+  const code = String(couponCode.value || '').trim().toUpperCase()
+  if (!code) return 0
+  if (code === 'OFF10') return Math.min(totalAmount.value * 0.1, totalAmount.value)
+  if (code === 'OFF50') return Math.min(50, totalAmount.value)
+  return 0
+})
+const payableAmount = computed(() => Math.max(totalAmount.value - couponDiscount.value, 0))
 
 const canSubmit = computed(() => cart.items.length > 0 && form.shipping_address.trim().length > 0)
 
@@ -108,7 +122,8 @@ async function submitOrder() {
     const payload = {
       shipping_address: form.shipping_address.trim(),
       items: cart.items.map((x) => ({ product_id: x.product_id, quantity: x.quantity })),
-      pay_method: payMethod.value
+      pay_method: payMethod.value,
+      coupon_code: couponCode.value ? String(couponCode.value).trim() : undefined
     }
     await http.post('/api/order/create', payload)
     await reco.track('purchase', { meta: { items: payload.items } })
@@ -191,7 +206,13 @@ onMounted(async () => {
 
         <div class="space-y-2">
           <div class="text-sm font-semibold text-[var(--c-muted)]">详细地址</div>
-          <el-input v-model="form.shipping_address" type="textarea" :rows="3" placeholder="请输入收货地址" />
+          <el-input
+            v-model="form.shipping_address"
+            data-testid="checkout-shipping-address"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入收货地址"
+          />
         </div>
 
         <div class="pt-4 border-t border-[var(--c-border)]/30 space-y-3" aria-label="支付方式">
@@ -199,10 +220,20 @@ onMounted(async () => {
           <el-radio-group v-model="payMethod">
             <el-radio-button label="wechat">微信支付</el-radio-button>
             <el-radio-button label="alipay">支付宝</el-radio-button>
+            <el-radio-button label="card">银行卡</el-radio-button>
           </el-radio-group>
           <div class="text-xs font-semibold text-[var(--c-muted)]">
             演示环境为模拟支付，提交订单后可在个人中心查看状态。
           </div>
+        </div>
+
+        <div class="pt-4 border-t border-[var(--c-border)]/30 space-y-3" aria-label="优惠券">
+          <div class="text-lg font-extrabold text-[var(--c-text)]">优惠券</div>
+          <el-select v-model="couponCode" placeholder="选择优惠券（可选）" style="width: 100%">
+            <el-option label="不使用优惠券" value="" />
+            <el-option v-for="c in couponOptions" :key="c.value" :label="c.label" :value="c.value" />
+          </el-select>
+          <div class="text-xs font-semibold text-[var(--c-muted)]">演示用优惠券：OFF10 / OFF50</div>
         </div>
       </section>
 
@@ -240,18 +271,23 @@ onMounted(async () => {
             <span>商品金额</span>
             <span class="text-[var(--c-text)] font-extrabold">¥{{ totalAmount.toFixed(2) }}</span>
           </div>
+          <div class="flex items-center justify-between" v-if="couponDiscount > 0">
+            <span>优惠券</span>
+            <span class="text-[var(--c-text)] font-extrabold">-¥{{ couponDiscount.toFixed(2) }}</span>
+          </div>
           <div class="flex items-center justify-between">
             <span>运费</span>
             <span class="text-[var(--c-text)] font-extrabold">¥0.00</span>
           </div>
           <div class="flex items-center justify-between text-base">
             <span>应付</span>
-            <span class="text-[var(--c-text)] font-extrabold">¥{{ totalAmount.toFixed(2) }}</span>
+            <span class="text-[var(--c-text)] font-extrabold">¥{{ payableAmount.toFixed(2) }}</span>
           </div>
         </div>
 
         <el-button
           type="primary"
+          data-testid="checkout-submit"
           class="w-full"
           :disabled="!canSubmit"
           :loading="submitting"

@@ -6,6 +6,7 @@ import { ElMessage } from 'element-plus'
 import { BadgeCheck, ChevronRight, ShieldCheck, Star, Truck } from 'lucide-vue-next'
 import ProductCard from '../components/ProductCard.vue'
 import { useCartStore } from '../stores/cart'
+import { useUserAuthStore } from '../stores/userAuth'
 import productPlaceholder from '@/assets/placeholders/product-square.svg'
 
 const route = useRoute()
@@ -16,6 +17,7 @@ const loading = ref(false)
 const errorMessage = ref<string | null>(null)
 const product = ref<any | null>(null)
 const cart = useCartStore()
+const userAuth = useUserAuthStore()
 const adding = ref(false)
 const qty = ref(1)
 
@@ -85,8 +87,8 @@ onMounted(fetchProduct)
 watch(productId, fetchProduct)
 
 async function addToCart() {
-  const token = localStorage.getItem('access_token')
-  if (!token) {
+  const ok = userAuth.verified ? true : await userAuth.verifyUser()
+  if (!ok) {
     ElMessage.warning('请先登录后再加入购物车')
     await router.push({ path: '/login', query: { redirect: route.fullPath } })
     return
@@ -229,6 +231,7 @@ async function addToCart() {
           </div>
           <el-button
             type="primary"
+            data-testid="product-detail-add"
             class="sm:ml-auto"
             :loading="adding"
             :disabled="Number(product.stock ?? 0) <= 0"

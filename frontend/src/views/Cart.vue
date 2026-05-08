@@ -103,8 +103,8 @@
             <span class="text-sm font-semibold text-[var(--c-muted)]">应付</span>
             <span class="text-2xl font-extrabold text-[var(--c-text)]">¥{{ totalAmount.toFixed(2) }}</span>
           </div>
-          <router-link to="/checkout" class="block mt-4">
-            <el-button type="primary" class="w-full">去结算</el-button>
+          <router-link to="/checkout" class="block mt-4" data-testid="cart-checkout-link">
+            <el-button type="primary" class="w-full" data-testid="cart-checkout-button">去结算</el-button>
           </router-link>
           <div class="mt-3 text-xs font-semibold text-[var(--c-muted)]">
             支持键盘操作与读屏提示，结算页可选择地址与支付方式。
@@ -133,11 +133,13 @@ import { ShoppingCart } from 'lucide-vue-next'
 import axios from 'axios'
 import ProductCard from '../components/ProductCard.vue'
 import { useCartStore } from '../stores/cart'
+import { useUserAuthStore } from '../stores/userAuth'
 import productPlaceholder from '@/assets/placeholders/product-square.svg'
 
 const router = useRouter()
 const cart = useCartStore()
-const hasToken = ref(false)
+const userAuth = useUserAuthStore()
+const hasToken = computed(() => userAuth.verified)
 
 type Row = {
   product_id: string
@@ -207,8 +209,8 @@ async function fetchReco() {
 }
 
 async function onQtyChange(productId: string, v: number) {
-  const token = localStorage.getItem('access_token')
-  if (!token) {
+  const ok = userAuth.verified ? true : await userAuth.verifyUser()
+  if (!ok) {
     ElMessage.warning('请先登录')
     router.push({ path: '/login', query: { redirect: '/cart' } })
     return
@@ -230,7 +232,7 @@ async function remove(productId: string) {
 }
 
 onMounted(async () => {
-  hasToken.value = Boolean(localStorage.getItem('access_token'))
+  await userAuth.verifyUser()
   await cart.init()
   if (hasToken.value && cart.totalQty > 0) await fetchReco()
 })

@@ -3,6 +3,7 @@ import { BadgeCheck, ShieldCheck, ShoppingCart, Star } from 'lucide-vue-next'
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
+import { useUserAuthStore } from '../stores/userAuth'
 import { notify } from '../utils/notify'
 
 const props = defineProps<{
@@ -20,6 +21,7 @@ const router = useRouter()
 const route = useRoute()
 const adding = ref(false)
 const cart = useCartStore()
+const userAuth = useUserAuthStore()
 
 function ratingText() {
   const r = Number(props.product.rating ?? 0)
@@ -29,8 +31,8 @@ function ratingText() {
 }
 
 async function addToCart() {
-  const token = localStorage.getItem('access_token')
-  if (!token) {
+  const ok = userAuth.verified ? true : await userAuth.verifyUser()
+  if (!ok) {
     notify('请先登录后再加入购物车', { tone: 'warning', flash: true })
     await router.push({ path: '/login', query: { redirect: route.fullPath } })
     return
@@ -54,11 +56,13 @@ async function addToCart() {
 
 <template>
   <div
+    data-testid="product-card"
+    :data-product-id="product.id"
     class="group bg-[var(--c-surface)] rounded-xl overflow-hidden shadow-sm border-2 border-[var(--c-border)]"
   >
     <!-- Image Container -->
     <div class="relative aspect-square overflow-hidden bg-[var(--c-bg)]">
-      <router-link :to="`/product/${product.id}`" class="block">
+      <router-link :to="`/product/${product.id}`" class="block" data-testid="product-card-link">
         <img
           :src="product.image"
           :alt="product.name"
@@ -76,7 +80,7 @@ async function addToCart() {
 
     <!-- Content -->
     <div class="p-4 flex flex-col gap-3">
-      <router-link :to="`/product/${product.id}`">
+      <router-link :to="`/product/${product.id}`" data-testid="product-card-title-link">
         <h3 class="font-extrabold text-[var(--c-text)] line-clamp-2 min-h-[3rem] mb-2 underline">
           {{ product.name }}
         </h3>
@@ -119,6 +123,7 @@ async function addToCart() {
 
         <button
           v-feedback
+          data-testid="product-card-add"
           class="a11y-hit rounded-full border-2 border-[var(--c-border)] bg-[var(--c-surface)] text-[var(--c-text)]"
           title="加入购物车"
           aria-label="加入购物车"

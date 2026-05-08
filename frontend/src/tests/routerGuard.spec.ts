@@ -20,18 +20,26 @@ vi.mock('vue-router', () => {
 vi.mock('@/stores/adminAuth', () => {
   return {
     useAdminAuthStore: vi.fn(() => ({
-      accessToken: null,
       verified: false,
-      syncFromStorage: vi.fn(),
       verifyAdmin: vi.fn()
+    }))
+  }
+})
+
+vi.mock('@/stores/userAuth', () => {
+  return {
+    useUserAuthStore: vi.fn(() => ({
+      verified: false,
+      verifyUser: vi.fn().mockResolvedValue(false)
     }))
   }
 })
 
 describe('router guard', () => {
   beforeEach(() => {
-    localStorage.clear()
     vi.clearAllMocks()
+    vi.resetModules()
+    guards = []
   })
 
   it('allows public routes', async () => {
@@ -51,10 +59,8 @@ describe('router guard', () => {
   it('redirects admin routes to admin login when missing admin token', async () => {
     const { useAdminAuthStore } = await import('@/stores/adminAuth')
       ; (useAdminAuthStore as any).mockReturnValueOnce({
-        accessToken: null,
         verified: false,
-        syncFromStorage: vi.fn(),
-        verifyAdmin: vi.fn()
+        verifyAdmin: vi.fn().mockResolvedValue(false)
       })
 
     await import('@/router')
@@ -67,9 +73,7 @@ describe('router guard', () => {
     const { useAdminAuthStore } = await import('@/stores/adminAuth')
     const verifyAdmin = vi.fn().mockResolvedValue(false)
       ; (useAdminAuthStore as any).mockReturnValueOnce({
-        accessToken: 't',
         verified: false,
-        syncFromStorage: vi.fn(),
         verifyAdmin
       })
 
@@ -77,15 +81,13 @@ describe('router guard', () => {
     const g = guards[0]
     const res = await g({ path: '/admin', meta: {}, fullPath: '/admin' })
     expect(verifyAdmin).toHaveBeenCalled()
-    expect(res).toEqual({ path: '/admin/forbidden' })
+    expect(res).toEqual({ path: '/admin/login', query: { redirect: '/admin' } })
   })
 
   it('allows admin routes when verified', async () => {
     const { useAdminAuthStore } = await import('@/stores/adminAuth')
       ; (useAdminAuthStore as any).mockReturnValueOnce({
-        accessToken: 't',
         verified: true,
-        syncFromStorage: vi.fn(),
         verifyAdmin: vi.fn()
       })
 
