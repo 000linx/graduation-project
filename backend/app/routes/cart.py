@@ -75,7 +75,28 @@ def get_cart():
     """
     user_id = JwtUtil.get_current_user_id()
     items = Cart.find_by_user_id(user_id)
-    return ApiResponse.success({"items": to_safe_json(items)})
+    ids = []
+    for it in items or []:
+        pid = it.get("product_id")
+        if pid is not None:
+            ids.append(str(pid))
+    products = {}
+    if ids:
+        try:
+            rows = Product.find_by_ids(ids)
+            for p in rows:
+                pid = str(p.get("_id"))
+                products[pid] = {
+                    "_id": pid,
+                    "name": p.get("name"),
+                    "price": p.get("price"),
+                    "image_url": p.get("image_url"),
+                    "category": p.get("category"),
+                    "stock": p.get("stock"),
+                }
+        except Exception:
+            products = {}
+    return ApiResponse.success({"items": to_safe_json(items), "products": to_safe_json(products)})
 
 @cart_bp.route('/remove/<product_id>', methods=['DELETE'])
 @jwt_required()

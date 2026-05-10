@@ -16,8 +16,10 @@ const mobileNavOpen = ref(false)
 const allNavItems = [
   { index: '/admin', label: '概览', perm: 'admin.stats.read' },
   { index: '/admin/users', label: '用户管理', perm: 'admin.users.read' },
+  { index: '/admin/activities', label: '活动管理', perm: 'admin.activities.read' },
   { index: '/admin/products', label: '商品管理', perm: 'admin.products.update' },
   { index: '/admin/orders', label: '订单管理', perm: 'admin.orders.read' },
+  { index: '/admin/maintenance', label: '保养预约', perm: 'admin.maintenance.read' },
   { index: '/admin/sales', label: '销售报表', perm: 'admin.stats.read' },
   { index: '/admin/audit', label: '审计日志', perm: 'admin.audit.read' }
 ] as const
@@ -37,8 +39,10 @@ const navItems = computed(() => allNavItems.filter((it) => hasPermission(it.perm
 const active = computed(() => {
   const p = route.path
   if (p.startsWith('/admin/users')) return '/admin/users'
+  if (p.startsWith('/admin/activities')) return '/admin/activities'
   if (p.startsWith('/admin/products')) return '/admin/products'
   if (p.startsWith('/admin/orders')) return '/admin/orders'
+  if (p.startsWith('/admin/maintenance')) return '/admin/maintenance'
   if (p.startsWith('/admin/sales')) return '/admin/sales'
   if (p.startsWith('/admin/audit')) return '/admin/audit'
   return '/admin'
@@ -101,7 +105,7 @@ onMounted(() => {
       <div class="flex-1 min-w-0">
         <header
           class="bg-white border-b flex items-center justify-between px-4 md:px-6"
-          :class="a11y.largeTextEnabled ? 'min-h-16 py-3 flex-wrap gap-3' : 'h-16'"
+          :class="a11y.largeTextEnabled ? 'min-h-16 py-3 flex-nowrap gap-3 overflow-x-auto' : 'h-16'"
         >
           <div class="flex items-center gap-3 min-w-0">
             <el-button v-if="auth.isAuthed" class="md:hidden" @click="mobileNavOpen = true">菜单</el-button>

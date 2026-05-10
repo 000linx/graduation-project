@@ -162,7 +162,7 @@
             />
             <template v-else>
               <div class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-5">
-                <div class="flex items-center justify-between gap-3 flex-wrap">
+                <div class="flex items-center justify-between gap-3 flex-nowrap overflow-x-auto">
                   <div>
                     <div class="text-base font-extrabold text-[var(--c-text)]">提交保养预约</div>
                     <div class="text-sm font-semibold text-[var(--c-muted)] mt-1">
@@ -205,6 +205,7 @@
                         <el-date-picker
                           v-model="maintForm.date"
                           type="date"
+                          format="YYYY-MM-DD"
                           value-format="YYYY-MM-DD"
                           placeholder="请选择日期"
                           @change="fetchSlots"
@@ -436,6 +437,53 @@
                   </div>
                 </el-form-item>
               </el-form>
+
+              <div class="border-t border-[var(--c-border)]/30 my-6" />
+
+              <div>
+                <div class="text-base font-extrabold text-red-500">注销账户</div>
+                <div class="text-sm font-semibold text-[var(--c-muted)] mt-1">
+                  注销后所有数据将被永久删除，此操作不可逆。提供15天冷静期，期间可撤销。
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <el-button type="danger" @click="deletionDialog?.open()">注销账户</el-button>
+              </div>
+            </div>
+          </div>
+        </el-tab-pane>
+
+        <el-tab-pane label="已拥有助听器" name="devices">
+          <div class="py-4 space-y-4">
+            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div class="text-sm font-semibold text-[var(--c-muted)]">
+                管理您绑定的所有助听器设备，支持查看详情、报修与解绑。
+              </div>
+              <div class="flex items-center gap-3">
+                <el-button v-if="hasToken" type="primary" @click="openBindDevice">绑定新设备</el-button>
+                <el-button :loading="deviceStore.loading" :disabled="!hasToken" @click="deviceStore.fetchDevices()">刷新</el-button>
+              </div>
+            </div>
+
+            <el-alert v-if="!hasToken" type="warning" show-icon title="未登录" description="请先登录后管理设备。" />
+            <el-alert v-else-if="deviceStore.error" type="error" show-icon :title="deviceStore.error" />
+
+            <div v-if="hasToken && deviceStore.devices.length === 0 && !deviceStore.loading" class="text-center py-12 bg-[var(--c-bg)] border-2 border-dashed border-[var(--c-border)] rounded-2xl">
+              <Cpu class="h-12 w-12 mx-auto icon-tone--muted mb-3" />
+              <div class="text-base font-extrabold text-[var(--c-muted)]">暂无已绑定设备</div>
+              <div class="text-sm font-semibold text-[var(--c-muted)] mt-1 mb-4">点击"绑定新设备"添加您的助听器</div>
+              <el-button type="primary" @click="openBindDevice">绑定新设备</el-button>
+            </div>
+
+            <div v-else-if="hasToken" v-loading="deviceStore.loading" class="space-y-3">
+              <DeviceCard
+                v-for="device in deviceStore.devices"
+                :key="device._id"
+                :device="device"
+                @unbind="confirmUnbind"
+                @report-repair="handleDeviceRepair"
+              />
             </div>
           </div>
         </el-tab-pane>
@@ -583,14 +631,14 @@
         <el-option label="退货退款" value="return" />
         <el-option label="维修" value="repair" />
       </el-select>
-      <el-input v-model="afterSaleForm.reason" type="textarea" :rows="4" placeholder="请输入售后原因" />
+      <el-input v-model="afterSaleForm.reason" type="textarea" :rows="4" placeholder="请详细描述售后原因（必填）" />
     </div>
     <template #footer>
       <el-button @click="afterSaleOpen = false">取消</el-button>
       <el-button
         type="primary"
         :loading="afterSaleLoading"
-        :disabled="!afterSaleForm.type"
+        :disabled="!afterSaleForm.type || !afterSaleForm.reason.trim()"
         @click="submitAfterSale"
         >提交</el-button
       >
@@ -654,6 +702,10 @@
       </el-form-item>
     </el-form>
   </el-drawer>
+
+  <BindDeviceDialog ref="bindDeviceDialog" @success="deviceStore.fetchDevices()" />
+
+  <AccountDeletion ref="deletionDialog" @logout="logout" />
 </template>
 
 <script setup lang="ts">
@@ -663,12 +715,18 @@ import type { FormInstance, FormRules } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import http, { unwrap } from '../api/http'
 import { useUserAuthStore } from '../stores/userAuth'
+import { useDeviceStore } from '../stores/device'
+import DeviceCard from '../components/DeviceCard.vue'
+import BindDeviceDialog from '../components/BindDeviceDialog.vue'
+import AccountDeletion from '../components/AccountDeletion.vue'
+import { Cpu } from 'lucide-vue-next'
 
 const router = useRouter()
 const userAuth = useUserAuthStore()
-const activeTab = ref<'orders' | 'maintenance' | 'profile' | 'notifications' | 'security' | 'address'>('orders')
+const activeTab = ref<'orders' | 'maintenance' | 'profile' | 'notifications' | 'security' | 'address' | 'devices'>('orders')
+const deviceStore = useDeviceStore()
 
-const hasToken = ref(false)
+const hasToken = computed(() => userAuth.verified)
 const logoutLoading = ref(false)
 
 const profile = reactive<{ username: string; phone: string }>({ username: '', phone: '' })
@@ -1028,6 +1086,7 @@ watch(
   () => activeTab.value,
   (v) => {
     if (v === 'maintenance') refreshMaintenance()
+    if (v === 'devices') deviceStore.fetchDevices()
   }
 )
 
@@ -1347,7 +1406,12 @@ function openAfterSale(orderId: string) {
 }
 
 async function submitAfterSale() {
-  if (!afterSaleOrderId.value || !afterSaleForm.type) return
+  if (!afterSaleOrderId.value || !afterSaleForm.type || !afterSaleForm.reason.trim()) {
+    if (!afterSaleForm.reason.trim()) {
+      ElMessage.warning('请填写售后原因说明')
+    }
+    return
+  }
   afterSaleLoading.value = true
   try {
     await http.post(`/api/order/${encodeURIComponent(afterSaleOrderId.value)}/after_sale`, {
@@ -1374,7 +1438,6 @@ async function logout() {
     await userAuth.logout()
   } catch {
   } finally {
-    hasToken.value = false
     profile.username = ''
     profile.phone = ''
     orders.value = []
@@ -1382,6 +1445,34 @@ async function logout() {
     logoutLoading.value = false
     router.replace('/')
   }
+}
+
+const bindDeviceDialog = ref<InstanceType<typeof BindDeviceDialog>>()
+const deletionDialog = ref<InstanceType<typeof AccountDeletion>>()
+
+function openBindDevice() {
+  bindDeviceDialog.value?.show()
+}
+
+async function confirmUnbind(deviceId: string) {
+  const ok = await ElMessageBox.confirm('确认解绑该设备吗？解绑后设备数据将被移除。', '解绑设备', {
+    confirmButtonText: '解绑',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).catch(() => false)
+  if (!ok) return
+
+  try {
+    await deviceStore.unbindDevice(deviceId)
+    ElMessage.success('设备已解绑')
+  } catch {
+    ElMessage.error('解绑失败，请重试')
+  }
+}
+
+function handleDeviceRepair(deviceId: string) {
+  activeTab.value = 'maintenance'
+  ElMessage.info('请在保养预约页面选择对应设备提交报修')
 }
 
 function resetPwdForm() {
@@ -1416,7 +1507,7 @@ async function submitChangePassword() {
 }
 
 onMounted(async () => {
-  hasToken.value = await userAuth.verifyUser()
+  await userAuth.verifyUser()
   if (hasToken.value) {
     await fetchProfile()
     await fetchOrders()

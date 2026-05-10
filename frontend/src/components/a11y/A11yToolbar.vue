@@ -153,7 +153,7 @@ onUnmounted(() => {
               type="checkbox"
               class="a11y-switch"
               :checked="a11y.largeTextEnabled"
-              @change="() => a11y.toggleLargeText()"
+              @click.prevent="a11y.toggleLargeText()"
             />
           </div>
 
@@ -240,7 +240,7 @@ onUnmounted(() => {
 
         <div class="space-y-2">
           <div class="text-sm font-semibold" style="color: var(--c-text)">{{ $t('a11y.feedback') }}</div>
-          <div class="flex flex-wrap gap-2">
+          <div class="flex flex-nowrap gap-2 overflow-x-auto">
             <button
               type="button"
               class="a11y-hit px-3 rounded-xl border-2 border-[var(--c-border)] font-extrabold"

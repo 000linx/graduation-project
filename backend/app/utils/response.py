@@ -32,6 +32,7 @@ class ApiResponse:
         """
         return jsonify({
             "code": code,
+            "msg": message,
             "message": message,
             "data": data
         }), code
@@ -51,6 +52,7 @@ class ApiResponse:
         """
         return jsonify({
             "code": code,
+            "msg": message,
             "message": message,
             "data": data
         }), code
@@ -68,6 +70,7 @@ class ApiResponse:
         """
         return jsonify({
             "code": 401,
+            "msg": message,
             "message": message
         }), 401
 
@@ -84,6 +87,7 @@ class ApiResponse:
         """
         return jsonify({
             "code": 403,
+            "msg": message,
             "message": message
         }), 403
 
@@ -100,5 +104,6 @@ class ApiResponse:
         """
         return jsonify({
             "code": 404,
+            "msg": message,
             "message": message
         }), 404

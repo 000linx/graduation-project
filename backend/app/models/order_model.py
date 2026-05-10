@@ -21,7 +21,7 @@ class Order:
     订单数据模型，负责订单数据的 CRUD 操作
     """
     @staticmethod
-    def create(user_id, items, total_amount, shipping_address):
+    def create(user_id, items, total_amount, shipping_address, coupon=None):
         """
         创建新订单
         :param user_id: 用户 ID
@@ -43,11 +43,25 @@ class Order:
                 "name": name
             })
 
+        coupon_obj = None
+        if isinstance(coupon, dict):
+            code = coupon.get("code")
+            discount_amount = coupon.get("discount_amount")
+            try:
+                discount_amount = float(discount_amount) if discount_amount is not None else 0.0
+            except Exception:
+                discount_amount = 0.0
+            if code:
+                coupon_obj = {"code": str(code), "discount_amount": float(max(discount_amount, 0.0))}
+
         order_data = {
             "user_id": ObjectId(user_id),
             "items": normalized_items,
             "total_amount": float(total_amount),
+            "original_total_amount": float(total_amount),
+            "coupon": coupon_obj,
             "shipping_address": shipping_address,
+            "shipping": None,
             "status": "pending",
             "payment": {
                 "status": "unpaid",
@@ -179,4 +193,25 @@ class Order:
                 "status": f"after_sale_{status}",
                 "updated_at": datetime.now()
             }}
+        )
+
+    @staticmethod
+    def set_shipping(order_id, carrier=None, tracking_no=None, status=None, events=None):
+        payload = {
+            "carrier": str(carrier or ""),
+            "tracking_no": str(tracking_no or ""),
+            "status": str(status or ""),
+            "events": events if isinstance(events, list) else [],
+            "updated_at": datetime.now(),
+        }
+        return mongo.db.orders.update_one(
+            {"_id": ObjectId(order_id)},
+            {"$set": {"shipping": payload, "updated_at": datetime.now()}},
+        )
+
+    @staticmethod
+    def confirm_received(order_id, user_id):
+        return mongo.db.orders.update_one(
+            {"_id": ObjectId(order_id), "user_id": ObjectId(user_id), "status": "delivered"},
+            {"$set": {"status": "completed", "updated_at": datetime.now()}},
         )

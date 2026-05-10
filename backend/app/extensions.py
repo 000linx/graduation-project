@@ -44,7 +44,7 @@ def init_extensions(app):
     origins = origins_raw
     if isinstance(origins_raw, str) and origins_raw.strip() != "*":
         origins = [x.strip() for x in origins_raw.split(",") if x.strip()]
-    cors.init_app(app, resources={r"/api/*": {"origins": origins}})
+    cors.init_app(app, resources={r"/api/*": {"origins": origins}}, supports_credentials=True)
     
     # 初始化 Redis 客户端
     global redis_client

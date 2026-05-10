@@ -119,7 +119,7 @@ async function addToCart() {
 
 <template>
   <div class="max-w-6xl mx-auto py-10 px-4">
-    <nav class="flex flex-wrap items-center gap-2 text-sm" aria-label="面包屑">
+    <nav class="flex flex-nowrap items-center gap-2 text-sm overflow-x-auto" aria-label="面包屑">
       <router-link
         to="/"
         class="font-extrabold text-[var(--c-primary)] no-underline"
@@ -173,7 +173,7 @@ async function addToCart() {
       <div class="space-y-5 text-left">
         <div class="text-sm font-semibold text-[var(--c-muted)]">ID：{{ productId }}</div>
         <div class="text-2xl font-extrabold text-[var(--c-text)]">{{ product.name ?? '未命名产品' }}</div>
-        <div class="flex flex-wrap items-center gap-3">
+        <div class="flex flex-nowrap items-center gap-3 overflow-x-auto">
           <div class="text-[var(--c-danger)] text-3xl font-extrabold">¥{{ Number(product.price ?? 0) }}</div>
           <div
             class="inline-flex items-center gap-2 px-3 py-1 rounded-full border-2 border-[var(--c-border)] bg-[var(--c-bg)]"
@@ -187,11 +187,11 @@ async function addToCart() {
           </div>
         </div>
 
-        <div class="text-sm font-semibold text-[var(--c-muted)] leading-relaxed whitespace-pre-line">
+        <div class="text-sm font-semibold text-[var(--c-muted)] leading-relaxed whitespace-nowrap overflow-x-auto">
           {{ product.description ?? '暂无描述。你可以先去个性化推荐填写画像，我们会给出更合适的匹配建议。' }}
         </div>
 
-        <div class="flex flex-wrap gap-2" aria-label="卖点">
+        <div class="flex flex-nowrap gap-2 overflow-x-auto" aria-label="卖点">
           <span
             class="inline-flex items-center gap-1 px-2 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold"
           >

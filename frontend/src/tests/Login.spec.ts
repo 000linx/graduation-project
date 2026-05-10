@@ -20,6 +20,9 @@ vi.mock('@/components/auth/UserLogin.vue', () => ({
 vi.mock('@/components/auth/AdminLogin.vue', () => ({
   default: { name: 'AdminLogin', template: '<div class="admin-login-stub"></div>' }
 }))
+vi.mock('@/stores/userAuth', () => ({
+  useUserAuthStore: () => ({ verified: false, verifyUser: vi.fn().mockResolvedValue(false) })
+}))
 
 const AppWrapper = defineComponent({
   template: '<router-view />'

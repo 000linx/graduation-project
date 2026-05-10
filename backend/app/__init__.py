@@ -29,6 +29,18 @@ from .utils.log_util import setup_logger
 from .utils.response import ApiResponse
 from .utils.errors import AppError
 
+
+def _register_static_products(app):
+    products_dir = os.path.join(os.path.dirname(__file__), '..', 'static', 'products')
+
+    if not os.path.isdir(products_dir):
+        return
+
+    @app.route('/static/products/<path:filename>')
+    def serve_product_image(filename):
+        return send_from_directory(products_dir, filename)
+
+
 def create_app(config_name='default'):
     """
     应用工厂函数：创建并配置 Flask 应用实例。
@@ -60,9 +72,11 @@ def create_app(config_name='default'):
     app.config.from_object(config[config_name])
 
     if config_name == "production":
-        if app.config.get("SECRET_KEY") in (None, "", "dev-secret-key"):
+        sk = str(app.config.get("SECRET_KEY") or "")
+        if not sk or sk.startswith("dev-") or "change-me" in sk:
             raise RuntimeError("SECRET_KEY must be set in production")
-        if app.config.get("JWT_SECRET_KEY") in (None, "", "jwt-secret-key"):
+        jk = str(app.config.get("JWT_SECRET_KEY") or "")
+        if not jk or jk.startswith("dev-") or "change-me" in jk:
             raise RuntimeError("JWT_SECRET_KEY must be set in production")
         if str(app.config.get("CORS_ORIGINS", "*")).strip() == "*":
             raise RuntimeError("CORS_ORIGINS must be restricted in production")
@@ -72,7 +86,40 @@ def create_app(config_name='default'):
     
     # 初始化扩展
     init_extensions(app)
-    
+
+    # 注册产品图片静态资源路由
+    _register_static_products(app)
+
+    try:
+        from .models.user_model import User
+        User.ensure_indexes()
+    except Exception:
+        pass
+
+    try:
+        from .services.maintenance_service import MaintenanceService
+        MaintenanceService.ensure_indexes()
+    except Exception:
+        pass
+
+    try:
+        from .services.activity_service import ActivityService
+        ActivityService.ensure_indexes()
+    except Exception:
+        pass
+
+    try:
+        from .models.device_model import DeviceModel
+        DeviceModel.ensure_indexes()
+    except Exception:
+        pass
+
+    try:
+        from .services.deletion_scheduler import init_deletion_scheduler
+        init_deletion_scheduler(app)
+    except Exception:
+        pass
+
     # 注册蓝图 (Blueprints)
     register_blueprints(app)
     register_error_handlers(app)
@@ -106,14 +153,19 @@ def register_blueprints(app):
     from .routes.search import search_bp
     from .routes.payment import payment_bp
     from .routes.admin import admin_bp
+    from .routes.maintenance import maintenance_bp
+    from .routes.activity import activity_bp
+    from .routes.device import device_bp
     
-    # 注册蓝图并指定 URL 前缀
     app.register_blueprint(user_bp, url_prefix='/api/user')
+    app.register_blueprint(device_bp, url_prefix='/api/user/devices')
     app.register_blueprint(product_bp, url_prefix='/api/product')
     app.register_blueprint(order_bp, url_prefix='/api/order')
     app.register_blueprint(cart_bp, url_prefix='/api/cart')
     app.register_blueprint(search_bp, url_prefix='/api/search')
     app.register_blueprint(payment_bp, url_prefix='/api/payment')
+    app.register_blueprint(maintenance_bp, url_prefix="/api/maintenance")
+    app.register_blueprint(activity_bp, url_prefix="/api/activity")
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
 
 def register_error_handlers(app: Flask):

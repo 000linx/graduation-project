@@ -81,7 +81,10 @@ async function addToCart() {
     <!-- Content -->
     <div class="p-4 flex flex-col gap-3">
       <router-link :to="`/product/${product.id}`" data-testid="product-card-title-link">
-        <h3 class="font-extrabold text-[var(--c-text)] line-clamp-2 min-h-[3rem] mb-2 underline">
+        <h3
+          class="font-extrabold text-[var(--c-text)] truncate mb-2 underline"
+          :title="product.name"
+        >
           {{ product.name }}
         </h3>
       </router-link>
@@ -94,7 +97,7 @@ async function addToCart() {
         <span class="text-xs font-semibold text-[var(--c-muted)]">口碑精选</span>
       </div>
 
-      <div class="flex flex-wrap gap-2" aria-label="卖点">
+      <div class="flex flex-nowrap gap-2 overflow-x-auto" aria-label="卖点">
         <span
           class="inline-flex items-center gap-1 px-2 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold text-[var(--c-text)]"
         >

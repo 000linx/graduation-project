@@ -16,11 +16,16 @@ Dependencies:
 from ..extensions import mongo
 from werkzeug.security import generate_password_hash, check_password_hash
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class User:
     """
     用户数据模型，负责用户数据的 CRUD 操作
+
+    账户状态枚举：
+    - "active": 正常使用中
+    - "pending_deletion": 已申请注销，处于冷静期
+    - "deleted": 已注销（软删除）
     """
     DEFAULT_NOTIFICATION_SETTINGS = {
         "email_notifications": True,
@@ -28,13 +33,30 @@ class User:
         "activity_reminders": True,
     }
 
+    DELETION_COOLING_DAYS = 15
+
+    VALID_ACCOUNT_STATUSES = ("active", "pending_deletion", "deleted")
+
     @staticmethod
-    def create(username, phone, password, role="user"):
+    def ensure_indexes():
+        try:
+            mongo.db.users.create_index([("phone", 1)], unique=True)
+        except Exception:
+            pass
+        try:
+            mongo.db.users.create_index([("account_status", 1), ("deletion_cooling_until", 1)])
+        except Exception:
+            pass
+
+    @staticmethod
+    def create(username, phone, password, role="user", email=None):
         """
         创建新用户
         :param username: 用户名
         :param phone: 手机号
         :param password: 明文密码
+        :param role: 用户角色
+        :param email: 邮箱地址（可选）
         :return: 新用户的 ObjectId
         """
         user_data = {
@@ -47,7 +69,10 @@ class User:
             "notification_settings": dict(User.DEFAULT_NOTIFICATION_SETTINGS),
             "created_at": datetime.now()
         }
-        
+        if email:
+            user_data["email"] = email
+            user_data["email_verified"] = True
+
         result = mongo.db.users.insert_one(user_data)
         return result.inserted_id
 
@@ -62,7 +87,10 @@ class User:
 
     @staticmethod
     def find_by_email(email):
-        return mongo.db.users.find_one({"email": email})
+        return mongo.db.users.find_one({
+            "email": email,
+            "account_status": {"$nin": ["pending_deletion", "deleted"]}
+        })
 
     @staticmethod
     def find_by_id(user_id):
@@ -273,3 +301,115 @@ class User:
             {"_id": ObjectId(user_id)},
             {"$set": {"notification_settings": payload}}
         )
+
+    @staticmethod
+    def request_deletion(user_id):
+        now = datetime.now()
+        cooling_until = now + timedelta(days=User.DELETION_COOLING_DAYS)
+        return mongo.db.users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {
+                "account_status": "pending_deletion",
+                "deletion_requested_at": now,
+                "deletion_cooling_until": cooling_until
+            }}
+        )
+
+    @staticmethod
+    def cancel_deletion(user_id):
+        return mongo.db.users.update_one(
+            {"_id": ObjectId(user_id), "account_status": "pending_deletion"},
+            {"$set": {"account_status": "active"},
+             "$unset": {"deletion_requested_at": "", "deletion_cooling_until": ""}}
+        )
+
+    @staticmethod
+    def get_deletion_status(user_id):
+        user = mongo.db.users.find_one(
+            {"_id": ObjectId(user_id)},
+            projection={"account_status": 1, "deletion_requested_at": 1, "deletion_cooling_until": 1}
+        )
+        if not user:
+            return None
+        return {
+            "account_status": user.get("account_status", "active"),
+            "deletion_requested_at": user.get("deletion_requested_at"),
+            "deletion_cooling_until": user.get("deletion_cooling_until"),
+        }
+
+    @staticmethod
+    def anonymize_user(user_id):
+        now = datetime.now()
+        anonymized_phone = f"deleted_{str(user_id)}_{int(now.timestamp())}"
+        return mongo.db.users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {
+                "account_status": "deleted",
+                "username": f"已注销用户_{str(user_id)[-6:]}",
+                "phone": anonymized_phone,
+                "password_hash": "",
+                "addresses": [],
+                "hearing_profile": None,
+                "notification_settings": {},
+                "anonymized_at": now
+            },
+             "$unset": {
+                "email": "",
+                "email_verified": "",
+                "deletion_requested_at": "",
+                "deletion_cooling_until": ""
+            }}
+        )
+
+    @staticmethod
+    def find_expired_deletions():
+        now = datetime.now()
+        return list(mongo.db.users.find(
+            {"account_status": "pending_deletion", "deletion_cooling_until": {"$lte": now}}
+        ))
+
+    @staticmethod
+    def export_user_data(user_id):
+        user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            return None
+        exported = {}
+        safe_fields = ["username", "phone", "email", "created_at", "role",
+                       "addresses", "notification_settings"]
+        for key in safe_fields:
+            val = user.get(key)
+            if isinstance(val, datetime):
+                val = val.isoformat()
+            exported[key] = val
+        hearing = user.get("hearing_profile")
+        if isinstance(hearing, dict):
+            hearing = dict(hearing)
+            for k, v in hearing.items():
+                if isinstance(v, datetime):
+                    hearing[k] = v.isoformat()
+        exported["hearing_profile"] = hearing
+        try:
+            cart_items = list(mongo.db.cart.find({"user_id": ObjectId(user_id)}))
+            exported["cart_items"] = [{k: str(v) if isinstance(v, ObjectId) else v
+                                        for k, v in item.items() if k != "_id"}
+                                       for item in cart_items]
+        except Exception:
+            exported["cart_items"] = []
+        try:
+            orders = list(mongo.db.orders.find({"user_id": ObjectId(user_id)}))
+            exported["orders"] = []
+            for o in orders:
+                entry = {}
+                for k, v in o.items():
+                    if k == "_id":
+                        entry["order_id"] = str(v)
+                    elif isinstance(v, ObjectId):
+                        entry[k] = str(v)
+                    elif isinstance(v, datetime):
+                        entry[k] = v.isoformat()
+                    else:
+                        entry[k] = v
+                exported["orders"].append(entry)
+        except Exception:
+            exported["orders"] = []
+        return exported

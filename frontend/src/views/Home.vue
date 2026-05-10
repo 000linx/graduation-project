@@ -10,7 +10,6 @@ import HomeHeroCarousel from '@/components/home/HomeHeroCarousel.vue'
 import HomeLiveStats from '@/components/home/HomeLiveStats.vue'
 import HomeTrustTiles from '@/components/home/HomeTrustTiles.vue'
 import HomeSidebar from '@/components/home/HomeSidebar.vue'
-import HomeGuideCard from '@/components/home/HomeGuideCard.vue'
 import hero1 from '@/assets/hero/hero-1.svg'
 import hero2 from '@/assets/hero/hero-2.svg'
 import hero3 from '@/assets/hero/hero-3.svg'
@@ -47,40 +46,6 @@ const heroSlides = [
     to: '/recommendations'
   }
 ]
-
-const guideCards = [
-  {
-    badge: '新手推荐',
-    title: '3分钟了解怎么选',
-    desc: '从听损等级、预算与日常场景出发，减少试错。',
-    to: '/recommendations'
-  },
-  {
-    badge: '售后说明',
-    title: '看懂试戴与退换',
-    desc: '把重要规则说清楚：试戴、退换、发票与维修。',
-    to: '/#support'
-  },
-  {
-    badge: '适老友好',
-    title: '家属代买也不慌',
-    desc: '清晰信息与大字号支持，帮你为家人做决定。',
-    to: '/recommendations'
-  },
-  {
-    badge: '对比技巧',
-    title: '关注这3个关键点',
-    desc: '降噪/续航/佩戴舒适度，快速挑出合适款。',
-    to: '/recommendations'
-  }
-]
-
-const guideCount = computed(() => {
-  if (loading.value) return 0
-  const need = 8 - products.value.length
-  if (need <= 0) return 0
-  return Math.min(4, need)
-})
 
 const activeFilterText = computed(() => {
   const parts: string[] = []
@@ -283,9 +248,9 @@ watch([activeCategory, currentPage, keyword], () => {
     <section id="campaign" class="scroll-mt-24" aria-label="限时活动">
       <HomeLiveStats :productCount="products.length" />
 
-      <div class="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div class="mt-6">
         <div
-          class="lg:col-span-8 bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-3xl p-6 lg:p-8"
+          class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-3xl p-6 lg:p-8"
         >
           <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div class="min-w-0">
@@ -298,7 +263,7 @@ watch([activeCategory, currentPage, keyword], () => {
               <div class="mt-2 text-sm font-semibold text-[var(--c-muted)] leading-relaxed">
                 倒计时与实时数据在上方同步更新；你可以直接进入推荐页快速匹配，也可以在本页继续筛选并对比。
               </div>
-              <div class="mt-4 flex flex-wrap gap-2" aria-label="活动卖点">
+              <div class="mt-4 flex flex-nowrap gap-2 overflow-x-auto" aria-label="活动卖点">
                 <span class="px-3 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold"
                   >30 天无忧试戴</span
                 >
@@ -330,29 +295,6 @@ watch([activeCategory, currentPage, keyword], () => {
               </a>
             </div>
           </div>
-        </div>
-
-        <div
-          class="lg:col-span-4 bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-3xl p-6 lg:p-8"
-          aria-label="用户动态"
-        >
-          <div class="text-base font-extrabold text-[var(--c-text)]">最新动态</div>
-          <div class="mt-2 text-sm font-semibold text-[var(--c-muted)]">模拟数据用于增强信息密度</div>
-          <ul class="mt-4 space-y-3" role="list">
-            <li class="flex items-start justify-between gap-3">
-              <div class="text-sm font-extrabold text-[var(--c-text)]">刚刚有人加入购物车</div>
-              <div class="text-xs font-semibold text-[var(--c-muted)]">1 分钟前</div>
-            </li>
-            <li class="flex items-start justify-between gap-3">
-              <div class="text-sm font-extrabold text-[var(--c-text)]">推荐页完成画像并刷新结果</div>
-              <div class="text-xs font-semibold text-[var(--c-muted)]">3 分钟前</div>
-            </li>
-            <li class="flex items-start justify-between gap-3">
-              <div class="text-sm font-extrabold text-[var(--c-text)]">同类推荐被查看详情</div>
-              <div class="text-xs font-semibold text-[var(--c-muted)]">5 分钟前</div>
-            </li>
-          </ul>
-          <div class="mt-4 text-xs font-semibold text-[var(--c-muted)]">动态不含个人信息，仅用于演示</div>
         </div>
       </div>
     </section>
@@ -448,14 +390,6 @@ watch([activeCategory, currentPage, keyword], () => {
 
             <template v-else>
               <ProductCard v-for="product in products" :key="product.id" :product="product" />
-              <HomeGuideCard
-                v-for="(c, idx) in guideCards.slice(0, guideCount)"
-                :key="idx"
-                :title="c.title"
-                :desc="c.desc"
-                :to="c.to"
-                :badge="c.badge"
-              />
             </template>
           </div>
 
@@ -473,7 +407,7 @@ watch([activeCategory, currentPage, keyword], () => {
               <div class="mt-2 text-sm font-semibold text-[var(--c-muted)] leading-relaxed">
                 全站支持键盘操作、清晰焦点、高对比与大字号；关键状态会读屏播报。购买相关规则用更明确的语言表达，减少误解。
               </div>
-              <div class="mt-4 flex flex-wrap gap-2">
+              <div class="mt-4 flex flex-nowrap gap-2 overflow-x-auto">
                 <span class="px-3 py-1 rounded-full border-2 border-[var(--c-border)] text-xs font-extrabold"
                   >命中区 ≥ 48px</span
                 >

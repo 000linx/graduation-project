@@ -56,3 +56,21 @@ def checkout():
         return ApiResponse.success(message=result['message'])
     else:
         return ApiResponse.error(result['message'])
+
+
+@payment_bp.route('/callback', methods=['POST'])
+def payment_callback():
+    data = request.get_json(silent=True) or {}
+    order_id = data.get('order_id')
+    payment_method = data.get('payment_method')
+    if not order_id or not payment_method:
+        return ApiResponse.error("Missing order_id or payment_method")
+
+    try:
+        updated = Order.mark_paid(order_id, payment_method)
+        if updated and updated.matched_count > 0:
+            return ApiResponse.success({"order_id": order_id}, "Callback processed")
+        return ApiResponse.success({"order_id": order_id}, "Already processed")
+    except Exception:
+        current_app.logger.exception("Payment callback failed")
+        return ApiResponse.error("Callback failed", 500)

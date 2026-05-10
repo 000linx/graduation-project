@@ -19,6 +19,7 @@ import time
 
 from flask import Blueprint, request, Response
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
+from .. import extensions
 from ..models.product_model import Product
 from ..utils.response import ApiResponse
 from ..utils.serialize import to_safe_json
@@ -154,6 +155,30 @@ def recommendations_v2():
     return ApiResponse.success(result)
 
 
+@product_bp.route('/batch', methods=['GET'])
+def batch_products():
+    ids_raw = request.args.get("ids") or ""
+    parts = [x.strip() for x in str(ids_raw).split(",") if x.strip()]
+    ids = parts[:100]
+    if not ids:
+        return ApiResponse.success({"items": []})
+    rows = Product.find_by_ids(ids)
+    items = []
+    for p in rows:
+        pid = str(p.get("_id"))
+        items.append(
+            {
+                "_id": pid,
+                "name": p.get("name"),
+                "price": p.get("price"),
+                "image_url": p.get("image_url"),
+                "category": p.get("category"),
+                "stock": p.get("stock"),
+            }
+        )
+    return ApiResponse.success({"items": to_safe_json(items)})
+
+
 @product_bp.route('/reco/event', methods=['POST'])
 def reco_event():
     data = request.get_json(silent=True) or {}
@@ -178,10 +203,23 @@ def reco_event():
         "meta": data.get("meta") or {},
     }
 
+    if request.content_length is not None and int(request.content_length) > 12 * 1024:
+        return ApiResponse.error("Payload too large", 413)
+
     if not event.get("event"):
         return ApiResponse.error("Missing fields")
 
     try:
+        key = f"reco_event:{anon_id or user_id or 'anon'}"
+        if extensions.redis_client is not None:
+            try:
+                n = extensions.redis_client.incr(key)
+                if int(n) == 1:
+                    extensions.redis_client.expire(key, 60)
+                if int(n) > 120:
+                    return ApiResponse.error("Too many requests", 429)
+            except Exception:
+                pass
         RecoEventService.log_event(event)
     except Exception:
         return ApiResponse.error("Failed to log event", 500)

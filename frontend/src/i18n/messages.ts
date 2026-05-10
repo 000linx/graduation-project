@@ -10,7 +10,7 @@ export const messages = {
       cover: '封面',
       searchPlaceholder: '搜索助听器型号、品牌...',
       searchLabel: '搜索商品',
-      campaign: '活动',
+      campaign: '今日限时',
       guide: '指南',
       support: '保障',
       reco: '推荐',

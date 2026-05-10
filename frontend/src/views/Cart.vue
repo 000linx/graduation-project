@@ -11,7 +11,7 @@
     />
 
     <div
-      v-else-if="cart.totalQty === 0"
+      v-else-if="!cart.loading && cart.totalQty === 0"
       class="bg-[var(--c-surface)] rounded-3xl p-8 shadow-sm border-2 border-[var(--c-border)] text-center"
     >
       <div class="text-[var(--c-muted)] mb-6">
@@ -20,28 +20,17 @@
       <p class="text-xl font-extrabold text-[var(--c-text)] mb-2">购物车还是空的</p>
       <p class="text-[var(--c-muted)] font-semibold mb-8">赶紧去选购你心仪的助听器吧！</p>
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-        <router-link
-          to="/"
-          v-feedback
-          class="a11y-hit px-8 rounded-full font-extrabold bg-[var(--c-primary)] text-[var(--c-on-primary)] no-underline"
-        >
-          去逛逛
-        </router-link>
-        <router-link
-          to="/recommendations"
-          v-feedback
-          class="a11y-hit px-8 rounded-full font-extrabold border-2 border-[var(--c-border)] bg-[var(--c-bg)] text-[var(--c-text)] no-underline"
-        >
-          去个性化推荐
-        </router-link>
+        <router-link to="/" v-feedback class="a11y-hit px-8 rounded-full font-extrabold bg-[var(--c-primary)] text-[var(--c-on-primary)] no-underline">去逛逛</router-link>
+        <router-link to="/recommendations" v-feedback class="a11y-hit px-8 rounded-full font-extrabold border-2 border-[var(--c-border)] bg-[var(--c-bg)] text-[var(--c-text)] no-underline">去个性化推荐</router-link>
       </div>
     </div>
 
     <div v-else class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      <div
-        class="lg:col-span-8 bg-[var(--c-surface)] rounded-3xl p-6 shadow-sm border-2 border-[var(--c-border)] space-y-4"
-      >
-        <el-table :data="tableRows" stripe size="small" class="border rounded-xl" v-loading="cart.loading">
+      <div class="lg:col-span-8 bg-[var(--c-surface)] rounded-3xl p-6 shadow-sm border-2 border-[var(--c-border)] space-y-4">
+        <div v-if="cart.loading" class="space-y-4">
+          <CartSkeleton v-for="i in 4" :key="i" />
+        </div>
+        <el-table v-else :data="tableRows" stripe size="small" class="border rounded-xl">
           <el-table-column label="商品" min-width="260">
             <template #default="{ row }">
               <div class="flex items-center gap-3">
@@ -49,6 +38,8 @@
                   :src="row.image"
                   :alt="row.name"
                   class="w-12 h-12 rounded object-cover bg-[var(--c-bg)] border-2 border-[var(--c-border)]"
+                  loading="lazy"
+                  decoding="async"
                 />
                 <div class="min-w-0">
                   <div class="font-extrabold text-[var(--c-text)] truncate">{{ row.name }}</div>
@@ -83,7 +74,8 @@
       </div>
 
       <aside class="lg:col-span-4 space-y-4" aria-label="结算摘要">
-        <div class="bg-[var(--c-surface)] rounded-3xl p-6 shadow-sm border-2 border-[var(--c-border)]">
+        <CartSkeleton v-if="cart.loading" />
+        <div v-else class="bg-[var(--c-surface)] rounded-3xl p-6 shadow-sm border-2 border-[var(--c-border)]">
           <div class="text-lg font-extrabold text-[var(--c-text)]">订单摘要</div>
           <div class="mt-4 space-y-2 text-sm font-semibold text-[var(--c-muted)]">
             <div class="flex items-center justify-between">
@@ -111,10 +103,7 @@
           </div>
         </div>
 
-        <div
-          v-if="recommended.length"
-          class="bg-[var(--c-surface)] rounded-3xl p-6 shadow-sm border-2 border-[var(--c-border)]"
-        >
+        <div v-if="recommended.length" class="bg-[var(--c-surface)] rounded-3xl p-6 shadow-sm border-2 border-[var(--c-border)]">
           <div class="text-lg font-extrabold text-[var(--c-text)] mb-4">你可能还需要</div>
           <div v-loading="recoLoading" class="grid grid-cols-1 gap-4">
             <ProductCard v-for="p in recommended" :key="p.id" :product="p" />
@@ -126,15 +115,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ShoppingCart } from 'lucide-vue-next'
 import axios from 'axios'
-import ProductCard from '../components/ProductCard.vue'
 import { useCartStore } from '../stores/cart'
 import { useUserAuthStore } from '../stores/userAuth'
 import productPlaceholder from '@/assets/placeholders/product-square.svg'
+
+const CartSkeleton = defineAsyncComponent(() => import('../components/CartSkeleton.vue'))
+const ProductCard = defineAsyncComponent(() => import('../components/ProductCard.vue'))
 
 const router = useRouter()
 const cart = useCartStore()

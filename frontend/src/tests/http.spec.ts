@@ -9,43 +9,38 @@ vi.mock('@/utils/notify', () => {
 describe('api/http', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    localStorage.clear()
   })
 
-  it('request interceptor attaches correct token by url prefix', async () => {
+  it('request interceptor attaches csrf header on unsafe method', async () => {
     const httpMod = await import('@/api/http')
     const http = httpMod.default as any
     const reqHandler = http.interceptors.request.handlers[0].fulfilled as (c: any) => any
 
-    localStorage.setItem('access_token', 'user_t')
-    localStorage.setItem('admin_access_token', 'admin_t')
+    Object.defineProperty(document, 'cookie', {
+      value: 'csrf_access_token=csrf123',
+      writable: true
+    })
 
-    const userReq = reqHandler({ url: '/api/product/list', headers: {} })
-    expect(userReq.headers.Authorization).toBe('Bearer user_t')
-
-    const adminReq = reqHandler({ url: '/api/admin/me/permissions', headers: {} })
-    expect(adminReq.headers.Authorization).toBe('Bearer admin_t')
+    const req = reqHandler({ method: 'post', url: '/api/cart/add', headers: {} })
+    expect(req.headers['X-CSRF-TOKEN']).toBe('csrf123')
   })
 
-  it('response interceptor clears tokens and emits logout on 401', async () => {
+  it('response interceptor emits logout on 401', async () => {
     const { notify } = await import('@/utils/notify')
     const httpMod = await import('@/api/http')
     const http = httpMod.default as any
     const rejHandler = http.interceptors.response.handlers[0].rejected as (e: any) => Promise<never>
 
-    localStorage.setItem('access_token', 't')
-    localStorage.setItem('refresh_token', 'rt')
-    localStorage.setItem('admin_access_token', 'at')
-    localStorage.setItem('admin_refresh_token', 'art')
-
     const dispatchSpy = vi.spyOn(window, 'dispatchEvent')
 
     await expect(
-      rejHandler({ response: { status: 401, data: { message: 'expired' } }, message: 'expired' })
+      rejHandler({
+        response: { status: 401, data: { message: 'expired' } },
+        message: 'expired',
+        config: { url: '/api/order/history', __retried: true }
+      })
     ).rejects.toBeTruthy()
 
-    expect(localStorage.getItem('access_token')).toBeNull()
-    expect(localStorage.getItem('admin_access_token')).toBeNull()
     expect(dispatchSpy).toHaveBeenCalled()
     expect((notify as any).mock.calls[0][0]).toBe('登录已过期，请重新登录')
   })
@@ -57,7 +52,7 @@ describe('api/http', () => {
     const rejHandler = http.interceptors.response.handlers[0].rejected as (e: any) => Promise<never>
 
     await expect(
-      rejHandler({ response: { status: 403, data: { message: 'forbidden' } } })
+      rejHandler({ response: { status: 403, data: { message: 'forbidden' } }, message: 'forbidden', config: { url: '/api/order/create' } })
     ).rejects.toBeTruthy()
     expect((notify as any).mock.calls.at(-1)[0]).toBe('无权限访问')
   })

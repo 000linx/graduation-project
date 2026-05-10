@@ -2,13 +2,15 @@
 import { computed, onMounted, ref } from 'vue'
 import { notify } from '../../utils/notify'
 import { useRecoStore } from '../../stores/reco'
+import { useUserAuthStore } from '../../stores/userAuth'
 
 const emit = defineEmits<{ (e: 'recommended'): void }>()
 
 const reco = useRecoStore()
+const userAuth = useUserAuthStore()
 const saving = ref(false)
 const loadingAccount = ref(false)
-const hasToken = computed(() => Boolean(localStorage.getItem('access_token')))
+const hasToken = computed(() => userAuth.verified)
 
 const sceneOptions = ['日常交流', '看电视', '电话', '会议', '课堂', '户外']
 
@@ -29,7 +31,8 @@ const brandOptions = computed(() => {
 })
 
 async function saveToAccount() {
-  if (!hasToken.value) {
+  const ok = userAuth.verified ? true : await userAuth.verifyUser()
+  if (!ok) {
     notify('登录后才可保存到账号', { tone: 'warning', flash: true })
     return
   }
@@ -77,8 +80,9 @@ async function recommendNow() {
   emit('recommended')
 }
 
-onMounted(() => {
+onMounted(async () => {
   reco.init()
+  await userAuth.verifyUser()
 })
 </script>
 

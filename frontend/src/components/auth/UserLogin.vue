@@ -54,18 +54,7 @@ async function submit() {
       phone: form.phone.trim(),
       password: form.password
     })
-    const data = unwrap<{ tokens?: { access_token?: string; refresh_token?: string } }>(resp)
-    const tokens = data?.tokens
-    const accessToken = tokens?.access_token
-    const refreshToken = tokens?.refresh_token
-    if (!accessToken) {
-      submitError.value = '登录失败：未获取到令牌'
-      notify(submitError.value, { tone: 'error', flash: true })
-      return
-    }
-
-    localStorage.setItem('access_token', String(accessToken))
-    if (refreshToken) localStorage.setItem('refresh_token', String(refreshToken))
+    unwrap(resp)
 
     notify('登录成功', { tone: 'success' })
     await router.replace(redirectTo.value)

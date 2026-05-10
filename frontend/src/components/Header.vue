@@ -39,7 +39,9 @@ function goToCampaign() {
 
 onMounted(() => {
   cart.init()
-  adminAuth.verifyAdmin()
+  if (!adminAuth.verified) {
+    adminAuth.verifyAdmin()
+  }
   window.addEventListener('auth:logout', adminAuth.logout)
 })
 
@@ -73,7 +75,7 @@ watch(
     </a>
     <div
       class="container mx-auto px-4 min-h-16 flex items-center justify-between"
-      :class="a11y.largeTextEnabled ? 'py-3 flex-wrap gap-3' : 'h-16'"
+      :class="a11y.largeTextEnabled ? 'py-3 flex-nowrap gap-3 overflow-x-auto' : 'h-16'"
     >
       <!-- Logo -->
       <div class="flex items-center gap-4 min-w-0">
@@ -87,17 +89,13 @@ watch(
             $t('app.name')
           }}</span>
         </router-link>
-        <div class="hidden lg:flex items-center gap-3 min-w-0" aria-label="品牌标语与快捷入口">
-          <div class="text-sm font-semibold text-[var(--c-muted)] truncate" :title="$t('app.tagline')">
-            {{ $t('app.tagline') }}
-          </div>
-          <div class="h-5 w-px bg-[var(--c-border)] opacity-30" aria-hidden="true" />
+        <div class="hidden lg:flex items-center gap-3 min-w-0" aria-label="快捷入口">
           <button
             v-feedback
             type="button"
             class="a11y-hit px-3 rounded-full border-2 border-[var(--c-border)] bg-[var(--c-bg)] text-[var(--c-text)] font-extrabold text-sm"
             @click="goToCampaign"
-            aria-label="查看限时活动"
+            aria-label="查看今日限时"
           >
             {{ $t('nav.campaign') }}
           </button>
@@ -125,7 +123,7 @@ watch(
       <!-- Search Bar -->
       <div
         class="flex-grow"
-        :class="a11y.largeTextEnabled ? 'flex w-full order-3' : 'hidden md:flex max-w-md mx-8'"
+        :class="a11y.largeTextEnabled ? 'flex min-w-[18rem] max-w-md mx-2' : 'hidden md:flex max-w-md mx-8'"
       >
         <div class="relative w-full">
           <input
@@ -146,7 +144,7 @@ watch(
       <div
         :class="
           a11y.largeTextEnabled
-            ? 'flex flex-wrap items-center justify-end gap-2'
+            ? 'flex flex-nowrap items-center justify-end gap-2 overflow-x-auto'
             : 'flex items-center space-x-6'
         "
       >
@@ -165,16 +163,16 @@ watch(
 
         <router-link
           to="/activities"
-          class="a11y-hit px-3 rounded-full border-2 border-[var(--c-border)] bg-[var(--c-surface)] text-[var(--c-text)] font-extrabold"
+          class="a11y-hit px-3 rounded-full border-2 border-[var(--c-border)] bg-[var(--c-surface)] text-[var(--c-text)] font-extrabold no-underline"
           v-feedback
-          aria-label="活动列表"
+          aria-label="活动"
         >
           活动
         </router-link>
 
         <router-link
           to="/recommendations"
-          class="a11y-hit px-3 rounded-full border-2 border-[var(--c-border)] bg-[var(--c-surface)] text-[var(--c-text)] font-extrabold"
+          class="a11y-hit px-3 rounded-full border-2 border-[var(--c-border)] bg-[var(--c-surface)] text-[var(--c-text)] font-extrabold no-underline"
           v-feedback
           aria-label="个性化推荐"
         >

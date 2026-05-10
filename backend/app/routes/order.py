@@ -50,6 +50,7 @@ def create_order():
     data = request.get_json(silent=True) or {}
     items = data.get('items') or []
     shipping_address = data.get('shipping_address')
+    coupon_code = data.get("coupon_code")
 
     if not items or not isinstance(items, list) or not shipping_address:
         return ApiResponse.error("Missing order information")
@@ -96,9 +97,22 @@ def create_order():
                 return ApiResponse.error("Insufficient stock")
             reserved.append({"product_id": it["product_id"], "quantity": it["quantity"]})
 
+        coupon = None
+        if coupon_code:
+            code = str(coupon_code).strip().upper()
+            discount = 0.0
+            if code == "OFF10":
+                discount = max(total_amount * 0.10, 0.0)
+            elif code == "OFF50":
+                discount = 50.0
+            discount = min(discount, total_amount)
+            if discount > 0:
+                total_amount = float(max(total_amount - discount, 0.0))
+                coupon = {"code": code, "discount_amount": float(discount)}
+
         order_id = None
         try:
-            order_id = Order.create(user_id, normalized_items, total_amount, shipping_address)
+            order_id = Order.create(user_id, normalized_items, total_amount, shipping_address, coupon=coupon)
         except Exception:
             for r in reserved:
                 Product.release_stock(r["product_id"], r["quantity"])
@@ -110,7 +124,11 @@ def create_order():
             except Exception:
                 current_app.logger.exception("Failed to remove cart item after order created")
 
-        return ApiResponse.success({"order_id": str(order_id), "total_amount": total_amount}, "Order created successfully", 201)
+        return ApiResponse.success(
+            {"order_id": str(order_id), "total_amount": total_amount, "coupon": coupon},
+            "Order created successfully",
+            201,
+        )
     except Exception:
         current_app.logger.exception("Failed to create order")
         return ApiResponse.error("Failed to create order", 500)
@@ -253,3 +271,13 @@ def after_sale(order_id):
     if not updated or updated.matched_count == 0:
         return ApiResponse.error("Failed to submit after-sale")
     return ApiResponse.success({"order_id": order_id}, "After-sale submitted")
+
+
+@order_bp.route('/<order_id>/confirm_received', methods=['POST'])
+@jwt_required()
+def confirm_received(order_id):
+    user_id = JwtUtil.get_current_user_id()
+    updated = Order.confirm_received(order_id, user_id)
+    if not updated or updated.matched_count == 0:
+        return ApiResponse.error("Order is not confirmable", 400)
+    return ApiResponse.success({"order_id": order_id}, "Confirmed received")

@@ -213,7 +213,8 @@ onMounted(() => {
   display: flex;
   gap: 10px;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
   margin-top: 6px;
 }
 

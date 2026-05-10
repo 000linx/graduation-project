@@ -5,18 +5,20 @@ import { useLoginMode } from '../hooks/useLoginMode'
 import UserLogin from '../components/auth/UserLogin.vue'
 import AdminLogin from '../components/auth/AdminLogin.vue'
 import { ShieldAlert, User } from 'lucide-vue-next'
+import { useUserAuthStore } from '../stores/userAuth'
 
 const router = useRouter()
 const { isUserMode, isAdminMode, toggleMode } = useLoginMode()
+const userAuth = useUserAuthStore()
 
 function goHome() {
   router.replace('/')
 }
 
-onMounted(() => {
-  const token = localStorage.getItem('access_token')
-  if (token && isUserMode.value) {
-    router.replace('/profile')
+onMounted(async () => {
+  if (isUserMode.value) {
+    const ok = userAuth.verified ? true : await userAuth.verifyUser()
+    if (ok) router.replace('/profile')
   }
 })
 

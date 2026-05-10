@@ -71,7 +71,7 @@ async function loadSeries(reset = false) {
     if (page.value === 1) series.value = list
     else series.value = [...series.value, ...list]
     await nextTick()
-    renderChart()
+    await renderChart()
   } catch (e: any) {
     error.value = e?.response?.data?.message || e?.message || '加载失败'
   } finally {
@@ -90,24 +90,35 @@ function fmtAmount(v: number) {
   return n.toFixed(2)
 }
 
+const chartError = ref<string | null>(null)
+
 async function ensureChart() {
-  if (!chartEl.value) return
-  if (!echartsMod) {
-    echartsMod = await import('echarts')
-  }
-  if (!chart) {
-    chart = echartsMod.init(chartEl.value, undefined, { renderer: 'canvas' })
-    chart.on('click', (params: any) => {
-      const bucket = String(params?.name ?? '')
-      if (!bucket) return
-      openDetail(bucket)
-    })
+  if (!chartEl.value) return false
+  try {
+    if (!echartsMod) {
+      echartsMod = await import('echarts')
+    }
+    if (!chart) {
+      chart = echartsMod.init(chartEl.value, undefined, { renderer: 'canvas' })
+      chart.on('click', (params: any) => {
+        const bucket = String(params?.name ?? '')
+        if (!bucket) return
+        openDetail(bucket)
+      })
+    }
+    chartError.value = null
+    return true
+  } catch (e: any) {
+    chartError.value = e?.message || '图表初始化失败'
+    return false
   }
 }
 
-function renderChart() {
+async function renderChart() {
   if (!chartEl.value) return
-  if (!echartsMod || !chart) return
+  const ok = await ensureChart()
+  if (!ok) return
+  if (!chart) return
 
   const vars = typeof window !== 'undefined' ? getComputedStyle(document.documentElement) : (null as any)
   const axisText = vars?.getPropertyValue('--c-muted')?.trim() || '#9aa4b2'
@@ -159,6 +170,7 @@ function renderChart() {
     },
     { notMerge: true, lazyUpdate: true }
   )
+  resizeChart()
 }
 
 function resizeChart() {
@@ -170,7 +182,6 @@ function resizeChart() {
 useResizeObserver(chartEl, () => resizeChart())
 
 onMounted(async () => {
-  await ensureChart()
   await loadSeries(true)
 })
 
@@ -287,6 +298,7 @@ function exportCsv() {
         <el-date-picker
           v-model="dateRange"
           type="daterange"
+          format="YYYY-MM-DD"
           range-separator="至"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
@@ -307,6 +319,10 @@ function exportCsv() {
 
     <div v-if="error" class="mt-4">
       <el-alert type="error" show-icon :title="error" />
+    </div>
+
+    <div v-else-if="chartError" class="mt-4">
+      <el-alert type="warning" show-icon :title="chartError" description="请尝试刷新页面或切换筛选条件" />
     </div>
 
     <div v-else class="mt-4">

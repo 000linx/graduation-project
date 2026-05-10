@@ -11,17 +11,22 @@ from __future__ import annotations
 
 import time
 from functools import wraps
+from datetime import datetime
 
 from flask import current_app, g, request
-from flask_jwt_extended import jwt_required, get_jwt, decode_token
+from flask_jwt_extended import decode_token, get_jwt, jwt_required, set_access_cookies, set_refresh_cookies, unset_jwt_cookies, verify_jwt_in_request
 from marshmallow import ValidationError as MarshmallowValidationError
 from werkzeug.security import generate_password_hash
+from bson import ObjectId
 
 from .. import extensions
 from ..extensions import mongo
 from ..models.order_model import Order
 from ..models.user_model import User
 from ..services.product_stream_service import ProductStreamService
+from ..services.activity_service import ActivityService
+from ..services.maintenance_pdf_service import MaintenancePdfService
+from ..services.maintenance_service import MaintenanceService
 from ..utils.errors import ConflictError, ValidationError
 from ..utils.jwt_util import JwtUtil
 from ..utils.response import ApiResponse
@@ -33,20 +38,26 @@ from .daos.rbac_dao import RbacDao
 from .daos.user_dao import AdminUserDao
 from .schemas import (
     AdminLoginSchema,
+    BatchMaintenanceActionSchema,
     BootstrapAdminSchema,
+    CompleteMaintenanceAppointmentSchema,
     CreateProductBatchSchema,
     CreateProductSchema,
     CreateRoleSchema,
     ListAuditLogsQuerySchema,
+    ListMaintenanceAppointmentsQuerySchema,
     ListOrdersQuerySchema,
     SalesDetailQuerySchema,
     SalesSeriesQuerySchema,
     ListUsersQuerySchema,
     LogoutSchema,
     ProcessAfterSaleSchema,
+    RejectMaintenanceAppointmentSchema,
+    RescheduleMaintenanceAppointmentSchema,
     SetUserRbacRolesSchema,
     SetUserRoleSchema,
     UpdateOrderStatusSchema,
+    UpdateOrderShippingSchema,
     UpdateProductSchema,
     UpdateRoleSchema,
 )
@@ -229,9 +240,16 @@ def register_admin_routes(admin_bp):
     AdminUserDao.ensure_indexes()
     AdminProductDao.ensure_indexes()
     AdminOrderDao.ensure_indexes()
+    MaintenanceService.ensure_indexes()
+    ActivityService.ensure_indexes()
     RbacDao.ensure_indexes()
     AuditDao.ensure_indexes()
     RbacService.ensure_defaults()
+    try:
+        from .activity_controllers import register_admin_activity_routes
+        register_admin_activity_routes(admin_bp)
+    except Exception:
+        pass
 
     @admin_bp.route("/bootstrap", methods=["POST"])
     @audit(action="admin.bootstrap", resource_type="user")
@@ -294,7 +312,7 @@ def register_admin_routes(admin_bp):
         RbacService.ensure_admin_user_initialized(user_id)
         perms, version = RbacService.get_user_permissions(user_id)
         tokens = JwtUtil.create_tokens(user["_id"])
-        return ApiResponse.success(
+        resp, status = ApiResponse.success(
             {
                 "tokens": tokens,
                 "user": {"username": user.get("username"), "phone": user.get("phone")},
@@ -303,6 +321,19 @@ def register_admin_routes(admin_bp):
             },
             "Login successful",
         )
+        set_access_cookies(resp, tokens["access_token"])
+        set_refresh_cookies(resp, tokens["refresh_token"])
+        return resp, status
+
+    @admin_bp.route("/refresh", methods=["POST"])
+    @jwt_required(refresh=True)
+    def admin_refresh():
+        user_id = JwtUtil.get_current_user_id()
+        tokens = JwtUtil.create_tokens(user_id)
+        resp, status = ApiResponse.success({"tokens": tokens}, "Refreshed")
+        set_access_cookies(resp, tokens["access_token"])
+        set_refresh_cookies(resp, tokens["refresh_token"])
+        return resp, status
 
     @admin_bp.route("/stats", methods=["GET"])
     @require_permission("admin.stats.read")
@@ -339,6 +370,113 @@ def register_admin_routes(admin_bp):
             page_size=int(q["page_size"]),
         )
         return ApiResponse.success(to_safe_json(data))
+
+    @admin_bp.route("/maintenance/appointments", methods=["GET"])
+    @require_permission("admin.maintenance.read")
+    @audit(action="admin.maintenance.read", resource_type="maintenance_appointment")
+    def maintenance_list_appointments():
+        q = _load_query(ListMaintenanceAppointmentsQuerySchema())
+        rows, total = MaintenanceService.admin_list_appointments(
+            user_id=q.get("user_id"),
+            status=q.get("status"),
+            start_iso=q.get("start"),
+            end_iso=q.get("end"),
+            page=int(q["page"]),
+            page_size=int(q["page_size"]),
+        )
+        return ApiResponse.success({"items": to_safe_json(rows), "total": total, "page": q["page"], "page_size": q["page_size"]})
+
+    @admin_bp.route("/maintenance/appointments/batch", methods=["POST"])
+    @require_permission("admin.maintenance.manage")
+    @audit(action="admin.maintenance.batch", resource_type="maintenance_appointment")
+    def maintenance_batch():
+        admin_user_id = str(g.admin_user["_id"])
+        body = _load_json(BatchMaintenanceActionSchema(), request.get_json(silent=True))
+        action = body["action"]
+        ids = body["ids"]
+        reason = body.get("reason") or ""
+        ok = 0
+        fail = 0
+        for aid in ids:
+            try:
+                if action == "confirm":
+                    MaintenanceService.admin_confirm(aid, admin_user_id)
+                elif action == "reject":
+                    MaintenanceService.admin_reject(aid, admin_user_id, reason=reason or "Rejected by batch")
+                elif action == "cancel":
+                    appt = MaintenanceService.admin_get_detail(aid)[0]
+                    mongo.db["maintenance_appointments"].update_one(
+                        {"_id": appt["_id"], "status": {"$in": ["pending", "confirmed"]}},
+                        {"$set": {"status": "cancelled", "cancel_reason": reason or "Cancelled by admin", "updated_at": datetime.now()}},
+                    )
+                ok += 1
+            except Exception:
+                fail += 1
+        return ApiResponse.success({"ok": ok, "failed": fail})
+
+    @admin_bp.route("/maintenance/appointments/<appointment_id>", methods=["GET"])
+    @require_permission("admin.maintenance.read")
+    @audit(action="admin.maintenance.detail", resource_type="maintenance_appointment")
+    def maintenance_get_detail(appointment_id: str):
+        appt, history, record = MaintenanceService.admin_get_detail(appointment_id)
+        return ApiResponse.success({"appointment": to_safe_json(appt), "history": to_safe_json(history), "record": to_safe_json(record) if record else None})
+
+    @admin_bp.route("/maintenance/appointments/<appointment_id>/confirm", methods=["POST"])
+    @require_permission("admin.maintenance.manage")
+    @audit(action="admin.maintenance.confirm", resource_type="maintenance_appointment")
+    def maintenance_confirm(appointment_id: str):
+        admin_user_id = str(g.admin_user["_id"])
+        appt = MaintenanceService.admin_confirm(appointment_id, admin_user_id)
+        return ApiResponse.success({"appointment": to_safe_json(appt)})
+
+    @admin_bp.route("/maintenance/appointments/<appointment_id>/reject", methods=["POST"])
+    @require_permission("admin.maintenance.manage")
+    @audit(action="admin.maintenance.reject", resource_type="maintenance_appointment")
+    def maintenance_reject(appointment_id: str):
+        admin_user_id = str(g.admin_user["_id"])
+        body = _load_json(RejectMaintenanceAppointmentSchema(), request.get_json(silent=True))
+        appt = MaintenanceService.admin_reject(appointment_id, admin_user_id, reason=body["reason"])
+        return ApiResponse.success({"appointment": to_safe_json(appt)})
+
+    @admin_bp.route("/maintenance/appointments/<appointment_id>/reschedule", methods=["POST"])
+    @require_permission("admin.maintenance.manage")
+    @audit(action="admin.maintenance.reschedule", resource_type="maintenance_appointment")
+    def maintenance_reschedule(appointment_id: str):
+        admin_user_id = str(g.admin_user["_id"])
+        body = _load_json(RescheduleMaintenanceAppointmentSchema(), request.get_json(silent=True))
+        appt = MaintenanceService.admin_reschedule(appointment_id, admin_user_id, new_start_iso=body["new_start"])
+        return ApiResponse.success({"appointment": to_safe_json(appt)})
+
+    @admin_bp.route("/maintenance/appointments/<appointment_id>/complete", methods=["POST"])
+    @require_permission("admin.maintenance.manage")
+    @audit(action="admin.maintenance.complete", resource_type="maintenance_appointment")
+    def maintenance_complete(appointment_id: str):
+        admin_user_id = str(g.admin_user["_id"])
+        body = _load_json(CompleteMaintenanceAppointmentSchema(), request.get_json(silent=True))
+        record_id = MaintenanceService.admin_complete(
+            appointment_id=appointment_id,
+            admin_user_id=admin_user_id,
+            technician=body.get("technician") or {},
+            items=body.get("items") or [],
+            replaced_parts=body.get("replaced_parts") or [],
+            total_cost=body.get("total_cost") or 0,
+            report=body.get("report") or "",
+        )
+        return ApiResponse.success({"record_id": str(record_id)}, "Completed")
+
+    @admin_bp.route("/maintenance/records/<record_id>/pdf", methods=["GET"])
+    @require_permission("admin.maintenance.manage")
+    @audit(action="admin.maintenance.export_pdf", resource_type="maintenance_record")
+    def maintenance_record_pdf(record_id: str):
+        record = mongo.db["maintenance_records"].find_one({"_id": ObjectId(record_id)})
+        if not record:
+            return ApiResponse.not_found("Record not found")
+        pdf_bytes, filename = MaintenancePdfService.export_record_pdf_for_user(str(record["user_id"]), record_id)
+        return current_app.response_class(
+            pdf_bytes,
+            mimetype="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
 
     @admin_bp.route("/reco/metrics", methods=["GET"])
     @require_permission("admin.stats.read")
@@ -516,6 +654,22 @@ def register_admin_routes(admin_bp):
             return ApiResponse.not_found("Order not found")
         return ApiResponse.success({"order_id": order_id, "status": status}, "Status updated")
 
+    @admin_bp.route("/orders/<order_id>/shipping", methods=["PUT"])
+    @require_permission("admin.orders.update_status")
+    @audit(action="admin.orders.update_shipping", resource_type="order", resource_id_kw="order_id")
+    def update_order_shipping(order_id):
+        data = _load_json(UpdateOrderShippingSchema(), request.get_json(silent=True))
+        updated = Order.set_shipping(
+            order_id,
+            carrier=data.get("carrier"),
+            tracking_no=data.get("tracking_no"),
+            status=data.get("status"),
+            events=data.get("events"),
+        )
+        if not updated or updated.matched_count == 0:
+            return ApiResponse.not_found("Order not found")
+        return ApiResponse.success({"order_id": order_id}, "Shipping updated")
+
     @admin_bp.route("/orders/<order_id>/after_sale", methods=["PUT"])
     @require_permission("admin.orders.process_after_sale")
     @audit(action="admin.orders.process_after_sale", resource_type="order", resource_id_kw="order_id")
@@ -604,21 +758,25 @@ def register_admin_routes(admin_bp):
         )
 
     @admin_bp.route("/logout", methods=["POST"])
-    @admin_required
     @audit(action="admin.logout", resource_type="auth")
     def admin_logout():
-        data = _load_json(LogoutSchema(), request.get_json(silent=True))
-        payload = get_jwt()
-        jti = payload.get("jti")
-        exp = payload.get("exp")
         try:
-            if extensions.redis_client is not None and jti and exp:
-                ttl = max(int(exp - time.time()), 1)
-                extensions.redis_client.setex(f"bl:{jti}", ttl, "1")
+            verify_jwt_in_request(optional=True)
+            payload = get_jwt()
+            if payload:
+                jti = payload.get("jti")
+                exp = payload.get("exp")
+                try:
+                    if extensions.redis_client is not None and jti and exp:
+                        ttl = max(int(exp - time.time()), 1)
+                        extensions.redis_client.setex(f"bl:{jti}", ttl, "1")
+                except Exception:
+                    pass
         except Exception:
             pass
 
-        refresh_token = data.get("refresh_token")
+        refresh_cookie_name = current_app.config.get("JWT_REFRESH_COOKIE_NAME", "refresh_token_cookie")
+        refresh_token = request.cookies.get(refresh_cookie_name)
         if refresh_token:
             try:
                 decoded = decode_token(refresh_token)
@@ -630,4 +788,6 @@ def register_admin_routes(admin_bp):
             except Exception:
                 pass
 
-        return ApiResponse.success(message="Logged out")
+        resp, status = ApiResponse.success(message="Logged out")
+        unset_jwt_cookies(resp)
+        return resp, status

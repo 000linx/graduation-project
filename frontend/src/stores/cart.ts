@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import axios from 'axios'
 import http, { unwrap } from '@/api/http'
 
 type CartItem = {
@@ -32,6 +31,9 @@ export const useCartStore = defineStore('cart', () => {
   const listenerBound = ref(false)
 
   const totalQty = computed(() => items.value.reduce((sum, it) => sum + Number(it.quantity || 0), 0))
+
+  let _debounceTimer: ReturnType<typeof setTimeout> | null = null
+  const _pendingUpdates = new Map<string, number>()
 
   function _saveCache() {
     const payload: CartCache = {
@@ -65,56 +67,51 @@ export const useCartStore = defineStore('cart', () => {
     window.addEventListener('auth:logout', () => {
       clearCache()
     })
-
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'access_token' && !e.newValue) {
-        clearCache()
-      }
-    })
   }
 
   async function _ensureProducts(ids: string[]) {
     const missing = ids.filter((id) => !products.value[id])
     if (missing.length === 0) return
     const fetched: Record<string, ProductInfo> = {}
-    await Promise.all(
-      missing.map(async (id) => {
-        try {
-          const { data } = await axios.get(`/api/product/${encodeURIComponent(id)}`)
-          const p = (data?.data ?? {}) as any
-          const pid = String(p?._id ?? id)
-          fetched[pid] = {
-            _id: pid,
-            name: p?.name,
-            price: Number(p?.price ?? 0),
-            image_url: p?.image_url,
-            category: p?.category,
-            stock: p?.stock
-          }
-        } catch {}
-      })
-    )
+    try {
+      const resp = await http.get('/api/product/batch', { params: { ids: missing.join(',') } })
+      const data = unwrap<{ items: any[] }>(resp)
+      const list = Array.isArray(data?.items) ? data.items : []
+      for (const p of list) {
+        const pid = String(p?._id ?? p?.id ?? '')
+        if (!pid) continue
+        fetched[pid] = {
+          _id: pid,
+          name: p?.name,
+          price: Number(p?.price ?? 0),
+          image_url: p?.image_url,
+          category: p?.category,
+          stock: p?.stock
+        }
+      }
+    } catch {}
     products.value = { ...products.value, ...fetched }
   }
 
   async function fetchCart() {
-    const token = localStorage.getItem('access_token')
-    if (!token) {
-      clearCache()
-      return
-    }
-
     loading.value = true
     try {
       const resp = await http.get('/api/cart/items')
-      const data = unwrap<{ items: any[] }>(resp)
+      const data = unwrap<{ items: any[]; products?: Record<string, ProductInfo> }>(resp)
       const apiItems = Array.isArray(data?.items) ? data.items : []
       items.value = apiItems.map((it) => ({
         product_id: String(it.product_id),
         quantity: Number(it.quantity ?? 0)
       }))
-      await _ensureProducts(items.value.map((i) => i.product_id))
+      if (data?.products && typeof data.products === 'object') {
+        products.value = data.products
+      } else {
+        await _ensureProducts(items.value.map((i) => i.product_id))
+      }
       _saveCache()
+    } catch (e: any) {
+      if (e?.response?.status === 401) clearCache()
+      throw e
     } finally {
       loading.value = false
     }
@@ -125,25 +122,58 @@ export const useCartStore = defineStore('cart', () => {
     await fetchCart()
   }
 
+  function _flushBatch() {
+    const entries = Array.from(_pendingUpdates.entries())
+    _pendingUpdates.clear()
+    if (entries.length === 0) return
+    const promises = entries.map(([product_id, quantity]) =>
+      http.put('/api/cart/update', { product_id, quantity })?.catch(() => {}) ?? Promise.resolve()
+    )
+    Promise.all(promises).finally(() => {
+      _saveCache()
+    })
+  }
+
+  function _scheduleFlush() {
+    if (_debounceTimer) clearTimeout(_debounceTimer)
+    _debounceTimer = setTimeout(() => {
+      _debounceTimer = null
+      _flushBatch()
+    }, 300)
+  }
+
   async function updateQty(productId: string, quantity: number) {
+    const item = items.value.find((it) => it.product_id === productId)
+    if (item) {
+      item.quantity = Number(quantity)
+      _saveCache()
+    }
+    _pendingUpdates.set(productId, Number(quantity))
+    _scheduleFlush()
+  }
+
+  async function updateQtyImmediate(productId: string, quantity: number) {
     await http.put('/api/cart/update', { product_id: productId, quantity })
-    await fetchCart()
+    const item = items.value.find((it) => it.product_id === productId)
+    if (item) item.quantity = Number(quantity)
+    _saveCache()
   }
 
   async function removeItem(productId: string) {
+    if (_pendingUpdates.has(productId)) {
+      _pendingUpdates.delete(productId)
+    }
     await http.delete(`/api/cart/remove/${encodeURIComponent(productId)}`)
-    await fetchCart()
+    items.value = items.value.filter((it) => it.product_id !== productId)
+    _saveCache()
   }
 
   async function init() {
     bindAuthListener()
-    const token = localStorage.getItem('access_token')
-    if (!token) {
-      clearCache()
-      return
-    }
     loadFromCache()
-    await fetchCart()
+    try {
+      await fetchCart()
+    } catch {}
   }
 
   return {
@@ -155,8 +185,11 @@ export const useCartStore = defineStore('cart', () => {
     fetchCart,
     addToCart,
     updateQty,
+    updateQtyImmediate,
     removeItem,
     loadFromCache,
-    clearCache
+    clearCache,
+    _flushBatch,
+    _pendingUpdates
   }
 })

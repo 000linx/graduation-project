@@ -15,7 +15,6 @@
 
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import axios from 'axios'
 import http, { unwrap } from '@/api/http'
 
 type LoginResponse = {
@@ -25,25 +24,47 @@ type LoginResponse = {
   rbac_version?: number
 }
 
+const STORAGE_KEY_ACCESS = 'admin_access_token'
+const STORAGE_KEY_REFRESH = 'admin_refresh_token'
+const STORAGE_KEY_PHONE = 'admin_user_phone'
+const STORAGE_KEY_NAME = 'admin_user_name'
+
 export const useAdminAuthStore = defineStore('adminAuth', () => {
-  const accessToken = ref<string | null>(localStorage.getItem('admin_access_token'))
-  const refreshToken = ref<string | null>(localStorage.getItem('admin_refresh_token'))
+  const accessToken = ref<string | null>(null)
+  const refreshToken = ref<string | null>(null)
   const userPhone = ref<string | null>(null)
   const userName = ref<string | null>(null)
   const permissions = ref<string[]>([])
   const verified = ref(false)
+  const checking = ref(false)
 
-  const isAuthed = computed(() => Boolean(accessToken.value))
+  const isAuthed = computed(() => verified.value)
 
-  /**
-   * 从 localStorage 同步 token 到响应式状态。
-   *
-   * Notes:
-   * - 该函数不会进行后端验真，仅用于刷新内存态。
-   */
   function syncFromStorage() {
-    accessToken.value = localStorage.getItem('admin_access_token')
-    refreshToken.value = localStorage.getItem('admin_refresh_token')
+    const at = localStorage.getItem(STORAGE_KEY_ACCESS)
+    const rt = localStorage.getItem(STORAGE_KEY_REFRESH)
+    if (at) {
+      accessToken.value = at
+      refreshToken.value = rt || null
+      userPhone.value = localStorage.getItem(STORAGE_KEY_PHONE) || null
+      userName.value = localStorage.getItem(STORAGE_KEY_NAME) || null
+    }
+  }
+
+  function persistToStorage() {
+    if (accessToken.value) {
+      localStorage.setItem(STORAGE_KEY_ACCESS, accessToken.value)
+      localStorage.setItem(STORAGE_KEY_REFRESH, refreshToken.value || '')
+      localStorage.setItem(STORAGE_KEY_PHONE, userPhone.value || '')
+      localStorage.setItem(STORAGE_KEY_NAME, userName.value || '')
+    }
+  }
+
+  function clearStorage() {
+    localStorage.removeItem(STORAGE_KEY_ACCESS)
+    localStorage.removeItem(STORAGE_KEY_REFRESH)
+    localStorage.removeItem(STORAGE_KEY_PHONE)
+    localStorage.removeItem(STORAGE_KEY_NAME)
   }
 
   /**
@@ -57,37 +78,32 @@ export const useAdminAuthStore = defineStore('adminAuth', () => {
    *   Error: 当后端返回异常或响应不包含 access_token 时抛出
    */
   async function login(phone: string, password: string) {
-    const resp = await axios.post('/api/admin/login', { phone, password })
-    const data = (resp?.data?.data ?? {}) as LoginResponse
+    const resp = await http.post('/api/admin/login', { phone, password })
+    const data = unwrap<LoginResponse>(resp)
     const at = data?.tokens?.access_token
     const rt = data?.tokens?.refresh_token
     if (!at) {
       throw new Error(resp?.data?.message || '登录失败')
     }
-    localStorage.setItem('admin_access_token', String(at))
-    if (rt) localStorage.setItem('admin_refresh_token', String(rt))
     accessToken.value = String(at)
     refreshToken.value = rt ? String(rt) : null
     userPhone.value = data?.user?.phone ? String(data.user.phone) : phone
     userName.value = data?.user?.username ? String(data.user.username) : null
     permissions.value = Array.isArray(data?.permissions) ? data.permissions.map(String) : []
     verified.value = true
+    persistToStorage()
   }
 
   /**
-   * 向后端验证当前 admin_access_token 是否为“真实管理员会话”。
+   * 向后端验证当前 admin_access_token 是否为"真实管理员会话"。
    *
    * Returns:
    *   - true: token 有效且具备管理员身份（并刷新 permissions）
    *   - false: token 缺失/失效/非管理员（会清理本地后台 token）
    */
   async function verifyAdmin() {
-    syncFromStorage()
-    if (!accessToken.value) {
-      verified.value = false
-      permissions.value = []
-      return false
-    }
+    if (checking.value) return verified.value
+    checking.value = true
     try {
       const resp = await http.get('/api/admin/me/permissions')
       const data = unwrap<{ permissions?: string[] }>(resp)
@@ -97,6 +113,8 @@ export const useAdminAuthStore = defineStore('adminAuth', () => {
     } catch {
       logout()
       return false
+    } finally {
+      checking.value = false
     }
   }
 
@@ -104,14 +122,23 @@ export const useAdminAuthStore = defineStore('adminAuth', () => {
    * 退出管理后台：清理本地后台 token 与相关状态。
    */
   function logout() {
-    localStorage.removeItem('admin_access_token')
-    localStorage.removeItem('admin_refresh_token')
     accessToken.value = null
     refreshToken.value = null
     userPhone.value = null
     userName.value = null
     permissions.value = []
     verified.value = false
+    clearStorage()
+  }
+
+  async function logoutRemote() {
+    try {
+      await http.post('/api/admin/logout')
+    } catch {}
+    logout()
+    try {
+      window.dispatchEvent(new Event('auth:logout'))
+    } catch {}
   }
 
   return {
@@ -121,10 +148,12 @@ export const useAdminAuthStore = defineStore('adminAuth', () => {
     userName,
     permissions,
     verified,
+    checking,
     isAuthed,
     syncFromStorage,
     login,
     verifyAdmin,
-    logout
+    logout,
+    logoutRemote
   }
 })

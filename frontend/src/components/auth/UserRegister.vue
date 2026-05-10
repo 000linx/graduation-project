@@ -2,6 +2,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { FormInstance, FormRules } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import http, { unwrap } from '@/api/http'
 import { notify } from '@/utils/notify'
 import { toZhAuthErrorMessage } from '@/utils/apiErrorZh'
@@ -12,13 +13,29 @@ const route = useRoute()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 const submitError = ref('')
+const sendingCode = ref(false)
+const codeSent = ref(false)
+const countdown = ref(0)
+let countdownTimer: ReturnType<typeof setInterval> | null = null
 
 const form = reactive({
   username: '',
   phone: '',
+  email: '',
+  verify_code: '',
   password: '',
   confirm_password: ''
 })
+
+const validateEmail = (_rule: any, value: string, callback: (err?: Error) => void) => {
+  const v = (value || '').trim()
+  if (!v) return callback()
+  if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v)) {
+    callback(new Error('邮箱格式不正确'))
+  } else {
+    callback()
+  }
+}
 
 const rules: FormRules = {
   username: [
@@ -32,6 +49,20 @@ const rules: FormRules = {
         const v = String(value || '').trim()
         if (!/^1\d{10}$/.test(v)) callback(new Error('请输入 11 位手机号'))
         else callback()
+      },
+      trigger: 'blur'
+    }
+  ],
+  email: [{ validator: validateEmail, trigger: 'blur' }],
+  verify_code: [
+    {
+      validator: (_rule, value, callback) => {
+        const emailVal = (form.email || '').trim()
+        if (!emailVal) return callback()
+        const v = (value || '').trim()
+        if (!v) { callback(new Error('请输入邮箱验证码')); return }
+        if (!/^\d{6}$/.test(v)) { callback(new Error('验证码为6位数字')); return }
+        callback()
       },
       trigger: 'blur'
     }
@@ -57,6 +88,42 @@ const redirectTo = computed(() => {
   return typeof q === 'string' && q.length > 0 ? q : '/profile'
 })
 
+const emailTrimmed = computed(() => (form.email || '').trim())
+const showEmailVerify = computed(() => emailTrimmed.value.length > 0)
+
+async function sendVerifyCode() {
+  const email = emailTrimmed.value
+  if (!email) {
+    ElMessage.warning('请先输入邮箱地址')
+    return
+  }
+  if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+    ElMessage.warning('邮箱格式不正确')
+    return
+  }
+  if (countdown.value > 0) return
+
+  sendingCode.value = true
+  try {
+    await http.post('/api/user/send_verify_code', { email })
+    codeSent.value = true
+    form.verify_code = ''
+    countdown.value = 60
+    countdownTimer = setInterval(() => {
+      countdown.value--
+      if (countdown.value <= 0) {
+        if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null }
+      }
+    }, 1000)
+    ElMessage.success('验证码已发送')
+  } catch (e: any) {
+    const msg = e?.response?.data?.message || e?.message || '发送失败'
+    ElMessage.error(msg)
+  } finally {
+    sendingCode.value = false
+  }
+}
+
 async function submit() {
   const inst = formRef.value
   if (!inst) return
@@ -66,10 +133,14 @@ async function submit() {
   loading.value = true
   submitError.value = ''
   try {
-    const payload = {
+    const payload: Record<string, string> = {
       username: form.username.trim(),
       phone: form.phone.trim(),
       password: form.password
+    }
+    if (emailTrimmed.value) {
+      payload.email = emailTrimmed.value
+      payload.verify_code = form.verify_code.trim()
     }
     await http.post('/api/user/register', payload)
 
@@ -82,19 +153,7 @@ async function submit() {
       await router.replace('/login')
       return
     }
-    const loginData = unwrap<{ tokens?: { access_token?: string; refresh_token?: string } }>(loginResp)
-    const tokens = loginData?.tokens
-    const accessToken = tokens?.access_token
-    const refreshToken = tokens?.refresh_token
-    if (!accessToken) {
-      submitError.value = '注册成功，但自动登录失败，请手动登录'
-      notify(submitError.value, { tone: 'warning', flash: true })
-      await router.replace('/login')
-      return
-    }
-
-    localStorage.setItem('access_token', String(accessToken))
-    if (refreshToken) localStorage.setItem('refresh_token', String(refreshToken))
+    unwrap(loginResp)
 
     notify('注册成功', { tone: 'success' })
     await router.replace(redirectTo.value)
@@ -111,7 +170,7 @@ async function submit() {
 }
 
 watch(
-  () => `${form.username}|${form.phone}|${form.password}|${form.confirm_password}`,
+  () => `${form.username}|${form.phone}|${form.password}|${form.confirm_password}|${form.email}`,
   () => {
     if (submitError.value) submitError.value = ''
   }
@@ -130,6 +189,32 @@ watch(
         inputmode="numeric"
         autocomplete="tel"
       />
+    </el-form-item>
+    <el-form-item label="邮箱（可选）" prop="email">
+      <el-input
+        v-model="form.email"
+        placeholder="选填，填写后可接收订单通知"
+        inputmode="email"
+        autocomplete="email"
+      />
+    </el-form-item>
+    <el-form-item v-if="showEmailVerify" label="邮箱验证码" prop="verify_code">
+      <div class="flex gap-2">
+        <el-input
+          v-model="form.verify_code"
+          placeholder="请输入6位验证码"
+          maxlength="6"
+          inputmode="numeric"
+          class="flex-1"
+        />
+        <el-button
+          :loading="sendingCode"
+          :disabled="countdown > 0"
+          @click="sendVerifyCode"
+        >
+          {{ countdown > 0 ? `${countdown}s 后重发` : codeSent ? '重新发送' : '发送验证码' }}
+        </el-button>
+      </div>
     </el-form-item>
     <el-form-item label="密码" prop="password">
       <el-input

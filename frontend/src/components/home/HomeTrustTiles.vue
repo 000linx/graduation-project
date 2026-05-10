@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BadgeCheck, BookOpen, Headphones, Truck } from 'lucide-vue-next'
+import { BadgeCheck, Headphones, Truck } from 'lucide-vue-next'
 
 type Tile = {
   title: string
@@ -11,14 +11,6 @@ type Tile = {
 }
 
 const tiles: Tile[] = [
-  {
-    title: '选购指南',
-    desc: '按听损、预算与场景快速匹配，减少试错成本。',
-    icon: BookOpen,
-    tone: 'info',
-    to: '/recommendations',
-    ariaLabel: '打开选购指南与个性化推荐'
-  },
   {
     title: '服务保障',
     desc: '支持无忧试戴、透明售后与清晰使用说明。',
@@ -48,7 +40,7 @@ const tiles: Tile[] = [
 
 <template>
   <section aria-label="导购与信任信息">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       <router-link
         v-for="t in tiles"
         :key="t.title"

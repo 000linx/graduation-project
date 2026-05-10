@@ -179,7 +179,7 @@ function openSocial(name: string) {
           <div class="text-sm font-semibold text-[var(--c-muted)]">一键筛选</div>
         </div>
       </div>
-      <div class="mt-4 flex flex-wrap gap-2">
+      <div class="mt-4 flex flex-nowrap gap-2 overflow-x-auto">
         <button
           v-for="t in tags"
           :key="t.label"

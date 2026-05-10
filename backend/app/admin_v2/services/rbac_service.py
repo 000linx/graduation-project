@@ -27,12 +27,16 @@ DEFAULT_PERMISSIONS = [
     {"name": "admin.users.read", "description": "查看用户列表"},
     {"name": "admin.users.set_role", "description": "修改用户角色"},
     {"name": "admin.users.set_rbac_roles", "description": "分配RBAC角色"},
+    {"name": "admin.activities.read", "description": "查看活动列表"},
+    {"name": "admin.activities.manage", "description": "管理活动（编辑/发布/下架/回滚）"},
     {"name": "admin.products.create", "description": "新增商品"},
     {"name": "admin.products.update", "description": "编辑商品"},
     {"name": "admin.products.delete", "description": "删除商品"},
     {"name": "admin.orders.read", "description": "查看订单列表"},
     {"name": "admin.orders.update_status", "description": "修改订单状态"},
     {"name": "admin.orders.process_after_sale", "description": "处理售后"},
+    {"name": "admin.maintenance.read", "description": "查看保养预约"},
+    {"name": "admin.maintenance.manage", "description": "管理保养预约（确认/拒绝/改期/完成/导出）"},
     {"name": "admin.rbac.manage", "description": "管理RBAC配置"},
     {"name": "admin.audit.read", "description": "查看审计日志"},
 ]
@@ -49,11 +53,17 @@ class RbacService:
         if not RbacDao.get_role_by_name("super_admin"):
             RbacDao.create_role("super_admin", "超级管理员", ["*"])
 
-        if not RbacDao.get_role_by_name("admin_basic"):
+        admin_basic = RbacDao.get_role_by_name("admin_basic")
+        if not admin_basic:
             RbacDao.create_role("admin_basic", "基础管理员", [p["name"] for p in DEFAULT_PERMISSIONS])
+        else:
+            RbacDao.update_role(str(admin_basic["_id"]), {"perm_names": [p["name"] for p in DEFAULT_PERMISSIONS]})
 
-        if not RbacDao.get_role_by_name("audit_viewer"):
+        audit_viewer = RbacDao.get_role_by_name("audit_viewer")
+        if not audit_viewer:
             RbacDao.create_role("audit_viewer", "审计查看者", ["admin.audit.read"])
+        else:
+            RbacDao.update_role(str(audit_viewer["_id"]), {"perm_names": ["admin.audit.read"]})
 
     @staticmethod
     def _cache_key(user_id: str, rbac_version: int):

@@ -23,46 +23,83 @@ import { notify } from '@/utils/notify'
  */
 export type ApiEnvelope<T> = {
   code: number
-  message: string
+  msg?: string
+  message?: string
   data?: T
 }
 
-const http = axios.create()
+function getCookie(name: string): string | null {
+  const raw = String(document?.cookie || '')
+  if (!raw) return null
+  const parts = raw.split(';')
+  for (const p of parts) {
+    const [k, ...rest] = p.trim().split('=')
+    if (k === name) return decodeURIComponent(rest.join('=') || '')
+  }
+  return null
+}
+
+const http = axios.create({ withCredentials: true })
 
 http.interceptors.request.use((config) => {
-  const url = String(config?.url || '')
-  const isAdminApi = url.startsWith('/api/admin')
-  // 管理端 API 只能携带 admin_access_token，避免普通用户 token 被误用到后台接口
-  const token = isAdminApi ? localStorage.getItem('admin_access_token') : localStorage.getItem('access_token')
-  if (token) {
-    config.headers = config.headers ?? {}
-    config.headers.Authorization = `Bearer ${token}`
+  const m = String(config?.method || 'get').toUpperCase()
+  const unsafe = m !== 'GET' && m !== 'HEAD' && m !== 'OPTIONS'
+  if (unsafe) {
+    const url = String(config?.url || '')
+    const isRefresh = url.startsWith('/api/user/refresh') || url.startsWith('/api/admin/refresh')
+    const csrf = isRefresh ? getCookie('csrf_refresh_token') : getCookie('csrf_access_token')
+    if (csrf) {
+      config.headers = config.headers ?? {}
+      config.headers['X-CSRF-TOKEN'] = csrf
+    }
   }
   return config
 })
 
 http.interceptors.response.use(
   (resp) => resp,
-  (error) => {
+  async (error) => {
     const status = error?.response?.status
     const url = String(error?.config?.url || '')
-    const msg = error?.response?.data?.message || error?.message || '请求失败'
-    const isAuthApi = url.startsWith('/api/user/login') || url.startsWith('/api/user/register') || url.startsWith('/api/admin/login')
+    const msg = error?.response?.data?.msg || error?.response?.data?.message || error?.message || '请求失败'
+
+    const isAuthAction =
+      url.startsWith('/api/user/login') ||
+      url.startsWith('/api/user/register') ||
+      url.startsWith('/api/admin/login')
+
+    const isRefresh =
+      url.startsWith('/api/user/refresh') ||
+      url.startsWith('/api/admin/refresh')
+
+    const isSilentCheck =
+      url.startsWith('/api/user/profile') ||
+      url.startsWith('/api/admin/me/permissions')
+
+    const needsFeedback = !isAuthAction && !isRefresh && !isSilentCheck
+
     if (status === 401) {
-      if (!isAuthApi) {
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')
-        localStorage.removeItem('admin_access_token')
-        localStorage.removeItem('admin_refresh_token')
+      const cfg = error?.config || {}
+      if (!isRefresh && !cfg.__retried) {
+        cfg.__retried = true
+        try {
+          const refreshUrl = url.startsWith('/api/admin') ? '/api/admin/refresh' : '/api/user/refresh'
+          await http.post(refreshUrl)
+          return http.request(cfg)
+        } catch {}
+      }
+      if (!isAuthAction && !isRefresh) {
         try {
           window.dispatchEvent(new Event('auth:logout'))
         } catch {}
+      }
+      if (needsFeedback) {
         notify('登录已过期，请重新登录', { tone: 'error', flash: true })
       }
     } else if (status === 403) {
-      if (!isAuthApi) notify('无权限访问', { tone: 'error', flash: true })
+      if (needsFeedback) notify('无权限访问', { tone: 'error', flash: true })
     } else {
-      if (!isAuthApi) notify(String(msg), { tone: 'error' })
+      if (needsFeedback) notify(String(msg), { tone: 'error' })
     }
     return Promise.reject(error)
   }

@@ -1,0 +1,3688 @@
+{
+  "generated_at": "2026-05-04T19:41:26",
+  "file_count": 159,
+  "roots": [
+    "E:\\毕设1\\基于Flask的助听器购物商城设计与实现\\backend\\app",
+    "E:\\毕设1\\基于Flask的助听器购物商城设计与实现\\backend\\tools",
+    "E:\\毕设1\\基于Flask的助听器购物商城设计与实现\\frontend\\src",
+    "E:\\毕设1\\基于Flask的助听器购物商城设计与实现\\tools"
+  ],
+  "metrics": {
+    "backend/app/__init__.py": {
+      "basic": {
+        "lines": 219,
+        "blank_lines": 33,
+        "comment_lines": 5
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "create_app",
+            "line": 32,
+            "length": 84,
+            "complexity": 22
+          },
+          {
+            "name": "register_blueprints",
+            "line": 117,
+            "length": 25,
+            "complexity": 1
+          },
+          {
+            "name": "register_error_handlers",
+            "line": 143,
+            "length": 46,
+            "complexity": 11
+          },
+          {
+            "name": "register_jwt_handlers",
+            "line": 190,
+            "length": 30,
+            "complexity": 5
+          },
+          {
+            "name": "handle_http_exception",
+            "line": 145,
+            "length": 4,
+            "complexity": 3
+          },
+          {
+            "name": "handle_invalid_id",
+            "line": 151,
+            "length": 4,
+            "complexity": 2
+          },
+          {
+            "name": "handle_pymongo_error",
+            "line": 157,
+            "length": 5,
+            "complexity": 2
+          },
+          {
+            "name": "handle_app_error",
+            "line": 164,
+            "length": 10,
+            "complexity": 5
+          },
+          {
+            "name": "handle_redis_error",
+            "line": 176,
+            "length": 5,
+            "complexity": 2
+          },
+          {
+            "name": "handle_unexpected_error",
+            "line": 183,
+            "length": 6,
+            "complexity": 2
+          },
+          {
+            "name": "token_in_blocklist",
+            "line": 192,
+            "length": 8,
+            "complexity": 5
+          },
+          {
+            "name": "handle_missing_token",
+            "line": 202,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "handle_invalid_token",
+            "line": 206,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "handle_expired_token",
+            "line": 210,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "handle_needs_fresh_token",
+            "line": 214,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "handle_revoked_token",
+            "line": 218,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "frontend_index",
+            "line": 103,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "frontend_spa",
+            "line": 107,
+            "length": 7,
+            "complexity": 4
+          }
+        ],
+        "imports": {
+          "total": 28,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/admin_v2/__init__.py": {
+      "basic": {
+        "lines": 1,
+        "blank_lines": 1,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [],
+        "imports": {
+          "total": 0,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/admin_v2/activity_controllers.py": {
+      "basic": {
+        "lines": 86,
+        "blank_lines": 13,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "register_admin_activity_routes",
+            "line": 12,
+            "length": 74,
+            "complexity": 2
+          },
+          {
+            "name": "list_activities",
+            "line": 16,
+            "length": 4,
+            "complexity": 1
+          },
+          {
+            "name": "create_activity",
+            "line": 24,
+            "length": 4,
+            "complexity": 1
+          },
+          {
+            "name": "get_activity",
+            "line": 32,
+            "length": 3,
+            "complexity": 1
+          },
+          {
+            "name": "save_draft",
+            "line": 39,
+            "length": 5,
+            "complexity": 2
+          },
+          {
+            "name": "save_activity",
+            "line": 48,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "publish_activity",
+            "line": 57,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "offline_activity",
+            "line": 66,
+            "length": 4,
+            "complexity": 1
+          },
+          {
+            "name": "versions",
+            "line": 74,
+            "length": 3,
+            "complexity": 1
+          },
+          {
+            "name": "rollback",
+            "line": 81,
+            "length": 5,
+            "complexity": 1
+          }
+        ],
+        "imports": {
+          "total": 14,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/admin_v2/blueprint.py": {
+      "basic": {
+        "lines": 13,
+        "blank_lines": 5,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [],
+        "imports": {
+          "total": 2,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/admin_v2/controllers.py": {
+      "basic": {
+        "lines": 772,
+        "blank_lines": 92,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "_load_json",
+            "line": 71,
+            "length": 18,
+            "complexity": 4
+          },
+          {
+            "name": "_load_query",
+            "line": 91,
+            "length": 17,
+            "complexity": 3
+          },
+          {
+            "name": "_extract_status_code",
+            "line": 110,
+            "length": 16,
+            "complexity": 7
+          },
+          {
+            "name": "audit",
+            "line": 128,
+            "length": 51,
+            "complexity": 7
+          },
+          {
+            "name": "admin_required",
+            "line": 181,
+            "length": 26,
+            "complexity": 1
+          },
+          {
+            "name": "require_permission",
+            "line": 209,
+            "length": 24,
+            "complexity": 1
+          },
+          {
+            "name": "register_admin_routes",
+            "line": 235,
+            "length": 538,
+            "complexity": 62
+          },
+          {
+            "name": "decorator",
+            "line": 142,
+            "length": 35,
+            "complexity": 7
+          },
+          {
+            "name": "wrapper",
+            "line": 200,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "decorator",
+            "line": 222,
+            "length": 9,
+            "complexity": 1
+          },
+          {
+            "name": "bootstrap_admin",
+            "line": 255,
+            "length": 25,
+            "complexity": 5
+          },
+          {
+            "name": "admin_login",
+            "line": 283,
+            "length": 43,
+            "complexity": 4
+          },
+          {
+            "name": "admin_refresh",
+            "line": 329,
+            "length": 7,
+            "complexity": 1
+          },
+          {
+            "name": "stats",
+            "line": 340,
+            "length": 3,
+            "complexity": 1
+          },
+          {
+            "name": "sales_series",
+            "line": 347,
+            "length": 11,
+            "complexity": 1
+          },
+          {
+            "name": "sales_detail",
+            "line": 362,
+            "length": 10,
+            "complexity": 1
+          },
+          {
+            "name": "maintenance_list_appointments",
+            "line": 376,
+            "length": 11,
+            "complexity": 1
+          },
+          {
+            "name": "maintenance_get_detail",
+            "line": 391,
+            "length": 3,
+            "complexity": 1
+          },
+          {
+            "name": "maintenance_confirm",
+            "line": 398,
+            "length": 4,
+            "complexity": 1
+          },
+          {
+            "name": "maintenance_reject",
+            "line": 406,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "maintenance_reschedule",
+            "line": 415,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "maintenance_complete",
+            "line": 424,
+            "length": 13,
+            "complexity": 6
+          },
+          {
+            "name": "maintenance_batch",
+            "line": 441,
+            "length": 24,
+            "complexity": 10
+          },
+          {
+            "name": "maintenance_record_pdf",
+            "line": 469,
+            "length": 10,
+            "complexity": 2
+          },
+          {
+            "name": "reco_metrics",
+            "line": 483,
+            "length": 8,
+            "complexity": 3
+          },
+          {
+            "name": "list_users",
+            "line": 495,
+            "length": 20,
+            "complexity": 1
+          },
+          {
+            "name": "set_user_role",
+            "line": 519,
+            "length": 15,
+            "complexity": 4
+          },
+          {
+            "name": "my_permissions",
+            "line": 538,
+            "length": 4,
+            "complexity": 1
+          },
+          {
+            "name": "create_product",
+            "line": 546,
+            "length": 14,
+            "complexity": 3
+          },
+          {
+            "name": "batch_create_products",
+            "line": 564,
+            "length": 16,
+            "complexity": 5
+          },
+          {
+            "name": "update_product",
+            "line": 584,
+            "length": 11,
+            "complexity": 5
+          },
+          {
+            "name": "delete_product",
+            "line": 599,
+            "length": 6,
+            "complexity": 3
+          },
+          {
+            "name": "list_orders",
+            "line": 609,
+            "length": 20,
+            "complexity": 1
+          },
+          {
+            "name": "update_order_status",
+            "line": 633,
+            "length": 22,
+            "complexity": 4
+          },
+          {
+            "name": "process_after_sale",
+            "line": 659,
+            "length": 6,
+            "complexity": 3
+          },
+          {
+            "name": "list_permissions",
+            "line": 669,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "list_roles",
+            "line": 675,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "create_role",
+            "line": 681,
+            "length": 4,
+            "complexity": 1
+          },
+          {
+            "name": "update_role",
+            "line": 689,
+            "length": 11,
+            "complexity": 3
+          },
+          {
+            "name": "delete_role",
+            "line": 704,
+            "length": 5,
+            "complexity": 3
+          },
+          {
+            "name": "set_user_rbac_roles",
+            "line": 713,
+            "length": 4,
+            "complexity": 1
+          },
+          {
+            "name": "list_audit_logs",
+            "line": 721,
+            "length": 21,
+            "complexity": 1
+          },
+          {
+            "name": "admin_logout",
+            "line": 746,
+            "length": 27,
+            "complexity": 12
+          },
+          {
+            "name": "wrapper",
+            "line": 144,
+            "length": 31,
+            "complexity": 7
+          },
+          {
+            "name": "wrapper",
+            "line": 225,
+            "length": 4,
+            "complexity": 1
+          }
+        ],
+        "imports": {
+          "total": 63,
+          "unused": 2
+        }
+      }
+    },
+    "backend/app/admin_v2/daos/audit_dao.py": {
+      "basic": {
+        "lines": 104,
+        "blank_lines": 14,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "ensure_indexes",
+            "line": 23,
+            "length": 22,
+            "complexity": 9
+          },
+          {
+            "name": "insert",
+            "line": 47,
+            "length": 21,
+            "complexity": 9
+          },
+          {
+            "name": "list_logs",
+            "line": 70,
+            "length": 35,
+            "complexity": 7
+          }
+        ],
+        "imports": {
+          "total": 4,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/admin_v2/daos/order_dao.py": {
+      "basic": {
+        "lines": 75,
+        "blank_lines": 12,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "ensure_indexes",
+            "line": 20,
+            "length": 18,
+            "complexity": 7
+          },
+          {
+            "name": "list_orders",
+            "line": 40,
+            "length": 36,
+            "complexity": 4
+          }
+        ],
+        "imports": {
+          "total": 3,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/admin_v2/daos/product_dao.py": {
+      "basic": {
+        "lines": 65,
+        "blank_lines": 11,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "ensure_indexes",
+            "line": 21,
+            "length": 18,
+            "complexity": 7
+          },
+          {
+            "name": "create",
+            "line": 41,
+            "length": 9,
+            "complexity": 1
+          },
+          {
+            "name": "update_by_id",
+            "line": 52,
+            "length": 7,
+            "complexity": 1
+          },
+          {
+            "name": "delete_by_id",
+            "line": 61,
+            "length": 5,
+            "complexity": 1
+          }
+        ],
+        "imports": {
+          "total": 4,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/admin_v2/daos/rbac_dao.py": {
+      "basic": {
+        "lines": 153,
+        "blank_lines": 22,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "ensure_indexes",
+            "line": 28,
+            "length": 18,
+            "complexity": 7
+          },
+          {
+            "name": "upsert_permissions",
+            "line": 48,
+            "length": 14,
+            "complexity": 2
+          },
+          {
+            "name": "list_permissions",
+            "line": 64,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "get_role_by_name",
+            "line": 71,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "create_role",
+            "line": 78,
+            "length": 15,
+            "complexity": 1
+          },
+          {
+            "name": "list_roles",
+            "line": 95,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "get_role",
+            "line": 102,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "update_role",
+            "line": 109,
+            "length": 6,
+            "complexity": 1
+          },
+          {
+            "name": "delete_role",
+            "line": 117,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "set_user_roles",
+            "line": 124,
+            "length": 11,
+            "complexity": 2
+          },
+          {
+            "name": "get_user_role_ids",
+            "line": 137,
+            "length": 8,
+            "complexity": 3
+          },
+          {
+            "name": "get_roles_by_ids",
+            "line": 147,
+            "length": 7,
+            "complexity": 2
+          }
+        ],
+        "imports": {
+          "total": 4,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/admin_v2/daos/user_dao.py": {
+      "basic": {
+        "lines": 136,
+        "blank_lines": 18,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "ensure_indexes",
+            "line": 21,
+            "length": 18,
+            "complexity": 7
+          },
+          {
+            "name": "get_by_id",
+            "line": 41,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "set_legacy_role",
+            "line": 48,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "ensure_rbac_version",
+            "line": 55,
+            "length": 8,
+            "complexity": 1
+          },
+          {
+            "name": "bump_rbac_version",
+            "line": 65,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "list_users",
+            "line": 72,
+            "length": 48,
+            "complexity": 5
+          },
+          {
+            "name": "create_admin_user",
+            "line": 122,
+            "length": 15,
+            "complexity": 1
+          }
+        ],
+        "imports": {
+          "total": 4,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/admin_v2/schemas.py": {
+      "basic": {
+        "lines": 239,
+        "blank_lines": 56,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [],
+        "imports": {
+          "total": 4,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/admin_v2/services/admin_service.py": {
+      "basic": {
+        "lines": 44,
+        "blank_lines": 9,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "get_stats",
+            "line": 15,
+            "length": 30,
+            "complexity": 4
+          }
+        ],
+        "imports": {
+          "total": 4,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/admin_v2/services/audit_service.py": {
+      "basic": {
+        "lines": 77,
+        "blank_lines": 11,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "_sanitize",
+            "line": 18,
+            "length": 15,
+            "complexity": 6
+          },
+          {
+            "name": "log",
+            "line": 37,
+            "length": 41,
+            "complexity": 4
+          }
+        ],
+        "imports": {
+          "total": 4,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/admin_v2/services/auth_service.py": {
+      "basic": {
+        "lines": 32,
+        "blank_lines": 6,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "get_admin_user",
+            "line": 16,
+            "length": 17,
+            "complexity": 4
+          }
+        ],
+        "imports": {
+          "total": 5,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/admin_v2/services/rbac_service.py": {
+      "basic": {
+        "lines": 222,
+        "blank_lines": 27,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "ensure_defaults",
+            "line": 47,
+            "length": 20,
+            "complexity": 6
+          },
+          {
+            "name": "_cache_key",
+            "line": 69,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "_match_permission",
+            "line": 76,
+            "length": 15,
+            "complexity": 6
+          },
+          {
+            "name": "get_user_permissions",
+            "line": 93,
+            "length": 25,
+            "complexity": 7
+          },
+          {
+            "name": "ensure_admin_user_initialized",
+            "line": 120,
+            "length": 16,
+            "complexity": 4
+          },
+          {
+            "name": "require",
+            "line": 138,
+            "length": 7,
+            "complexity": 2
+          },
+          {
+            "name": "list_roles",
+            "line": 147,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "list_permissions",
+            "line": 154,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "create_role",
+            "line": 161,
+            "length": 9,
+            "complexity": 5
+          },
+          {
+            "name": "update_role",
+            "line": 172,
+            "length": 14,
+            "complexity": 5
+          },
+          {
+            "name": "delete_role",
+            "line": 188,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "set_user_roles",
+            "line": 195,
+            "length": 13,
+            "complexity": 3
+          },
+          {
+            "name": "assign_default_admin_role",
+            "line": 210,
+            "length": 13,
+            "complexity": 3
+          }
+        ],
+        "imports": {
+          "total": 8,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/admin_v2/services/reco_metrics_service.py": {
+      "basic": {
+        "lines": 51,
+        "blank_lines": 9,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "metrics",
+            "line": 8,
+            "length": 44,
+            "complexity": 11
+          }
+        ],
+        "imports": {
+          "total": 3,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/admin_v2/services/sales_service.py": {
+      "basic": {
+        "lines": 235,
+        "blank_lines": 20,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "_parse_date_like",
+            "line": 11,
+            "length": 12,
+            "complexity": 8
+          },
+          {
+            "name": "_bucket_expr",
+            "line": 25,
+            "length": 27,
+            "complexity": 6
+          },
+          {
+            "name": "_bucket_range",
+            "line": 54,
+            "length": 36,
+            "complexity": 8
+          },
+          {
+            "name": "series",
+            "line": 94,
+            "length": 59,
+            "complexity": 11
+          },
+          {
+            "name": "detail",
+            "line": 155,
+            "length": 81,
+            "complexity": 9
+          }
+        ],
+        "imports": {
+          "total": 4,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/config.py": {
+      "basic": {
+        "lines": 59,
+        "blank_lines": 8,
+        "comment_lines": 1
+      },
+      "python": {
+        "functions": [],
+        "imports": {
+          "total": 1,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/extensions.py": {
+      "basic": {
+        "lines": 61,
+        "blank_lines": 9,
+        "comment_lines": 3
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "init_extensions",
+            "line": 28,
+            "length": 34,
+            "complexity": 7
+          }
+        ],
+        "imports": {
+          "total": 4,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/main.py": {
+      "basic": {
+        "lines": 27,
+        "blank_lines": 7,
+        "comment_lines": 2
+      },
+      "python": {
+        "functions": [],
+        "imports": {
+          "total": 3,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/models/activity_model.py": {
+      "basic": {
+        "lines": 139,
+        "blank_lines": 25,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "ensure_indexes",
+            "line": 19,
+            "length": 17,
+            "complexity": 9
+          },
+          {
+            "name": "create",
+            "line": 38,
+            "length": 8,
+            "complexity": 1
+          },
+          {
+            "name": "get",
+            "line": 48,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "update",
+            "line": 52,
+            "length": 4,
+            "complexity": 1
+          },
+          {
+            "name": "ensure_indexes",
+            "line": 62,
+            "length": 9,
+            "complexity": 5
+          },
+          {
+            "name": "next_version_no",
+            "line": 73,
+            "length": 3,
+            "complexity": 3
+          },
+          {
+            "name": "create",
+            "line": 78,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "list",
+            "line": 85,
+            "length": 8,
+            "complexity": 1
+          },
+          {
+            "name": "get",
+            "line": 95,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "ensure_indexes",
+            "line": 107,
+            "length": 13,
+            "complexity": 7
+          },
+          {
+            "name": "count_by_activity",
+            "line": 122,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "count_paid_by_activity",
+            "line": 126,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "count_paid_by_tier",
+            "line": 130,
+            "length": 9,
+            "complexity": 2
+          }
+        ],
+        "imports": {
+          "total": 4,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/models/cart_model.py": {
+      "basic": {
+        "lines": 107,
+        "blank_lines": 13,
+        "comment_lines": 2
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "get_cart",
+            "line": 25,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "add_item",
+            "line": 32,
+            "length": 23,
+            "complexity": 2
+          },
+          {
+            "name": "remove_item",
+            "line": 57,
+            "length": 8,
+            "complexity": 1
+          },
+          {
+            "name": "find_by_user_id",
+            "line": 67,
+            "length": 17,
+            "complexity": 3
+          },
+          {
+            "name": "clear_cart",
+            "line": 86,
+            "length": 8,
+            "complexity": 1
+          },
+          {
+            "name": "update_item",
+            "line": 96,
+            "length": 12,
+            "complexity": 2
+          }
+        ],
+        "imports": {
+          "total": 3,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/models/maintenance_model.py": {
+      "basic": {
+        "lines": 146,
+        "blank_lines": 21,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "ensure_indexes",
+            "line": 21,
+            "length": 25,
+            "complexity": 11
+          },
+          {
+            "name": "find_overlaps",
+            "line": 48,
+            "length": 9,
+            "complexity": 2
+          },
+          {
+            "name": "find_user_overlaps",
+            "line": 59,
+            "length": 10,
+            "complexity": 2
+          },
+          {
+            "name": "create",
+            "line": 71,
+            "length": 7,
+            "complexity": 1
+          },
+          {
+            "name": "get",
+            "line": 80,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "list_by_user",
+            "line": 84,
+            "length": 11,
+            "complexity": 1
+          },
+          {
+            "name": "update",
+            "line": 97,
+            "length": 7,
+            "complexity": 2
+          },
+          {
+            "name": "ensure_indexes",
+            "line": 110,
+            "length": 9,
+            "complexity": 5
+          },
+          {
+            "name": "create",
+            "line": 121,
+            "length": 4,
+            "complexity": 1
+          },
+          {
+            "name": "get",
+            "line": 127,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "get_by_appointment",
+            "line": 131,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "list_by_user",
+            "line": 135,
+            "length": 11,
+            "complexity": 1
+          }
+        ],
+        "imports": {
+          "total": 4,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/models/order_model.py": {
+      "basic": {
+        "lines": 182,
+        "blank_lines": 16,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "create",
+            "line": 24,
+            "length": 42,
+            "complexity": 3
+          },
+          {
+            "name": "find_by_user_id",
+            "line": 68,
+            "length": 7,
+            "complexity": 1
+          },
+          {
+            "name": "find_by_id",
+            "line": 77,
+            "length": 7,
+            "complexity": 1
+          },
+          {
+            "name": "find_all",
+            "line": 86,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "update_status",
+            "line": 90,
+            "length": 11,
+            "complexity": 1
+          },
+          {
+            "name": "set_payment",
+            "line": 103,
+            "length": 12,
+            "complexity": 2
+          },
+          {
+            "name": "mark_paid",
+            "line": 117,
+            "length": 13,
+            "complexity": 2
+          },
+          {
+            "name": "request_cancel",
+            "line": 132,
+            "length": 9,
+            "complexity": 1
+          },
+          {
+            "name": "add_review",
+            "line": 143,
+            "length": 9,
+            "complexity": 1
+          },
+          {
+            "name": "create_after_sale",
+            "line": 154,
+            "length": 16,
+            "complexity": 1
+          },
+          {
+            "name": "process_after_sale",
+            "line": 172,
+            "length": 11,
+            "complexity": 1
+          }
+        ],
+        "imports": {
+          "total": 3,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/models/product_model.py": {
+      "basic": {
+        "lines": 202,
+        "blank_lines": 26,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "create",
+            "line": 25,
+            "length": 24,
+            "complexity": 1
+          },
+          {
+            "name": "find_all",
+            "line": 51,
+            "length": 6,
+            "complexity": 1
+          },
+          {
+            "name": "find_by_id",
+            "line": 59,
+            "length": 7,
+            "complexity": 1
+          },
+          {
+            "name": "find_by_ids",
+            "line": 68,
+            "length": 5,
+            "complexity": 4
+          },
+          {
+            "name": "find_by_category",
+            "line": 75,
+            "length": 7,
+            "complexity": 1
+          },
+          {
+            "name": "query",
+            "line": 84,
+            "length": 35,
+            "complexity": 9
+          },
+          {
+            "name": "find_reco_candidates",
+            "line": 121,
+            "length": 26,
+            "complexity": 7
+          },
+          {
+            "name": "update_stock",
+            "line": 149,
+            "length": 11,
+            "complexity": 1
+          },
+          {
+            "name": "reserve_stock",
+            "line": 162,
+            "length": 10,
+            "complexity": 3
+          },
+          {
+            "name": "release_stock",
+            "line": 174,
+            "length": 10,
+            "complexity": 3
+          },
+          {
+            "name": "update_by_id",
+            "line": 186,
+            "length": 13,
+            "complexity": 5
+          },
+          {
+            "name": "delete_by_id",
+            "line": 201,
+            "length": 2,
+            "complexity": 1
+          }
+        ],
+        "imports": {
+          "total": 4,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/models/user_model.py": {
+      "basic": {
+        "lines": 282,
+        "blank_lines": 36,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "ensure_indexes",
+            "line": 32,
+            "length": 5,
+            "complexity": 3
+          },
+          {
+            "name": "create",
+            "line": 39,
+            "length": 21,
+            "complexity": 1
+          },
+          {
+            "name": "find_by_phone",
+            "line": 62,
+            "length": 7,
+            "complexity": 1
+          },
+          {
+            "name": "find_by_email",
+            "line": 71,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "find_by_id",
+            "line": 75,
+            "length": 7,
+            "complexity": 1
+          },
+          {
+            "name": "find_all",
+            "line": 84,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "set_role",
+            "line": 88,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "verify_password",
+            "line": 95,
+            "length": 8,
+            "complexity": 1
+          },
+          {
+            "name": "update_password",
+            "line": 105,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "list_addresses",
+            "line": 112,
+            "length": 21,
+            "complexity": 4
+          },
+          {
+            "name": "add_address",
+            "line": 135,
+            "length": 29,
+            "complexity": 6
+          },
+          {
+            "name": "update_address",
+            "line": 166,
+            "length": 26,
+            "complexity": 11
+          },
+          {
+            "name": "delete_address",
+            "line": 194,
+            "length": 25,
+            "complexity": 9
+          },
+          {
+            "name": "set_default_address",
+            "line": 221,
+            "length": 21,
+            "complexity": 8
+          },
+          {
+            "name": "get_hearing_profile",
+            "line": 244,
+            "length": 3,
+            "complexity": 2
+          },
+          {
+            "name": "set_hearing_profile",
+            "line": 249,
+            "length": 7,
+            "complexity": 2
+          },
+          {
+            "name": "get_notification_settings",
+            "line": 258,
+            "length": 13,
+            "complexity": 5
+          },
+          {
+            "name": "set_notification_settings",
+            "line": 273,
+            "length": 10,
+            "complexity": 4
+          }
+        ],
+        "imports": {
+          "total": 5,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/routes/activity.py": {
+      "basic": {
+        "lines": 44,
+        "blank_lines": 11,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "list_activities",
+            "line": 16,
+            "length": 13,
+            "complexity": 3
+          },
+          {
+            "name": "get_activity",
+            "line": 32,
+            "length": 3,
+            "complexity": 1
+          },
+          {
+            "name": "register",
+            "line": 39,
+            "length": 5,
+            "complexity": 2
+          }
+        ],
+        "imports": {
+          "total": 8,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/routes/admin.py": {
+      "basic": {
+        "lines": 13,
+        "blank_lines": 3,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [],
+        "imports": {
+          "total": 1,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/routes/cart.py": {
+      "basic": {
+        "lines": 146,
+        "blank_lines": 18,
+        "comment_lines": 4
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "add_to_cart",
+            "line": 28,
+            "length": 40,
+            "complexity": 12
+          },
+          {
+            "name": "get_cart",
+            "line": 71,
+            "length": 29,
+            "complexity": 8
+          },
+          {
+            "name": "remove_from_cart",
+            "line": 103,
+            "length": 8,
+            "complexity": 1
+          },
+          {
+            "name": "update_cart",
+            "line": 114,
+            "length": 33,
+            "complexity": 9
+          }
+        ],
+        "imports": {
+          "total": 8,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/routes/maintenance.py": {
+      "basic": {
+        "lines": 114,
+        "blank_lines": 23,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "eligible_orders",
+            "line": 18,
+            "length": 4,
+            "complexity": 1
+          },
+          {
+            "name": "slots",
+            "line": 26,
+            "length": 5,
+            "complexity": 3
+          },
+          {
+            "name": "create_appointment",
+            "line": 35,
+            "length": 13,
+            "complexity": 5
+          },
+          {
+            "name": "list_appointments",
+            "line": 52,
+            "length": 6,
+            "complexity": 3
+          },
+          {
+            "name": "update_appointment",
+            "line": 62,
+            "length": 11,
+            "complexity": 2
+          },
+          {
+            "name": "cancel_appointment",
+            "line": 77,
+            "length": 5,
+            "complexity": 2
+          },
+          {
+            "name": "list_records",
+            "line": 86,
+            "length": 6,
+            "complexity": 3
+          },
+          {
+            "name": "list_notifications",
+            "line": 96,
+            "length": 6,
+            "complexity": 3
+          },
+          {
+            "name": "record_pdf",
+            "line": 106,
+            "length": 8,
+            "complexity": 1
+          }
+        ],
+        "imports": {
+          "total": 10,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/routes/order.py": {
+      "basic": {
+        "lines": 255,
+        "blank_lines": 33,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "create_order",
+            "line": 43,
+            "length": 74,
+            "complexity": 29
+          },
+          {
+            "name": "order_history",
+            "line": 120,
+            "length": 14,
+            "complexity": 5
+          },
+          {
+            "name": "get_order",
+            "line": 137,
+            "length": 13,
+            "complexity": 3
+          },
+          {
+            "name": "cancel_order",
+            "line": 153,
+            "length": 24,
+            "complexity": 8
+          },
+          {
+            "name": "pay_order",
+            "line": 181,
+            "length": 19,
+            "complexity": 7
+          },
+          {
+            "name": "review_order",
+            "line": 204,
+            "length": 26,
+            "complexity": 12
+          },
+          {
+            "name": "after_sale",
+            "line": 234,
+            "length": 22,
+            "complexity": 9
+          }
+        ],
+        "imports": {
+          "total": 11,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/routes/payment.py": {
+      "basic": {
+        "lines": 58,
+        "blank_lines": 10,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "checkout",
+            "line": 26,
+            "length": 33,
+            "complexity": 10
+          }
+        ],
+        "imports": {
+          "total": 8,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/routes/product.py": {
+      "basic": {
+        "lines": 247,
+        "blank_lines": 36,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "list_products",
+            "line": 33,
+            "length": 49,
+            "complexity": 5
+          },
+          {
+            "name": "get_product",
+            "line": 84,
+            "length": 10,
+            "complexity": 2
+          },
+          {
+            "name": "recommend",
+            "line": 96,
+            "length": 13,
+            "complexity": 2
+          },
+          {
+            "name": "recommendations_v2",
+            "line": 112,
+            "length": 44,
+            "complexity": 15
+          },
+          {
+            "name": "batch_products",
+            "line": 159,
+            "length": 21,
+            "complexity": 5
+          },
+          {
+            "name": "reco_event",
+            "line": 183,
+            "length": 45,
+            "complexity": 19
+          },
+          {
+            "name": "product_stream",
+            "line": 231,
+            "length": 17,
+            "complexity": 4
+          },
+          {
+            "name": "gen",
+            "line": 232,
+            "length": 14,
+            "complexity": 4
+          }
+        ],
+        "imports": {
+          "total": 14,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/routes/search.py": {
+      "basic": {
+        "lines": 37,
+        "blank_lines": 7,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "query",
+            "line": 22,
+            "length": 16,
+            "complexity": 4
+          }
+        ],
+        "imports": {
+          "total": 5,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/routes/user.py": {
+      "basic": {
+        "lines": 317,
+        "blank_lines": 48,
+        "comment_lines": 4
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "register",
+            "line": 29,
+            "length": 23,
+            "complexity": 9
+          },
+          {
+            "name": "login",
+            "line": 54,
+            "length": 32,
+            "complexity": 8
+          },
+          {
+            "name": "refresh",
+            "line": 90,
+            "length": 7,
+            "complexity": 1
+          },
+          {
+            "name": "profile",
+            "line": 100,
+            "length": 17,
+            "complexity": 2
+          },
+          {
+            "name": "logout",
+            "line": 120,
+            "length": 27,
+            "complexity": 12
+          },
+          {
+            "name": "change_password",
+            "line": 151,
+            "length": 25,
+            "complexity": 11
+          },
+          {
+            "name": "list_addresses",
+            "line": 180,
+            "length": 7,
+            "complexity": 3
+          },
+          {
+            "name": "create_address",
+            "line": 191,
+            "length": 12,
+            "complexity": 6
+          },
+          {
+            "name": "update_address",
+            "line": 207,
+            "length": 16,
+            "complexity": 8
+          },
+          {
+            "name": "delete_address",
+            "line": 227,
+            "length": 11,
+            "complexity": 5
+          },
+          {
+            "name": "set_default_address",
+            "line": 242,
+            "length": 11,
+            "complexity": 5
+          },
+          {
+            "name": "get_hearing_profile",
+            "line": 257,
+            "length": 7,
+            "complexity": 2
+          },
+          {
+            "name": "update_hearing_profile",
+            "line": 268,
+            "length": 20,
+            "complexity": 7
+          },
+          {
+            "name": "get_notification_settings",
+            "line": 292,
+            "length": 6,
+            "complexity": 2
+          },
+          {
+            "name": "update_notification_settings",
+            "line": 302,
+            "length": 16,
+            "complexity": 8
+          }
+        ],
+        "imports": {
+          "total": 16,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/services/activity_service.py": {
+      "basic": {
+        "lines": 597,
+        "blank_lines": 79,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "_parse_dt",
+            "line": 17,
+            "length": 9,
+            "complexity": 6
+          },
+          {
+            "name": "_now",
+            "line": 28,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "_field_paths",
+            "line": 32,
+            "length": 13,
+            "complexity": 3
+          },
+          {
+            "name": "_pick",
+            "line": 47,
+            "length": 2,
+            "complexity": 2
+          },
+          {
+            "name": "_activity_time_status",
+            "line": 51,
+            "length": 11,
+            "complexity": 5
+          },
+          {
+            "name": "walk",
+            "line": 35,
+            "length": 7,
+            "complexity": 3
+          },
+          {
+            "name": "ensure_indexes",
+            "line": 72,
+            "length": 12,
+            "complexity": 5
+          },
+          {
+            "name": "validate_activity",
+            "line": 86,
+            "length": 103,
+            "complexity": 58
+          },
+          {
+            "name": "admin_list",
+            "line": 191,
+            "length": 41,
+            "complexity": 15
+          },
+          {
+            "name": "admin_get",
+            "line": 234,
+            "length": 9,
+            "complexity": 2
+          },
+          {
+            "name": "admin_create_draft",
+            "line": 245,
+            "length": 22,
+            "complexity": 1
+          },
+          {
+            "name": "_has_paid_orders",
+            "line": 269,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "_restrict_updates_if_paid",
+            "line": 273,
+            "length": 10,
+            "complexity": 4
+          },
+          {
+            "name": "_build_ticket_tiers",
+            "line": 285,
+            "length": 27,
+            "complexity": 14
+          },
+          {
+            "name": "admin_update",
+            "line": 314,
+            "length": 34,
+            "complexity": 11
+          },
+          {
+            "name": "_create_version",
+            "line": 350,
+            "length": 24,
+            "complexity": 4
+          },
+          {
+            "name": "admin_versions",
+            "line": 376,
+            "length": 5,
+            "complexity": 2
+          },
+          {
+            "name": "admin_publish",
+            "line": 383,
+            "length": 28,
+            "complexity": 6
+          },
+          {
+            "name": "admin_offline",
+            "line": 413,
+            "length": 10,
+            "complexity": 2
+          },
+          {
+            "name": "admin_rollback",
+            "line": 425,
+            "length": 24,
+            "complexity": 8
+          },
+          {
+            "name": "_admin_activity_log",
+            "line": 451,
+            "length": 13,
+            "complexity": 4
+          },
+          {
+            "name": "public_list",
+            "line": 466,
+            "length": 53,
+            "complexity": 18
+          },
+          {
+            "name": "public_detail",
+            "line": 521,
+            "length": 14,
+            "complexity": 6
+          },
+          {
+            "name": "register",
+            "line": 537,
+            "length": 60,
+            "complexity": 27
+          }
+        ],
+        "imports": {
+          "total": 20,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/services/hearing_eval.py": {
+      "basic": {
+        "lines": 53,
+        "blank_lines": 8,
+        "comment_lines": 3
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "evaluate",
+            "line": 18,
+            "length": 36,
+            "complexity": 6
+          }
+        ],
+        "imports": {
+          "total": 0,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/services/maintenance_pdf_service.py": {
+      "basic": {
+        "lines": 110,
+        "blank_lines": 18,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "_require_reportlab",
+            "line": 13,
+            "length": 6,
+            "complexity": 3
+          },
+          {
+            "name": "export_record_pdf_for_user",
+            "line": 21,
+            "length": 89,
+            "complexity": 22
+          }
+        ],
+        "imports": {
+          "total": 12,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/services/maintenance_service.py": {
+      "basic": {
+        "lines": 489,
+        "blank_lines": 56,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "_parse_date",
+            "line": 18,
+            "length": 5,
+            "complexity": 3
+          },
+          {
+            "name": "_parse_local_datetime",
+            "line": 25,
+            "length": 5,
+            "complexity": 3
+          },
+          {
+            "name": "_round_up",
+            "line": 32,
+            "length": 6,
+            "complexity": 1
+          },
+          {
+            "name": "ensure_indexes",
+            "line": 55,
+            "length": 7,
+            "complexity": 3
+          },
+          {
+            "name": "_require_purchased",
+            "line": 64,
+            "length": 8,
+            "complexity": 3
+          },
+          {
+            "name": "list_eligible_orders",
+            "line": 74,
+            "length": 30,
+            "complexity": 5
+          },
+          {
+            "name": "_get_busy_intervals",
+            "line": 106,
+            "length": 16,
+            "complexity": 4
+          },
+          {
+            "name": "recommend_slots",
+            "line": 124,
+            "length": 35,
+            "complexity": 11
+          },
+          {
+            "name": "_notify_user",
+            "line": 161,
+            "length": 18,
+            "complexity": 5
+          },
+          {
+            "name": "create_appointment",
+            "line": 181,
+            "length": 80,
+            "complexity": 22
+          },
+          {
+            "name": "cancel_appointment",
+            "line": 263,
+            "length": 16,
+            "complexity": 6
+          },
+          {
+            "name": "update_appointment",
+            "line": 281,
+            "length": 20,
+            "complexity": 8
+          },
+          {
+            "name": "list_user_appointments",
+            "line": 303,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "list_user_records",
+            "line": 307,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "admin_list_appointments",
+            "line": 311,
+            "length": 30,
+            "complexity": 7
+          },
+          {
+            "name": "admin_get_detail",
+            "line": 343,
+            "length": 7,
+            "complexity": 2
+          },
+          {
+            "name": "_admin_transition",
+            "line": 352,
+            "length": 10,
+            "complexity": 2
+          },
+          {
+            "name": "admin_confirm",
+            "line": 364,
+            "length": 9,
+            "complexity": 1
+          },
+          {
+            "name": "admin_reject",
+            "line": 375,
+            "length": 11,
+            "complexity": 2
+          },
+          {
+            "name": "admin_reschedule",
+            "line": 388,
+            "length": 45,
+            "complexity": 13
+          },
+          {
+            "name": "admin_complete",
+            "line": 435,
+            "length": 41,
+            "complexity": 9
+          },
+          {
+            "name": "list_notifications",
+            "line": 478,
+            "length": 11,
+            "complexity": 1
+          }
+        ],
+        "imports": {
+          "total": 21,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/services/payment_service.py": {
+      "basic": {
+        "lines": 47,
+        "blank_lines": 9,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "process_payment",
+            "line": 25,
+            "length": 23,
+            "complexity": 5
+          }
+        ],
+        "imports": {
+          "total": 4,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/services/product_stream_service.py": {
+      "basic": {
+        "lines": 63,
+        "blank_lines": 13,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "get_version",
+            "line": 33,
+            "length": 11,
+            "complexity": 3
+          },
+          {
+            "name": "bump_version",
+            "line": 46,
+            "length": 17,
+            "complexity": 3
+          }
+        ],
+        "imports": {
+          "total": 3,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/services/reco_event_service.py": {
+      "basic": {
+        "lines": 56,
+        "blank_lines": 12,
+        "comment_lines": 2
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "log_event",
+            "line": 24,
+            "length": 32,
+            "complexity": 8
+          }
+        ],
+        "imports": {
+          "total": 3,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/services/recommender.py": {
+      "basic": {
+        "lines": 280,
+        "blank_lines": 30,
+        "comment_lines": 3
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "get_recommendations",
+            "line": 25,
+            "length": 11,
+            "complexity": 1
+          },
+          {
+            "name": "recommend_by_hearing_loss",
+            "line": 38,
+            "length": 8,
+            "complexity": 2
+          },
+          {
+            "name": "_normalize_hearing_level",
+            "line": 48,
+            "length": 14,
+            "complexity": 3
+          },
+          {
+            "name": "_parse_list",
+            "line": 64,
+            "length": 10,
+            "complexity": 7
+          },
+          {
+            "name": "_stable_variant",
+            "line": 76,
+            "length": 6,
+            "complexity": 4
+          },
+          {
+            "name": "_score_product",
+            "line": 84,
+            "length": 124,
+            "complexity": 48
+          },
+          {
+            "name": "recommend_v2",
+            "line": 210,
+            "length": 71,
+            "complexity": 17
+          }
+        ],
+        "imports": {
+          "total": 4,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/utils/cache.py": {
+      "basic": {
+        "lines": 71,
+        "blank_lines": 13,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "_redis",
+            "line": 23,
+            "length": 5,
+            "complexity": 1
+          },
+          {
+            "name": "make_cache_key",
+            "line": 30,
+            "length": 9,
+            "complexity": 2
+          },
+          {
+            "name": "get_json",
+            "line": 41,
+            "length": 16,
+            "complexity": 6
+          },
+          {
+            "name": "set_json",
+            "line": 59,
+            "length": 13,
+            "complexity": 4
+          }
+        ],
+        "imports": {
+          "total": 5,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/utils/distributed_lock.py": {
+      "basic": {
+        "lines": 40,
+        "blank_lines": 8,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "backoff_sleep",
+            "line": 37,
+            "length": 3,
+            "complexity": 1
+          },
+          {
+            "name": "__init__",
+            "line": 8,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "acquire",
+            "line": 11,
+            "length": 9,
+            "complexity": 4
+          },
+          {
+            "name": "release",
+            "line": 21,
+            "length": 14,
+            "complexity": 4
+          }
+        ],
+        "imports": {
+          "total": 3,
+          "unused": 1
+        }
+      }
+    },
+    "backend/app/utils/errors.py": {
+      "basic": {
+        "lines": 61,
+        "blank_lines": 13,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "__init__",
+            "line": 16,
+            "length": 6,
+            "complexity": 1
+          },
+          {
+            "name": "__init__",
+            "line": 28,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "__init__",
+            "line": 36,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "__init__",
+            "line": 44,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "__init__",
+            "line": 52,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "__init__",
+            "line": 60,
+            "length": 2,
+            "complexity": 1
+          }
+        ],
+        "imports": {
+          "total": 0,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/utils/jwt_util.py": {
+      "basic": {
+        "lines": 55,
+        "blank_lines": 10,
+        "comment_lines": 2
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "create_tokens",
+            "line": 22,
+            "length": 21,
+            "complexity": 1
+          },
+          {
+            "name": "get_current_user_id",
+            "line": 45,
+            "length": 11,
+            "complexity": 1
+          }
+        ],
+        "imports": {
+          "total": 4,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/utils/log_util.py": {
+      "basic": {
+        "lines": 48,
+        "blank_lines": 11,
+        "comment_lines": 3
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "setup_logger",
+            "line": 19,
+            "length": 30,
+            "complexity": 2
+          }
+        ],
+        "imports": {
+          "total": 3,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/utils/response.py": {
+      "basic": {
+        "lines": 109,
+        "blank_lines": 18,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "success",
+            "line": 21,
+            "length": 18,
+            "complexity": 1
+          },
+          {
+            "name": "error",
+            "line": 41,
+            "length": 18,
+            "complexity": 1
+          },
+          {
+            "name": "unauthorized",
+            "line": 61,
+            "length": 15,
+            "complexity": 1
+          },
+          {
+            "name": "forbidden",
+            "line": 78,
+            "length": 15,
+            "complexity": 1
+          },
+          {
+            "name": "not_found",
+            "line": 95,
+            "length": 15,
+            "complexity": 1
+          }
+        ],
+        "imports": {
+          "total": 1,
+          "unused": 0
+        }
+      }
+    },
+    "backend/app/utils/serialize.py": {
+      "basic": {
+        "lines": 44,
+        "blank_lines": 7,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "to_safe_json",
+            "line": 20,
+            "length": 25,
+            "complexity": 11
+          }
+        ],
+        "imports": {
+          "total": 3,
+          "unused": 1
+        }
+      }
+    },
+    "backend/tools/seed_api_test_data.py": {
+      "basic": {
+        "lines": 40,
+        "blank_lines": 10,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "main",
+            "line": 16,
+            "length": 20,
+            "complexity": 4
+          }
+        ],
+        "imports": {
+          "total": 7,
+          "unused": 1
+        }
+      }
+    },
+    "frontend/src/api/http.ts": {
+      "basic": {
+        "lines": 109,
+        "blank_lines": 8,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/App.vue": {
+      "basic": {
+        "lines": 195,
+        "blank_lines": 13,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/a11y/A11yBanner.vue": {
+      "basic": {
+        "lines": 157,
+        "blank_lines": 18,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/a11y/A11yLiveRegion.vue": {
+      "basic": {
+        "lines": 18,
+        "blank_lines": 2,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/a11y/A11yToolbar.vue": {
+      "basic": {
+        "lines": 323,
+        "blank_lines": 22,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/a11y/SpeechCaptionOverlay.vue": {
+      "basic": {
+        "lines": 42,
+        "blank_lines": 4,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/admin/SalesBarChart.vue": {
+      "basic": {
+        "lines": 355,
+        "blank_lines": 34,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/auth/AdminLogin.vue": {
+      "basic": {
+        "lines": 166,
+        "blank_lines": 15,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/auth/UserLogin.vue": {
+      "basic": {
+        "lines": 123,
+        "blank_lines": 11,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/auth/UserRegister.vue": {
+      "basic": {
+        "lines": 153,
+        "blank_lines": 11,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/cover/ParticleCanvas.vue": {
+      "basic": {
+        "lines": 76,
+        "blank_lines": 13,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/Header.vue": {
+      "basic": {
+        "lines": 211,
+        "blank_lines": 17,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/home/HomeGuideCard.vue": {
+      "basic": {
+        "lines": 31,
+        "blank_lines": 2,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/home/HomeHeroCarousel.vue": {
+      "basic": {
+        "lines": 138,
+        "blank_lines": 15,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/home/HomeLiveStats.vue": {
+      "basic": {
+        "lines": 97,
+        "blank_lines": 12,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/home/HomeSidebar.vue": {
+      "basic": {
+        "lines": 228,
+        "blank_lines": 14,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/home/HomeTrustTiles.vue": {
+      "basic": {
+        "lines": 76,
+        "blank_lines": 3,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/icons/FlameGradientIcon.vue": {
+      "basic": {
+        "lines": 57,
+        "blank_lines": 12,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/PageTransitionOverlay.vue": {
+      "basic": {
+        "lines": 86,
+        "blank_lines": 11,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/Pagination.vue": {
+      "basic": {
+        "lines": 48,
+        "blank_lines": 5,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/ProductCard.vue": {
+      "basic": {
+        "lines": 135,
+        "blank_lines": 11,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/reco/HearingProfileForm.vue": {
+      "basic": {
+        "lines": 195,
+        "blank_lines": 17,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/SearchBar.vue": {
+      "basic": {
+        "lines": 31,
+        "blank_lines": 3,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/components/ToastHost.vue": {
+      "basic": {
+        "lines": 40,
+        "blank_lines": 3,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/directives/feedback.ts": {
+      "basic": {
+        "lines": 46,
+        "blank_lines": 3,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/hooks/useLoginMode.ts": {
+      "basic": {
+        "lines": 24,
+        "blank_lines": 4,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/hooks/useSpeechRecognition.ts": {
+      "basic": {
+        "lines": 91,
+        "blank_lines": 9,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/i18n/index.ts": {
+      "basic": {
+        "lines": 10,
+        "blank_lines": 1,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/i18n/messages.ts": {
+      "basic": {
+        "lines": 206,
+        "blank_lines": 0,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/main.ts": {
+      "basic": {
+        "lines": 21,
+        "blank_lines": 4,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/router/index.ts": {
+      "basic": {
+        "lines": 206,
+        "blank_lines": 8,
+        "comment_lines": 1
+      },
+      "python": null
+    },
+    "frontend/src/stores/a11y.ts": {
+      "basic": {
+        "lines": 173,
+        "blank_lines": 21,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/stores/adminAuth.ts": {
+      "basic": {
+        "lines": 118,
+        "blank_lines": 9,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/stores/announcer.ts": {
+      "basic": {
+        "lines": 40,
+        "blank_lines": 6,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/stores/cart.ts": {
+      "basic": {
+        "lines": 153,
+        "blank_lines": 18,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/stores/cover.ts": {
+      "basic": {
+        "lines": 79,
+        "blank_lines": 13,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/stores/reco.ts": {
+      "basic": {
+        "lines": 207,
+        "blank_lines": 22,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/stores/speech.ts": {
+      "basic": {
+        "lines": 119,
+        "blank_lines": 12,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/stores/toast.ts": {
+      "basic": {
+        "lines": 34,
+        "blank_lines": 7,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/stores/transition.ts": {
+      "basic": {
+        "lines": 27,
+        "blank_lines": 5,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/stores/userAuth.ts": {
+      "basic": {
+        "lines": 38,
+        "blank_lines": 6,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/a11yStore.spec.ts": {
+      "basic": {
+        "lines": 52,
+        "blank_lines": 7,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/adminAuthStore.spec.ts": {
+      "basic": {
+        "lines": 72,
+        "blank_lines": 12,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/announcerStore.spec.ts": {
+      "basic": {
+        "lines": 35,
+        "blank_lines": 4,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/cartStore.spec.ts": {
+      "basic": {
+        "lines": 114,
+        "blank_lines": 22,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/coverEntry.spec.ts": {
+      "basic": {
+        "lines": 29,
+        "blank_lines": 6,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/e2e/a11y-modes.spec.ts": {
+      "basic": {
+        "lines": 50,
+        "blank_lines": 6,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/e2e/admin-access.spec.ts": {
+      "basic": {
+        "lines": 49,
+        "blank_lines": 7,
+        "comment_lines": 6
+      },
+      "python": null
+    },
+    "frontend/src/tests/e2e/admin-authorization.spec.ts": {
+      "basic": {
+        "lines": 25,
+        "blank_lines": 4,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/e2e/admin-return-from-home.spec.ts": {
+      "basic": {
+        "lines": 62,
+        "blank_lines": 7,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/e2e/admin-sales-chart.spec.ts": {
+      "basic": {
+        "lines": 45,
+        "blank_lines": 5,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/e2e/cart-sync.spec.ts": {
+      "basic": {
+        "lines": 93,
+        "blank_lines": 11,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/e2e/layout-density-smoke.spec.ts": {
+      "basic": {
+        "lines": 18,
+        "blank_lines": 4,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/e2e/logout-cart-badge.spec.ts": {
+      "basic": {
+        "lines": 92,
+        "blank_lines": 9,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/e2e/product-detail-add-cart.spec.ts": {
+      "basic": {
+        "lines": 61,
+        "blank_lines": 7,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/e2e/recommendations-flow.spec.ts": {
+      "basic": {
+        "lines": 83,
+        "blank_lines": 8,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/e2e/register-flow.spec.ts": {
+      "basic": {
+        "lines": 72,
+        "blank_lines": 10,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/feedbackDirective.spec.ts": {
+      "basic": {
+        "lines": 28,
+        "blank_lines": 7,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/http.spec.ts": {
+      "basic": {
+        "lines": 65,
+        "blank_lines": 12,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/Login.spec.ts": {
+      "basic": {
+        "lines": 64,
+        "blank_lines": 10,
+        "comment_lines": 5
+      },
+      "python": null
+    },
+    "frontend/src/tests/notify.spec.ts": {
+      "basic": {
+        "lines": 119,
+        "blank_lines": 20,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/particleMath.spec.ts": {
+      "basic": {
+        "lines": 51,
+        "blank_lines": 6,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/perfMonitor.spec.ts": {
+      "basic": {
+        "lines": 46,
+        "blank_lines": 11,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/recoStore.spec.ts": {
+      "basic": {
+        "lines": 127,
+        "blank_lines": 21,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/routerGuard.spec.ts": {
+      "basic": {
+        "lines": 97,
+        "blank_lines": 14,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/SalesBarChart.spec.ts": {
+      "basic": {
+        "lines": 70,
+        "blank_lines": 9,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/speechStore.spec.ts": {
+      "basic": {
+        "lines": 76,
+        "blank_lines": 11,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/useLoginMode.spec.ts": {
+      "basic": {
+        "lines": 42,
+        "blank_lines": 6,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/UserRegister.spec.ts": {
+      "basic": {
+        "lines": 64,
+        "blank_lines": 10,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/tests/useSpeechRecognition.spec.ts": {
+      "basic": {
+        "lines": 61,
+        "blank_lines": 11,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/utils/apiErrorZh.ts": {
+      "basic": {
+        "lines": 46,
+        "blank_lines": 9,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/utils/coverEntry.ts": {
+      "basic": {
+        "lines": 64,
+        "blank_lines": 8,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/utils/email.ts": {
+      "basic": {
+        "lines": 61,
+        "blank_lines": 12,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/utils/notify.ts": {
+      "basic": {
+        "lines": 53,
+        "blank_lines": 6,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/utils/particleEngine.ts": {
+      "basic": {
+        "lines": 474,
+        "blank_lines": 51,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/utils/particleMath.ts": {
+      "basic": {
+        "lines": 67,
+        "blank_lines": 10,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/utils/perfMonitor.ts": {
+      "basic": {
+        "lines": 75,
+        "blank_lines": 10,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/Activities.vue": {
+      "basic": {
+        "lines": 141,
+        "blank_lines": 14,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/ActivityDetail.vue": {
+      "basic": {
+        "lines": 209,
+        "blank_lines": 21,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/admin/AdminActivities.vue": {
+      "basic": {
+        "lines": 180,
+        "blank_lines": 16,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/admin/AdminActivityEdit.vue": {
+      "basic": {
+        "lines": 560,
+        "blank_lines": 42,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/admin/AdminAudit.vue": {
+      "basic": {
+        "lines": 116,
+        "blank_lines": 12,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/admin/AdminDashboard.vue": {
+      "basic": {
+        "lines": 77,
+        "blank_lines": 8,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/admin/AdminForbidden.vue": {
+      "basic": {
+        "lines": 33,
+        "blank_lines": 4,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/admin/AdminLayout.vue": {
+      "basic": {
+        "lines": 144,
+        "blank_lines": 13,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/admin/AdminMaintenance.vue": {
+      "basic": {
+        "lines": 396,
+        "blank_lines": 36,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/admin/AdminOrders.vue": {
+      "basic": {
+        "lines": 320,
+        "blank_lines": 27,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/admin/AdminProducts.vue": {
+      "basic": {
+        "lines": 228,
+        "blank_lines": 18,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/admin/AdminSales.vue": {
+      "basic": {
+        "lines": 13,
+        "blank_lines": 1,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/admin/AdminUsers.vue": {
+      "basic": {
+        "lines": 135,
+        "blank_lines": 13,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/AdminPanel.vue": {
+      "basic": {
+        "lines": 23,
+        "blank_lines": 1,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/Cart.vue": {
+      "basic": {
+        "lines": 258,
+        "blank_lines": 18,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/Checkout.vue": {
+      "basic": {
+        "lines": 268,
+        "blank_lines": 26,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/Cover.vue": {
+      "basic": {
+        "lines": 303,
+        "blank_lines": 39,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/Home.vue": {
+      "basic": {
+        "lines": 525,
+        "blank_lines": 37,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/Login.vue": {
+      "basic": {
+        "lines": 159,
+        "blank_lines": 13,
+        "comment_lines": 1
+      },
+      "python": null
+    },
+    "frontend/src/views/ProductDetail.vue": {
+      "basic": {
+        "lines": 280,
+        "blank_lines": 23,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/Recommendations.vue": {
+      "basic": {
+        "lines": 359,
+        "blank_lines": 26,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/Register.vue": {
+      "basic": {
+        "lines": 82,
+        "blank_lines": 5,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/views/UserCenter.vue": {
+      "basic": {
+        "lines": 1389,
+        "blank_lines": 106,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "frontend/src/vite-env.d.ts": {
+      "basic": {
+        "lines": 6,
+        "blank_lines": 1,
+        "comment_lines": 1
+      },
+      "python": null
+    },
+    "tools/api-integration-runner.mjs": {
+      "basic": {
+        "lines": 481,
+        "blank_lines": 42,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "tools/bench/cart_flow_bench.mjs": {
+      "basic": {
+        "lines": 157,
+        "blank_lines": 18,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "tools/bench/compare_bench.mjs": {
+      "basic": {
+        "lines": 68,
+        "blank_lines": 11,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "tools/bench/run_api_bench.mjs": {
+      "basic": {
+        "lines": 171,
+        "blank_lines": 19,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "tools/code-review/run_code_review.py": {
+      "basic": {
+        "lines": 394,
+        "blank_lines": 51,
+        "comment_lines": 0
+      },
+      "python": {
+        "functions": [
+          {
+            "name": "_is_excluded",
+            "line": 56,
+            "length": 5,
+            "complexity": 3
+          },
+          {
+            "name": "iter_source_files",
+            "line": 63,
+            "length": 15,
+            "complexity": 7
+          },
+          {
+            "name": "read_text",
+            "line": 80,
+            "length": 8,
+            "complexity": 5
+          },
+          {
+            "name": "rel",
+            "line": 90,
+            "length": 5,
+            "complexity": 3
+          },
+          {
+            "name": "compute_basic_metrics",
+            "line": 97,
+            "length": 9,
+            "complexity": 5
+          },
+          {
+            "name": "complexity_score",
+            "line": 108,
+            "length": 10,
+            "complexity": 5
+          },
+          {
+            "name": "analyze_python",
+            "line": 120,
+            "length": 88,
+            "complexity": 25
+          },
+          {
+            "name": "scan_patterns",
+            "line": 222,
+            "length": 18,
+            "complexity": 4
+          },
+          {
+            "name": "normalize_lines_for_dupe",
+            "line": 242,
+            "length": 12,
+            "complexity": 7
+          },
+          {
+            "name": "find_duplicate_blocks",
+            "line": 256,
+            "length": 37,
+            "complexity": 10
+          },
+          {
+            "name": "severity_rank",
+            "line": 295,
+            "length": 2,
+            "complexity": 1
+          },
+          {
+            "name": "main",
+            "line": 299,
+            "length": 91,
+            "complexity": 12
+          }
+        ],
+        "imports": {
+          "total": 9,
+          "unused": 0
+        }
+      }
+    },
+    "tools/loadtest-maintenance.mjs": {
+      "basic": {
+        "lines": 89,
+        "blank_lines": 11,
+        "comment_lines": 0
+      },
+      "python": null
+    },
+    "tools/repo-audit.mjs": {
+      "basic": {
+        "lines": 981,
+        "blank_lines": 116,
+        "comment_lines": 0
+      },
+      "python": null
+    }
+  }
+}

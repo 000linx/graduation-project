@@ -1,0 +1,114 @@
+========== 商品图片统一处理日志 ==========
+操作时间: 2026-05-09 08:42:48 UTC
+静态资源目录: e:\毕设1\基于Flask的助听器购物商城设计与实现\tools\..\backend\static\products
+
+[INFO] MongoDB 连接成功
+[INFO] 静态目录已就绪: e:\毕设1\基于Flask的助听器购物商城设计与实现\tools\..\backend\static\products
+[INFO] 数据库商品总数: 10
+
+========== 下载与命名 ==========
+  商品: 西门子 Lotus Pro 经济型助听器
+  品牌: 西门子 | 英文标识: siemens
+  旧URL: https://picsum.photos/seed/siemens-lotus/800/800
+  新文件名: siemens_lotus.jpg
+  下载成功: 52.1 KB → e:\毕设1\基于Flask的助听器购物商城设计与实现\tools\..\backend\static\products\siemens_lotus.jpg
+  数据库已更新: image_url → /static/products/siemens_lotus.jpg
+
+  商品: 奥迪康 Oticon Opn S 2 降噪助听器
+  品牌: 奥迪康 | 英文标识: oticon
+  旧URL: https://picsum.photos/seed/oticon-opn/800/800
+  新文件名: oticon_opn.jpg
+  下载成功: 128.6 KB → e:\毕设1\基于Flask的助听器购物商城设计与实现\tools\..\backend\static\products\oticon_opn.jpg
+  数据库已更新: image_url → /static/products/oticon_opn.jpg
+
+  商品: 优利康 Unitron Moxi Blu 蓝牙助听器
+  品牌: 优利康 | 英文标识: unitron
+  旧URL: https://picsum.photos/seed/unitron-moxi/800/800
+  新文件名: unitron_moxi.jpg
+  下载成功: 39.6 KB → e:\毕设1\基于Flask的助听器购物商城设计与实现\tools\..\backend\static\products\unitron_moxi.jpg
+  数据库已更新: image_url → /static/products/unitron_moxi.jpg
+
+  商品: 峰力 Virto Paradise P70 定制式助听器
+  品牌: 峰力 | 英文标识: phonak
+  旧URL: https://picsum.photos/seed/phonak-virto/800/800
+  新文件名: phonak_virto.jpg
+  下载成功: 71.2 KB → e:\毕设1\基于Flask的助听器购物商城设计与实现\tools\..\backend\static\products\phonak_virto.jpg
+  数据库已更新: image_url → /static/products/phonak_virto.jpg
+
+  商品: 西嘉 Signia Styletto X 纤薄助听器
+  品牌: 西嘉 | 英文标识: signia
+  旧URL: https://picsum.photos/seed/signia-styletto/800/800
+  新文件名: signia_styletto.jpg
+  下载成功: 114.5 KB → e:\毕设1\基于Flask的助听器购物商城设计与实现\tools\..\backend\static\products\signia_styletto.jpg
+  数据库已更新: image_url → /static/products/signia_styletto.jpg
+
+  商品: 斯达克 Starkey Evolv AI 2400 智能助听器
+  品牌: 斯达克 | 英文标识: starkey
+  旧URL: https://picsum.photos/seed/starkey-evolv/800/800
+  新文件名: starkey_evolv.jpg
+  下载成功: 65.5 KB → e:\毕设1\基于Flask的助听器购物商城设计与实现\tools\..\backend\static\products\starkey_evolv.jpg
+  数据库已更新: image_url → /static/products/starkey_evolv.jpg
+
+  商品: 瑞声达 ReSound ONE 9 全向助听器
+  品牌: 瑞声达 | 英文标识: resound
+  旧URL: https://picsum.photos/seed/resound-one/800/800
+  新文件名: resound_one.jpg
+  下载成功: 106.3 KB → e:\毕设1\基于Flask的助听器购物商城设计与实现\tools\..\backend\static\products\resound_one.jpg
+  数据库已更新: image_url → /static/products/resound_one.jpg
+
+  商品: 峰力 Audeo Paradise P90 智能助听器
+  品牌: 峰力 | 英文标识: phonak
+  旧URL: https://picsum.photos/seed/phonak-p90/800/800
+  新文件名: phonak_p90.jpg
+  下载成功: 54.1 KB → e:\毕设1\基于Flask的助听器购物商城设计与实现\tools\..\backend\static\products\phonak_p90.jpg
+  数据库已更新: image_url → /static/products/phonak_p90.jpg
+
+  商品: 唯听 Widex Moment 440 极速助听器
+  品牌: 唯听 | 英文标识: widex
+  旧URL: https://picsum.photos/seed/widex-moment/800/800
+  新文件名: widex_moment.jpg
+  下载成功: 89.7 KB → e:\毕设1\基于Flask的助听器购物商城设计与实现\tools\..\backend\static\products\widex_moment.jpg
+  数据库已更新: image_url → /static/products/widex_moment.jpg
+
+  商品: 奥迪康 Oticon More 1 智能助听器
+  品牌: 奥迪康 | 英文标识: oticon
+  旧URL: https://picsum.photos/seed/oticon-more/800/800
+  新文件名: oticon_more.jpg
+  下载成功: 41.3 KB → e:\毕设1\基于Flask的助听器购物商城设计与实现\tools\..\backend\static\products\oticon_more.jpg
+  数据库已更新: image_url → /static/products/oticon_more.jpg
+
+[结果] 成功更新: 10/10
+
+========== 数据库验证 ==========
+  ✓ 本地 | 西门子    | /static/products/siemens_lotus.jpg
+  ✓ 本地 | 奥迪康    | /static/products/oticon_opn.jpg
+  ✓ 本地 | 优利康    | /static/products/unitron_moxi.jpg
+  ✓ 本地 | 峰力     | /static/products/phonak_virto.jpg
+  ✓ 本地 | 西嘉     | /static/products/signia_styletto.jpg
+  ✓ 本地 | 斯达克    | /static/products/starkey_evolv.jpg
+  ✓ 本地 | 瑞声达    | /static/products/resound_one.jpg
+  ✓ 本地 | 峰力     | /static/products/phonak_p90.jpg
+  ✓ 本地 | 唯听     | /static/products/widex_moment.jpg
+  ✓ 本地 | 奥迪康    | /static/products/oticon_more.jpg
+
+========== 文件系统验证 ==========
+  ✓ oticon_more.jpg (42317 bytes)
+  ✓ oticon_opn.jpg (131675 bytes)
+  ✓ phonak_p90.jpg (55374 bytes)
+  ✓ phonak_virto.jpg (72907 bytes)
+  ✓ resound_one.jpg (108838 bytes)
+  ✓ siemens_lotus.jpg (53368 bytes)
+  ✓ signia_styletto.jpg (117244 bytes)
+  ✓ starkey_evolv.jpg (67072 bytes)
+  ✓ unitron_moxi.jpg (40584 bytes)
+  ✓ widex_moment.jpg (91806 bytes)
+[文件] 静态目录文件数: 10
+[文件] 完整性: ✓ 全部存在
+
+========== 操作摘要 ==========
+处理商品数: 10
+成功更新: 10
+静态目录: e:\毕设1\基于Flask的助听器购物商城设计与实现\tools\..\backend\static\products
+文件数量: 10
+访问路径: http://localhost:5000/static/products/<filename>
+==================================

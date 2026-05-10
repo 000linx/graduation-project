@@ -15,6 +15,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
 import { useAdminAuthStore } from '@/stores/adminAuth'
+import { useUserAuthStore } from '@/stores/userAuth'
 import Cover from '@/views/Cover.vue'
 import { markCoverSeen, shouldRedirectHomeToCover } from '@/utils/coverEntry'
 
@@ -44,7 +45,8 @@ const routes = [
   {
     path: '/cart',
     name: 'Cart',
-    component: () => import('../views/Cart.vue')
+    component: () => import('../views/Cart.vue'),
+    meta: { requiresAuth: true }
   },
   {
     path: '/checkout',
@@ -68,6 +70,16 @@ const routes = [
     component: () => import('../views/Recommendations.vue')
   },
   {
+    path: '/activities',
+    name: 'Activities',
+    component: () => import('../views/Activities.vue')
+  },
+  {
+    path: '/activities/:id',
+    name: 'ActivityDetail',
+    component: () => import('../views/ActivityDetail.vue')
+  },
+  {
     path: '/admin/login',
     name: 'AdminLogin',
     component: () => import('../views/Login.vue')
@@ -81,6 +93,12 @@ const routes = [
     path: '/profile',
     name: 'UserCenter',
     component: () => import('../views/UserCenter.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/device/:id',
+    name: 'DeviceDetail',
+    component: () => import('../views/DeviceDetail.vue'),
     meta: { requiresAuth: true }
   },
   {
@@ -122,6 +140,24 @@ const routes = [
         name: 'AdminAudit',
         component: () => import('../views/admin/AdminAudit.vue'),
         meta: { title: '审计日志' }
+      },
+      {
+        path: 'maintenance',
+        name: 'AdminMaintenance',
+        component: () => import('../views/admin/AdminMaintenance.vue'),
+        meta: { title: '保养预约' }
+      },
+      {
+        path: 'activities',
+        name: 'AdminActivities',
+        component: () => import('../views/admin/AdminActivities.vue'),
+        meta: { title: '活动管理' }
+      },
+      {
+        path: 'activities/:id',
+        name: 'AdminActivityEdit',
+        component: () => import('../views/admin/AdminActivityEdit.vue'),
+        meta: { title: '编辑活动' }
       }
     ]
   }
@@ -155,11 +191,9 @@ router.beforeEach(async (to) => {
   // Admin routes (excluding /admin/login) require authentication
   if (isAdmin && !isAdminLogin && !isAdminForbidden) {
     const auth = useAdminAuthStore()
-    auth.syncFromStorage()
-    if (!auth.accessToken) return { path: '/admin/login', query: { redirect: to.fullPath } }
     if (!auth.verified) {
       const ok = await auth.verifyAdmin()
-      if (!ok) return { path: '/admin/forbidden' }
+      if (!ok) return { path: '/admin/login', query: { redirect: to.fullPath } }
     }
     return true
   }
@@ -170,8 +204,9 @@ router.beforeEach(async (to) => {
   }
 
   if (!requiresAuth) return true
-  const token = localStorage.getItem('access_token')
-  if (token) return true
+  const userAuth = useUserAuthStore()
+  const ok = userAuth.verified ? true : await userAuth.verifyUser()
+  if (ok) return true
   return { path: '/login', query: { redirect: to.fullPath } }
 })
 

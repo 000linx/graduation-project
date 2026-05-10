@@ -105,6 +105,13 @@ class ProcessAfterSaleSchema(Schema):
     remark = fields.Str(load_default=None, allow_none=True, validate=validate.Length(max=500))
 
 
+class UpdateOrderShippingSchema(Schema):
+    carrier = fields.Str(required=True, validate=validate.Length(min=1, max=60))
+    tracking_no = fields.Str(required=True, validate=validate.Length(min=1, max=80))
+    status = fields.Str(required=True, validate=validate.OneOf(["created", "in_transit", "delivered"]))
+    events = fields.List(fields.Dict(), load_default=None, allow_none=True)
+
+
 class LogoutSchema(Schema):
     """
     /api/admin/logout 请求体校验。
@@ -170,3 +177,70 @@ class SalesDetailQuerySchema(Schema):
     category = fields.Str(load_default=None, allow_none=True)
     page = fields.Int(load_default=1, validate=validate.Range(min=1, max=100000))
     page_size = fields.Int(load_default=20, validate=validate.Range(min=1, max=200))
+
+
+class ListMaintenanceAppointmentsQuerySchema(Schema):
+    user_id = fields.Str(load_default=None, allow_none=True)
+    status = fields.Str(load_default=None, allow_none=True)
+    start = fields.Str(load_default=None, allow_none=True)
+    end = fields.Str(load_default=None, allow_none=True)
+    page = fields.Int(load_default=1, validate=validate.Range(min=1, max=100000))
+    page_size = fields.Int(load_default=20, validate=validate.Range(min=1, max=200))
+
+
+class RejectMaintenanceAppointmentSchema(Schema):
+    reason = fields.Str(required=True, validate=validate.Length(min=1, max=500))
+
+
+class RescheduleMaintenanceAppointmentSchema(Schema):
+    new_start = fields.Str(required=True, validate=validate.Length(min=5, max=40))
+
+
+class CompleteMaintenanceAppointmentSchema(Schema):
+    technician = fields.Dict(load_default={})
+    items = fields.List(fields.Dict(), load_default=[])
+    replaced_parts = fields.List(fields.Dict(), load_default=[])
+    total_cost = fields.Float(load_default=0, allow_none=True)
+    report = fields.Str(load_default="", allow_none=True)
+
+
+class BatchMaintenanceActionSchema(Schema):
+    action = fields.Str(required=True, validate=validate.OneOf(["confirm", "reject", "cancel"]))
+    ids = fields.List(fields.Str(), required=True, validate=validate.Length(min=1, max=200))
+    reason = fields.Str(load_default=None, allow_none=True, validate=validate.Length(max=500))
+
+
+class ListActivitiesQuerySchema(Schema):
+    q = fields.Str(load_default=None, allow_none=True)
+    status = fields.Str(load_default=None, allow_none=True)
+    start = fields.Str(load_default=None, allow_none=True)
+    end = fields.Str(load_default=None, allow_none=True)
+    sort_by = fields.Str(load_default="created_at")
+    sort_dir = fields.Int(load_default=-1, validate=validate.OneOf([-1, 1]))
+    page = fields.Int(load_default=1, validate=validate.Range(min=1, max=100000))
+    page_size = fields.Int(load_default=20, validate=validate.Range(min=1, max=200))
+
+
+class SaveActivitySchema(Schema):
+    name = fields.Str(required=True, validate=validate.Length(min=1, max=120))
+    subtitle = fields.Str(load_default="", allow_none=True, validate=validate.Length(max=200))
+    description = fields.Str(load_default="", allow_none=True)
+    cover = fields.Str(load_default="", allow_none=True)
+    location = fields.Dict(load_default={})
+    start_at = fields.Str(required=True)
+    end_at = fields.Str(required=True)
+    signup_deadline = fields.Str(load_default=None, allow_none=True)
+    capacity = fields.Int(load_default=None, allow_none=True)
+    tags = fields.List(fields.Str(), load_default=[])
+    fee_type = fields.Str(load_default="free", validate=validate.OneOf(["free", "paid"]))
+    ticket_tiers = fields.List(fields.Dict(), load_default=[])
+    form_fields = fields.List(fields.Dict(), load_default=[])
+
+
+class PublishActivitySchema(Schema):
+    mode = fields.Str(required=True, validate=validate.OneOf(["now", "schedule"]))
+    publish_at = fields.Str(load_default=None, allow_none=True)
+
+
+class RollbackActivitySchema(Schema):
+    version_id = fields.Str(required=True)

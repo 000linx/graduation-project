@@ -28,22 +28,31 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:5000',
         changeOrigin: true
+      },
+      '/static': {
+        target: 'http://localhost:5000',
+        changeOrigin: true
       }
     }
   },
   build: {
     cssCodeSplit: false,
+    target: 'es2020',
+    minify: 'esbuild',
+    reportCompressedSize: false,
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
             if (id.includes('element-plus')) return 'vendor_element'
             if (id.includes('echarts')) return 'vendor_charts'
-            if (id.includes('vue')) return 'vendor_vue'
+            if (id.includes('vue') || id.includes('pinia') || id.includes('vue-router')) return 'vendor_vue'
+            if (id.includes('axios')) return 'vendor_axios'
+            if (id.includes('lucide')) return 'vendor_icons'
             return 'vendor'
           }
         },
       },
     },
-  }
+  },
 })

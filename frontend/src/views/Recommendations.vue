@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
 import { useRecoStore } from '../stores/reco'
 import { useA11yStore } from '../stores/a11y'
+import { useUserAuthStore } from '../stores/userAuth'
 import HearingProfileForm from '../components/reco/HearingProfileForm.vue'
 import { notify } from '../utils/notify'
 import { useI18n } from 'vue-i18n'
@@ -12,6 +13,7 @@ const router = useRouter()
 const cart = useCartStore()
 const reco = useRecoStore()
 const a11y = useA11yStore()
+const userAuth = useUserAuthStore()
 const { t } = useI18n()
 
 const debTimer = ref<number | null>(null)
@@ -155,8 +157,8 @@ function imageOf(p: any) {
 }
 
 async function addFromReco(item: any) {
-  const token = localStorage.getItem('access_token')
-  if (!token) {
+  const ok = userAuth.verified ? true : await userAuth.verifyUser()
+  if (!ok) {
     notify('请先登录后再加入购物车', { tone: 'warning', flash: true })
     router.push({ path: '/login', query: { redirect: '/recommendations' } })
     return
@@ -197,7 +199,7 @@ watch(
       <div>
         <h1 class="text-3xl font-extrabold text-[var(--c-text)]">{{ t('reco.title') }}</h1>
         <div class="text-base font-bold text-[var(--c-muted)] mt-1">{{ t('reco.subtitle') }}</div>
-        <div v-if="filterChips.length" class="mt-3 flex flex-wrap gap-2" aria-label="筛选摘要">
+        <div v-if="filterChips.length" class="mt-3 flex flex-nowrap gap-2 overflow-x-auto" aria-label="筛选摘要">
           <span
             v-for="c in filterChips"
             :key="c.key"
@@ -334,7 +336,7 @@ watch(
                     </div>
                     <div v-if="Array.isArray(item.reasons) && item.reasons.length" class="pt-1">
                       <div class="text-sm font-extrabold text-[var(--c-text)]">推荐理由</div>
-                      <div class="mt-2 flex flex-wrap gap-2">
+                      <div class="mt-2 flex flex-nowrap gap-2 overflow-x-auto">
                         <span
                           v-for="r in item.reasons"
                           :key="r.factor"

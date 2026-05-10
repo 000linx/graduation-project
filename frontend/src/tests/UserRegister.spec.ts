@@ -26,7 +26,7 @@ function makeRouter() {
 
 describe('UserRegister', () => {
   beforeEach(() => {
-    localStorage.clear()
+    vi.clearAllMocks()
   })
 
   it('registers then auto logs in and redirects', async () => {
@@ -59,7 +59,6 @@ describe('UserRegister', () => {
     await wrapper.find('button').trigger('click')
     await flushPromises()
 
-    expect(localStorage.getItem('access_token')).toBe('at')
-    expect(localStorage.getItem('refresh_token')).toBe('rt')
+    expect(router.currentRoute.value.path).toBe('/profile')
   })
 })
