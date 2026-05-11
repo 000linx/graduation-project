@@ -31,8 +31,25 @@ test-results/
 test-reports/
 **/test-reports/
 
+.venv2/
+**/.venv2/
+
 .trash/
 audit/
+
+# Lighthouse / performance test artifacts
+lighthouse-report.json
+lh-scores.json
+
+# Test artifacts & evidence
+test_artifacts/
+**/TestEvidence/
+
+# Tool logs
+tools/*.txt
+
+# One-time backup data
+tools/backups/
 
 .DS_Store
 Thumbs.db
