@@ -51,5 +51,12 @@ tools/*.txt
 # One-time backup data
 tools/backups/
 
+# Redis dump
+dump.rdb
+*.rdb
+
+# Test backup archives
+tests_backup_*/
+
 .DS_Store
 Thumbs.db
