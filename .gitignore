@@ -7,9 +7,17 @@ build/
 **/build/
 coverage/
 **/coverage/
+*.coverage
+coverage.xml
+coverage_term.txt
+
+.npm-cache/
+**/.npm-cache/
 
 .venv/
+.venv*/
 **/.venv/
+**/.venv*/
 venv/
 **/venv/
 
@@ -31,32 +39,15 @@ test-results/
 test-reports/
 **/test-reports/
 
-.venv2/
-**/.venv2/
+tests_backup_*/
 
-.trash/
-audit/
+*.rdb
 
-# Lighthouse / performance test artifacts
 lighthouse-report.json
 lh-scores.json
 
-# Test artifacts & evidence
-test_artifacts/
-**/TestEvidence/
-
-# Tool logs
-tools/*.txt
-
-# One-time backup data
-tools/backups/
-
-# Redis dump
-dump.rdb
-*.rdb
-
-# Test backup archives
-tests_backup_*/
+.trash/
+audit/
 
 .DS_Store
 Thumbs.db
