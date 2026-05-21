@@ -115,6 +115,12 @@ def create_app(config_name='default'):
         pass
 
     try:
+        from .services.hearing_test_service import HearingTestService
+        HearingTestService.ensure_indexes()
+    except Exception:
+        pass
+
+    try:
         from .services.deletion_scheduler import init_deletion_scheduler
         init_deletion_scheduler(app)
     except Exception:

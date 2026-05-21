@@ -153,6 +153,14 @@ function openSocial(name: string) {
         >
           个人中心
         </router-link>
+        <router-link
+          to="/hearing-test"
+          v-feedback
+          class="a11y-hit justify-center rounded-xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] text-[var(--c-text)] font-extrabold no-underline"
+          aria-label="打开在线听力检测"
+        >
+          听力检测
+        </router-link>
         <a
           href="#support"
           v-feedback

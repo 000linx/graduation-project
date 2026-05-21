@@ -49,5 +49,13 @@ lh-scores.json
 .trash/
 audit/
 
+backend/tests/
+backend/TestEvidence/
+backend/docs/
+backend/scripts/
+docs/
+frontend/e2e/
+AUDIT_CLEANUP_MANUAL.md
+
 .DS_Store
 Thumbs.db

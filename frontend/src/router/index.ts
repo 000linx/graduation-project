@@ -96,6 +96,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/hearing-test',
+    name: 'HearingTest',
+    component: () => import('../views/HearingTest.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/device/:id',
     name: 'DeviceDetail',
     component: () => import('../views/DeviceDetail.vue'),

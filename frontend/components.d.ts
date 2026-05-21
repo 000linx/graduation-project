@@ -62,6 +62,7 @@ declare module 'vue' {
     ElUpload: typeof import('element-plus/es')['ElUpload']
     FlameGradientIcon: typeof import('./src/components/icons/FlameGradientIcon.vue')['default']
     Header: typeof import('./src/components/Header.vue')['default']
+    HearingAudiogramChart: typeof import('./src/components/hearing/HearingAudiogramChart.vue')['default']
     HearingProfileForm: typeof import('./src/components/reco/HearingProfileForm.vue')['default']
     HomeGuideCard: typeof import('./src/components/home/HomeGuideCard.vue')['default']
     HomeHeroCarousel: typeof import('./src/components/home/HomeHeroCarousel.vue')['default']

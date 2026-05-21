@@ -29,6 +29,7 @@ from datetime import datetime, timedelta
 from .. import extensions
 from bson.errors import InvalidId
 from pymongo.errors import DuplicateKeyError
+from ..services.hearing_test_service import HearingTestService
 
 user_bp = Blueprint('user', __name__)
 logger = logging.getLogger(__name__)
@@ -358,6 +359,51 @@ def update_hearing_profile():
         return ApiResponse.error("Failed to update", 500)
 
     return ApiResponse.success({"hearing_profile": payload}, "Updated")
+
+
+@user_bp.route('/hearing_tests', methods=['POST'])
+@jwt_required()
+def create_hearing_test():
+    user_id = JwtUtil.get_current_user_id()
+    data = request.get_json(silent=True) or {}
+    thresholds = data.get("thresholds") if isinstance(data, dict) else None
+    meta = data.get("meta") if isinstance(data, dict) else None
+    if not isinstance(thresholds, dict):
+        return ApiResponse.error("Missing fields")
+    if not isinstance(meta, dict):
+        meta = {}
+
+    left = thresholds.get("left")
+    right = thresholds.get("right")
+    if not isinstance(left, dict) or not isinstance(right, dict):
+        return ApiResponse.error("Invalid fields")
+
+    allowed = {str(x) for x in HearingTestService.STANDARD_FREQS}
+    for ear_obj in [left, right]:
+        for k, v in ear_obj.items():
+            if str(k) not in allowed:
+                return ApiResponse.error("Invalid fields")
+            if not isinstance(v, (int, float)):
+                return ApiResponse.error("Invalid fields")
+            if float(v) < 0 or float(v) > 120:
+                return ApiResponse.error("Invalid fields")
+
+    try:
+        created = HearingTestService.create_test(user_id, thresholds, meta=meta)
+        return ApiResponse.success({"hearing_test": created}, "Created", 201)
+    except Exception:
+        return ApiResponse.error("Failed to create", 500)
+
+
+@user_bp.route('/hearing_tests/latest', methods=['GET'])
+@jwt_required()
+def get_latest_hearing_test():
+    user_id = JwtUtil.get_current_user_id()
+    try:
+        doc = HearingTestService.get_latest(user_id)
+        return ApiResponse.success({"hearing_test": doc})
+    except Exception:
+        return ApiResponse.error("Failed to load", 500)
 
 
 @user_bp.route('/notification_settings', methods=['GET'])
