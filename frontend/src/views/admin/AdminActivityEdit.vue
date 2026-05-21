@@ -251,7 +251,9 @@ async function openVersions() {
 
 async function rollback(versionId: string) {
   try {
-    await ElMessageBox.confirm('确认回滚到该版本？回滚会再次进行校验并生成新版本。', '二次确认', { type: 'warning' })
+    await ElMessageBox.confirm('确认回滚到该版本？回滚会再次进行校验并生成新版本。', '二次确认', {
+      type: 'warning'
+    })
   } catch {
     return
   }
@@ -276,7 +278,14 @@ function cryptoRandomId() {
 }
 
 function addTier() {
-  form.ticket_tiers.push({ tier_id: cryptoRandomId(), name: '', price: 0, stock: 0, early_bird_price: null, early_bird_until: null })
+  form.ticket_tiers.push({
+    tier_id: cryptoRandomId(),
+    name: '',
+    price: 0,
+    stock: 0,
+    early_bird_price: null,
+    early_bird_until: null
+  })
 }
 
 function removeTier(i: number) {
@@ -284,7 +293,14 @@ function removeTier(i: number) {
 }
 
 function addField() {
-  form.form_fields.push({ field_id: cryptoRandomId(), label: '', type: 'text', required: false, options: [], options_text: '' })
+  form.form_fields.push({
+    field_id: cryptoRandomId(),
+    label: '',
+    type: 'text',
+    required: false,
+    options: [],
+    options_text: ''
+  })
 }
 
 function removeField(i: number) {
@@ -297,6 +313,14 @@ function moveField(i: number, dir: -1 | 1) {
   const tmp = form.form_fields[i]
   form.form_fields[i] = form.form_fields[j]
   form.form_fields[j] = tmp
+}
+
+function updateFieldOptionsText(field: FormField, v: any) {
+  field.options_text = String(v || '')
+  field.options = field.options_text
+    .split(',')
+    .map((x) => x.trim())
+    .filter(Boolean)
 }
 
 async function compressCover(file: File) {
@@ -413,22 +437,44 @@ onBeforeUnmount(() => {
           <el-input v-model="form.location.address" placeholder="请输入活动地址" />
         </el-form-item>
         <el-form-item label="开始时间" required>
-          <el-input v-model="form.start_at" :disabled="disableCriticalEdits" placeholder="ISO 例如 2026-05-02T10:30" />
+          <el-input
+            v-model="form.start_at"
+            :disabled="disableCriticalEdits"
+            placeholder="ISO 例如 2026-05-02T10:30"
+          />
           <div v-if="fieldErrors.start_at" class="text-xs text-red-500 mt-1">{{ fieldErrors.start_at }}</div>
         </el-form-item>
         <el-form-item label="结束时间" required>
-          <el-input v-model="form.end_at" :disabled="disableCriticalEdits" placeholder="ISO 例如 2026-05-02T12:00" />
+          <el-input
+            v-model="form.end_at"
+            :disabled="disableCriticalEdits"
+            placeholder="ISO 例如 2026-05-02T12:00"
+          />
           <div v-if="fieldErrors.end_at" class="text-xs text-red-500 mt-1">{{ fieldErrors.end_at }}</div>
         </el-form-item>
         <el-form-item label="报名截止时间">
-          <el-input v-model="form.signup_deadline" :disabled="disableCriticalEdits" placeholder="ISO 例如 2026-05-01T18:00" />
-          <div v-if="fieldErrors.signup_deadline" class="text-xs text-red-500 mt-1">{{ fieldErrors.signup_deadline }}</div>
+          <el-input
+            v-model="form.signup_deadline"
+            :disabled="disableCriticalEdits"
+            placeholder="ISO 例如 2026-05-01T18:00"
+          />
+          <div v-if="fieldErrors.signup_deadline" class="text-xs text-red-500 mt-1">
+            {{ fieldErrors.signup_deadline }}
+          </div>
         </el-form-item>
         <el-form-item label="定时发布时间">
-          <el-input v-model="form.publish_at" :disabled="disableCriticalEdits" placeholder="ISO 例如 2026-05-01T20:00" />
+          <el-input
+            v-model="form.publish_at"
+            :disabled="disableCriticalEdits"
+            placeholder="ISO 例如 2026-05-01T20:00"
+          />
         </el-form-item>
         <el-form-item label="人数上限">
-          <el-input v-model.number="form.capacity" :disabled="disableCriticalEdits" placeholder="留空表示不限" />
+          <el-input
+            v-model.number="form.capacity"
+            :disabled="disableCriticalEdits"
+            placeholder="留空表示不限"
+          />
           <div v-if="fieldErrors.capacity" class="text-xs text-red-500 mt-1">{{ fieldErrors.capacity }}</div>
         </el-form-item>
         <el-form-item label="活动标签（逗号分隔）" class="md:col-span-2">
@@ -486,7 +532,9 @@ onBeforeUnmount(() => {
           </el-table-column>
           <el-table-column label="操作" width="90">
             <template #default="{ $index }">
-              <el-button link type="danger" :disabled="disableCriticalEdits" @click="removeTier($index)">删除</el-button>
+              <el-button link type="danger" :disabled="disableCriticalEdits" @click="removeTier($index)"
+                >删除</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
@@ -505,7 +553,12 @@ onBeforeUnmount(() => {
             <div class="font-semibold">字段 {{ idx + 1 }}</div>
             <div class="flex items-center gap-2">
               <el-button size="small" @click="moveField(idx, -1)" :disabled="idx === 0">上移</el-button>
-              <el-button size="small" @click="moveField(idx, 1)" :disabled="idx === form.form_fields.length - 1">下移</el-button>
+              <el-button
+                size="small"
+                @click="moveField(idx, 1)"
+                :disabled="idx === form.form_fields.length - 1"
+                >下移</el-button
+              >
               <el-button size="small" type="danger" plain @click="removeField(idx)">删除</el-button>
             </div>
           </div>
@@ -521,10 +574,7 @@ onBeforeUnmount(() => {
           </div>
           <div v-if="['single', 'multi'].includes(f.type)" class="mt-3">
             <div class="text-sm text-gray-500 mb-1">选项（逗号分隔）</div>
-            <el-input
-              v-model="f.options_text"
-              @input="(v: any) => { f.options_text = String(v || ''); f.options = f.options_text.split(',').map((x) => x.trim()).filter(Boolean) }"
-            />
+            <el-input v-model="f.options_text" @input="updateFieldOptionsText(f, $event)" />
           </div>
         </div>
       </div>
@@ -557,4 +607,3 @@ onBeforeUnmount(() => {
     </el-dialog>
   </div>
 </template>
-

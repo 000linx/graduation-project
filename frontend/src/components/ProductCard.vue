@@ -81,10 +81,7 @@ async function addToCart() {
     <!-- Content -->
     <div class="p-4 flex flex-col gap-3">
       <router-link :to="`/product/${product.id}`" data-testid="product-card-title-link">
-        <h3
-          class="font-extrabold text-[var(--c-text)] truncate mb-2 underline"
-          :title="product.name"
-        >
+        <h3 class="font-extrabold text-[var(--c-text)] truncate mb-2 underline" :title="product.name">
           {{ product.name }}
         </h3>
       </router-link>

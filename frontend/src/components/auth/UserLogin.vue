@@ -60,7 +60,11 @@ async function submit() {
     await router.replace(redirectTo.value)
   } catch (e: any) {
     const msg = toZhAuthErrorMessage(
-      { status: e?.response?.status, message: e?.response?.data?.message || e?.message, url: '/api/user/login' },
+      {
+        status: e?.response?.status,
+        message: e?.response?.data?.message || e?.message,
+        url: '/api/user/login'
+      },
       '登录失败'
     )
     submitError.value = msg

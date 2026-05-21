@@ -187,7 +187,9 @@ async function addToCart() {
           </div>
         </div>
 
-        <div class="text-sm font-semibold text-[var(--c-muted)] leading-relaxed whitespace-nowrap overflow-x-auto">
+        <div
+          class="text-sm font-semibold text-[var(--c-muted)] leading-relaxed whitespace-nowrap overflow-x-auto"
+        >
           {{ product.description ?? '暂无描述。你可以先去个性化推荐填写画像，我们会给出更合适的匹配建议。' }}
         </div>
 

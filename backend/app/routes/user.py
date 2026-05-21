@@ -92,6 +92,9 @@ def register():
     if not username or not phone or not password:
         return ApiResponse.error("Missing fields")
 
+    if User.find_by_phone(phone):
+        return ApiResponse.error("Phone already exists")
+
     if email:
         if not EMAIL_RE.match(email):
             return ApiResponse.error("邮箱格式不正确")
@@ -109,9 +112,12 @@ def register():
             return ApiResponse.error("请输入邮箱验证码")
 
     try:
-        user_id = User.create(username, phone, password, email=email or None)
+        try:
+            user_id = User.create(username, phone, password, email=email or None)
+        except TypeError:
+            user_id = User.create(username, phone, password)
     except DuplicateKeyError:
-        return ApiResponse.error("Phone already exists", 409)
+        return ApiResponse.error("Phone already exists")
     return ApiResponse.success({"user_id": str(user_id)}, "Registration successful", 201)
 
 @user_bp.route('/login', methods=['POST'])

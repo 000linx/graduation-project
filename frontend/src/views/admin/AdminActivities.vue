@@ -102,6 +102,28 @@ function edit(row: Activity) {
   router.push(`/admin/activities/${row._id}`)
 }
 
+function search() {
+  query.page = 1
+  fetchList()
+}
+
+function toggleSortDir() {
+  query.sort_dir = query.sort_dir === 1 ? -1 : 1
+  fetchList()
+}
+
+function prevPage() {
+  if (query.page <= 1) return
+  query.page -= 1
+  fetchList()
+}
+
+function nextPage() {
+  if (query.page >= pageCount.value) return
+  query.page += 1
+  fetchList()
+}
+
 onMounted(() => fetchList())
 </script>
 
@@ -120,8 +142,8 @@ onMounted(() => fetchList())
 
     <div class="bg-white border rounded-2xl p-4">
       <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
-        <el-input v-model="query.q" placeholder="搜索：名称/状态" clearable @keyup.enter="query.page = 1; fetchList()" />
-        <el-select v-model="query.status" placeholder="状态" clearable @change="query.page = 1; fetchList()">
+        <el-input v-model="query.q" placeholder="搜索：名称/状态" clearable @keyup.enter="search" />
+        <el-select v-model="query.status" placeholder="状态" clearable @change="search">
           <el-option v-for="o in statusOptions" :key="o.value" :label="o.label" :value="o.value" />
         </el-select>
         <el-input v-model="query.start" placeholder="开始时间 ISO（可选）" clearable />
@@ -133,8 +155,8 @@ onMounted(() => fetchList())
         </el-select>
       </div>
       <div class="mt-3 flex items-center gap-2">
-        <el-button type="primary" :loading="loading" @click="query.page = 1; fetchList()">查询</el-button>
-        <el-button @click="query.sort_dir = query.sort_dir === 1 ? -1 : 1; fetchList()">
+        <el-button type="primary" :loading="loading" @click="search">查询</el-button>
+        <el-button @click="toggleSortDir">
           {{ query.sort_dir === 1 ? '升序' : '降序' }}
         </el-button>
         <div class="text-sm text-gray-500">共 {{ total }} 条</div>
@@ -157,11 +179,15 @@ onMounted(() => fetchList())
       </el-table-column>
       <el-table-column label="当前状态" width="120">
         <template #default="{ row }">
-          <el-tag size="small" :type="timeStatusTag(String(row.time_status))">{{ timeStatusLabel(String(row.time_status)) }}</el-tag>
+          <el-tag size="small" :type="timeStatusTag(String(row.time_status))">{{
+            timeStatusLabel(String(row.time_status))
+          }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="报名/名额" width="140">
-        <template #default="{ row }">{{ Number(row.signup_count || 0) }}/{{ row.capacity ?? '不限' }}</template>
+        <template #default="{ row }"
+          >{{ Number(row.signup_count || 0) }}/{{ row.capacity ?? '不限' }}</template
+        >
       </el-table-column>
       <el-table-column label="操作" width="140" fixed="right">
         <template #default="{ row }">
@@ -171,10 +197,9 @@ onMounted(() => fetchList())
     </el-table>
 
     <div class="flex items-center justify-end gap-2">
-      <el-button :disabled="query.page <= 1" @click="query.page -= 1; fetchList()">上一页</el-button>
+      <el-button :disabled="query.page <= 1" @click="prevPage">上一页</el-button>
       <div class="text-sm text-gray-500">{{ query.page }} / {{ pageCount }}</div>
-      <el-button :disabled="query.page >= pageCount" @click="query.page += 1; fetchList()">下一页</el-button>
+      <el-button :disabled="query.page >= pageCount" @click="nextPage">下一页</el-button>
     </div>
   </div>
 </template>
-

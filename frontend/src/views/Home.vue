@@ -249,9 +249,7 @@ watch([activeCategory, currentPage, keyword], () => {
       <HomeLiveStats :productCount="products.length" />
 
       <div class="mt-6">
-        <div
-          class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-3xl p-6 lg:p-8"
-        >
+        <div class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-3xl p-6 lg:p-8">
           <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div class="min-w-0">
               <div
@@ -452,6 +450,7 @@ watch([activeCategory, currentPage, keyword], () => {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;

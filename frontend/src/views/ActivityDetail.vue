@@ -108,7 +108,12 @@ async function submit() {
   for (let i = 0; i < fields.length; i++) {
     const f = fields[i]
     const k = fieldKey(f, i)
-    if (f.required && (form.answers[k] == null || form.answers[k] === '' || (Array.isArray(form.answers[k]) && form.answers[k].length === 0))) {
+    if (
+      f.required &&
+      (form.answers[k] == null ||
+        form.answers[k] === '' ||
+        (Array.isArray(form.answers[k]) && form.answers[k].length === 0))
+    ) {
       ElMessage.warning(`请填写：${f.label}`)
       return
     }
@@ -143,10 +148,18 @@ onMounted(async () => {
   <main class="container mx-auto px-4 py-8 space-y-6" id="main-content">
     <el-button @click="router.back()">返回</el-button>
 
-    <div v-loading="loading" class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-3xl overflow-hidden">
+    <div
+      v-loading="loading"
+      class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-3xl overflow-hidden"
+    >
       <div class="h-60 bg-[var(--c-bg)] overflow-hidden">
         <img v-if="activity?.cover" :src="activity.cover" alt="cover" class="w-full h-full object-cover" />
-        <div v-else class="w-full h-full flex items-center justify-center text-[var(--c-muted)] font-semibold">无封面</div>
+        <div
+          v-else
+          class="w-full h-full flex items-center justify-center text-[var(--c-muted)] font-semibold"
+        >
+          无封面
+        </div>
       </div>
       <div class="p-6 space-y-3">
         <div class="text-2xl font-extrabold text-[var(--c-text)]">{{ activity?.name || '' }}</div>
@@ -156,19 +169,31 @@ onMounted(async () => {
           <div>地址：{{ activity?.location?.address || '-' }}</div>
           <div>报名：{{ Number(activity?.signup_count || 0) }}/{{ activity?.capacity ?? '不限' }}</div>
         </div>
-        <div class="prose max-w-none whitespace-pre-wrap text-[var(--c-text)]">{{ activity?.description || '' }}</div>
+        <div class="prose max-w-none whitespace-pre-wrap text-[var(--c-text)]">
+          {{ activity?.description || '' }}
+        </div>
       </div>
     </div>
 
-    <div v-if="activity" class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-3xl p-6 space-y-4">
+    <div
+      v-if="activity"
+      class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-3xl p-6 space-y-4"
+    >
       <div class="text-lg font-extrabold text-[var(--c-text)]">报名</div>
-      <el-alert v-if="!hasToken" type="warning" show-icon title="未登录" description="登录后可报名参加活动。" />
+      <el-alert
+        v-if="!hasToken"
+        type="warning"
+        show-icon
+        title="未登录"
+        description="登录后可报名参加活动。"
+      />
 
       <div v-if="activity.fee_type === 'paid'">
         <div class="text-sm font-semibold text-[var(--c-muted)] mb-2">票价档位</div>
         <el-radio-group v-model="form.ticket_tier_id">
           <el-radio v-for="t in activity.ticket_tiers || []" :key="t.tier_id" :value="t.tier_id">
-            {{ t.name }} - ¥{{ pickPrice(t).toFixed(2) }}（剩余 {{ Math.max(0, (t.stock || 0) - (t.sold || 0)) }}）
+            {{ t.name }} - ¥{{ pickPrice(t).toFixed(2) }}（剩余
+            {{ Math.max(0, (t.stock || 0) - (t.sold || 0)) }}）
           </el-radio>
         </el-radio-group>
       </div>
@@ -178,11 +203,7 @@ onMounted(async () => {
           <div class="text-sm font-semibold text-[var(--c-muted)] mb-2">
             {{ f.label }}<span v-if="f.required" class="text-[var(--c-danger)]">*</span>
           </div>
-          <el-input
-            v-if="f.type === 'text'"
-            v-model="form.answers[fieldKey(f, idx)]"
-            placeholder="请输入"
-          />
+          <el-input v-if="f.type === 'text'" v-model="form.answers[fieldKey(f, idx)]" placeholder="请输入" />
           <el-radio-group v-else-if="f.type === 'single'" v-model="form.answers[fieldKey(f, idx)]">
             <el-radio v-for="o in f.options || []" :key="o" :value="o">{{ o }}</el-radio>
           </el-radio-group>
@@ -206,4 +227,3 @@ onMounted(async () => {
     </div>
   </main>
 </template>
-

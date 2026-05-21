@@ -54,4 +54,3 @@ onMounted(() => {
 <template>
   <Flame ref="iconRef" class="icon-tone--flame" v-bind="$attrs" />
 </template>
-

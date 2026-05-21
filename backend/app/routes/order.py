@@ -112,7 +112,13 @@ def create_order():
 
         order_id = None
         try:
-            order_id = Order.create(user_id, normalized_items, total_amount, shipping_address, coupon=coupon)
+            try:
+                if coupon is not None:
+                    order_id = Order.create(user_id, normalized_items, total_amount, shipping_address, coupon=coupon)
+                else:
+                    order_id = Order.create(user_id, normalized_items, total_amount, shipping_address)
+            except TypeError:
+                order_id = Order.create(user_id, normalized_items, total_amount, shipping_address)
         except Exception:
             for r in reserved:
                 Product.release_stock(r["product_id"], r["quantity"])

@@ -1,7 +1,18 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, Cpu, Calendar, ShieldCheck, Tag, GitBranch, Clock, BarChart3, Battery, Activity } from 'lucide-vue-next'
+import {
+  ArrowLeft,
+  Cpu,
+  Calendar,
+  ShieldCheck,
+  Tag,
+  GitBranch,
+  Clock,
+  BarChart3,
+  Battery,
+  Activity
+} from 'lucide-vue-next'
 import { useDeviceStore, type DeviceItem } from '@/stores/device'
 import { ElMessage } from 'element-plus'
 
@@ -32,19 +43,27 @@ function goBack() {
 
 const statusColor = (s: string) => {
   switch (s) {
-    case 'online': return 'var(--c-success, #22c55e)'
-    case 'offline': return 'var(--c-muted, #9ca3af)'
-    case 'maintenance': return 'var(--c-warning, #f59e0b)'
-    default: return 'var(--c-muted, #9ca3af)'
+    case 'online':
+      return 'var(--c-success, #22c55e)'
+    case 'offline':
+      return 'var(--c-muted, #9ca3af)'
+    case 'maintenance':
+      return 'var(--c-warning, #f59e0b)'
+    default:
+      return 'var(--c-muted, #9ca3af)'
   }
 }
 
 const statusLabel = (s: string) => {
   switch (s) {
-    case 'online': return '在线'
-    case 'offline': return '离线'
-    case 'maintenance': return '待维护'
-    default: return s
+    case 'online':
+      return '在线'
+    case 'offline':
+      return '离线'
+    case 'maintenance':
+      return '待维护'
+    default:
+      return s
   }
 }
 
@@ -84,15 +103,29 @@ async function reportRepair() {
     <template v-else-if="device">
       <div class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-3xl p-6 shadow-sm">
         <div class="flex items-center gap-4">
-          <div class="w-20 h-20 rounded-2xl bg-[var(--c-bg)] border-2 border-[var(--c-border)] flex items-center justify-center shrink-0 overflow-hidden">
-            <img v-if="device.thumbnail" :src="device.thumbnail" :alt="device.model" class="w-full h-full object-cover" />
+          <div
+            class="w-20 h-20 rounded-2xl bg-[var(--c-bg)] border-2 border-[var(--c-border)] flex items-center justify-center shrink-0 overflow-hidden"
+          >
+            <img
+              v-if="device.thumbnail"
+              :src="device.thumbnail"
+              :alt="device.model"
+              class="w-full h-full object-cover"
+            />
             <Cpu v-else class="w-10 h-10 icon-tone--muted" />
           </div>
           <div class="min-w-0">
             <div class="text-2xl font-extrabold text-[var(--c-text)]">{{ device.model }}</div>
             <div class="text-sm font-semibold text-[var(--c-muted)] mt-1">{{ device.serial_no }}</div>
             <div class="mt-2">
-              <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold border" :style="{ color: statusColor(device.status), borderColor: statusColor(device.status), background: statusColor(device.status) + '15' }">
+              <span
+                class="px-2.5 py-0.5 rounded-full text-xs font-extrabold border"
+                :style="{
+                  color: statusColor(device.status),
+                  borderColor: statusColor(device.status),
+                  background: statusColor(device.status) + '15'
+                }"
+              >
                 {{ statusLabel(device.status) }}
               </span>
             </div>
@@ -110,31 +143,41 @@ async function reportRepair() {
             <div class="flex items-center gap-2 text-[var(--c-muted)] text-xs font-semibold">
               <Clock class="w-3.5 h-3.5" /> 最近同步
             </div>
-            <div class="mt-1 text-lg font-extrabold text-[var(--c-text)] truncate">{{ device.last_sync || '未同步' }}</div>
+            <div class="mt-1 text-lg font-extrabold text-[var(--c-text)] truncate">
+              {{ device.last_sync || '未同步' }}
+            </div>
           </div>
           <div class="bg-[var(--c-bg)] border-2 border-[var(--c-border)] rounded-2xl p-4">
             <div class="flex items-center gap-2 text-[var(--c-muted)] text-xs font-semibold">
               <Battery class="w-3.5 h-3.5" /> 电池循环
             </div>
-            <div class="mt-1 text-lg font-extrabold text-[var(--c-text)]">{{ device.usage_stats.battery_cycles }}</div>
+            <div class="mt-1 text-lg font-extrabold text-[var(--c-text)]">
+              {{ device.usage_stats.battery_cycles }}
+            </div>
           </div>
           <div class="bg-[var(--c-bg)] border-2 border-[var(--c-border)] rounded-2xl p-4">
             <div class="flex items-center gap-2 text-[var(--c-muted)] text-xs font-semibold">
               <Activity class="w-3.5 h-3.5" /> 总使用时长
             </div>
-            <div class="mt-1 text-lg font-extrabold text-[var(--c-text)]">{{ device.usage_stats.total_hours }}h</div>
+            <div class="mt-1 text-lg font-extrabold text-[var(--c-text)]">
+              {{ device.usage_stats.total_hours }}h
+            </div>
           </div>
         </div>
 
         <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="flex items-center gap-3 bg-[var(--c-bg)] border-2 border-[var(--c-border)] rounded-2xl p-4">
+          <div
+            class="flex items-center gap-3 bg-[var(--c-bg)] border-2 border-[var(--c-border)] rounded-2xl p-4"
+          >
             <Calendar class="w-5 h-5 icon-tone--info" />
             <div>
               <div class="text-xs font-semibold text-[var(--c-muted)]">购买日期</div>
               <div class="font-extrabold text-[var(--c-text)]">{{ device.purchase_date || '未知' }}</div>
             </div>
           </div>
-          <div class="flex items-center gap-3 bg-[var(--c-bg)] border-2 border-[var(--c-border)] rounded-2xl p-4">
+          <div
+            class="flex items-center gap-3 bg-[var(--c-bg)] border-2 border-[var(--c-border)] rounded-2xl p-4"
+          >
             <ShieldCheck class="w-5 h-5 icon-tone--info" />
             <div>
               <div class="text-xs font-semibold text-[var(--c-muted)]">保修截止</div>
@@ -149,7 +192,11 @@ async function reportRepair() {
             <div class="text-base font-extrabold text-[var(--c-text)]">近7天使用时长（小时）</div>
           </div>
           <div class="grid grid-cols-7 gap-2">
-            <div v-for="(h, i) in device.usage_stats.last_7_days_hours" :key="i" class="flex flex-col items-center gap-1">
+            <div
+              v-for="(h, i) in device.usage_stats.last_7_days_hours"
+              :key="i"
+              class="flex flex-col items-center gap-1"
+            >
               <div class="w-full bg-[var(--c-border)]/20 rounded-lg overflow-hidden" style="height: 80px">
                 <div
                   class="w-full bg-[var(--c-primary)]/60 rounded-b-lg transition-all duration-300"

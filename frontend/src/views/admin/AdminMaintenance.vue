@@ -150,7 +150,9 @@ async function doReject() {
     ElMessage.warning('请输入拒绝原因')
     return
   }
-  await http.post(`/api/admin/maintenance/appointments/${rejectForm.appointment_id}/reject`, { reason: rejectForm.reason })
+  await http.post(`/api/admin/maintenance/appointments/${rejectForm.appointment_id}/reject`, {
+    reason: rejectForm.reason
+  })
   rejectDialogOpen.value = false
   ElMessage.success('已拒绝')
   await fetchList()
@@ -167,7 +169,9 @@ async function doReschedule() {
     ElMessage.warning('请输入新时间（ISO）')
     return
   }
-  await http.post(`/api/admin/maintenance/appointments/${rescheduleForm.appointment_id}/reschedule`, { new_start: rescheduleForm.new_start })
+  await http.post(`/api/admin/maintenance/appointments/${rescheduleForm.appointment_id}/reschedule`, {
+    new_start: rescheduleForm.new_start
+  })
   rescheduleDialogOpen.value = false
   ElMessage.success('已改期')
   await fetchList()
@@ -219,7 +223,10 @@ async function batch(action: 'confirm' | 'reject' | 'cancel') {
   let reason: string | undefined
   if (action === 'reject' || action === 'cancel') {
     try {
-      reason = await ElMessageBox.prompt('请输入原因（可选）', '批量操作', { confirmButtonText: '确定', cancelButtonText: '取消' }).then((r) => r.value)
+      reason = await ElMessageBox.prompt('请输入原因（可选）', '批量操作', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消'
+      }).then((r) => r.value)
     } catch {
       return
     }
@@ -259,6 +266,23 @@ async function exportPdf(recordId: string) {
   }
 }
 
+function search() {
+  query.page = 1
+  fetchList()
+}
+
+function prevPage() {
+  if (query.page <= 1) return
+  query.page -= 1
+  fetchList()
+}
+
+function nextPage() {
+  if (query.page >= pageCount.value) return
+  query.page += 1
+  fetchList()
+}
+
 onMounted(() => {
   fetchList()
 })
@@ -269,7 +293,9 @@ onMounted(() => {
     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
       <div>
         <div class="text-xl font-extrabold">保养预约管理</div>
-        <div class="text-sm text-gray-500 mt-1">支持按用户/时间/状态筛选，支持确认/拒绝/改期/完成与批量处理。</div>
+        <div class="text-sm text-gray-500 mt-1">
+          支持按用户/时间/状态筛选，支持确认/拒绝/改期/完成与批量处理。
+        </div>
       </div>
       <div class="flex items-center gap-2 flex-nowrap overflow-x-auto">
         <el-button :disabled="loading" type="success" plain @click="batch('confirm')">批量确认</el-button>
@@ -279,7 +305,13 @@ onMounted(() => {
       </div>
     </div>
 
-    <el-alert v-if="forbidden" type="error" show-icon title="无权限" description="你没有访问保养预约模块的权限。" />
+    <el-alert
+      v-if="forbidden"
+      type="error"
+      show-icon
+      title="无权限"
+      description="你没有访问保养预约模块的权限。"
+    />
     <el-alert v-else-if="error" type="error" show-icon :title="error" />
 
     <div class="bg-white border rounded-2xl p-4">
@@ -292,7 +324,7 @@ onMounted(() => {
         <el-input v-model="query.end" placeholder="结束时间 ISO（可选）" clearable />
       </div>
       <div class="mt-3 flex items-center gap-2">
-        <el-button type="primary" :loading="loading" @click="query.page = 1; fetchList()">查询</el-button>
+        <el-button type="primary" :loading="loading" @click="search">查询</el-button>
         <div class="text-sm text-gray-500">共 {{ total }} 条</div>
       </div>
     </div>
@@ -322,20 +354,30 @@ onMounted(() => {
       <el-table-column label="操作" width="260" fixed="right">
         <template #default="{ row }">
           <el-button link type="primary" @click="openDetail(row)">详情</el-button>
-          <el-button v-if="row.status === 'pending'" link type="success" @click="confirmOne(row._id)">确认</el-button>
-          <el-button v-if="row.status === 'pending'" link type="danger" @click="openReject(row._id)">拒绝</el-button>
-          <el-button v-if="['pending', 'confirmed'].includes(String(row.status))" link type="warning" @click="openReschedule(row._id)"
+          <el-button v-if="row.status === 'pending'" link type="success" @click="confirmOne(row._id)"
+            >确认</el-button
+          >
+          <el-button v-if="row.status === 'pending'" link type="danger" @click="openReject(row._id)"
+            >拒绝</el-button
+          >
+          <el-button
+            v-if="['pending', 'confirmed'].includes(String(row.status))"
+            link
+            type="warning"
+            @click="openReschedule(row._id)"
             >改期</el-button
           >
-          <el-button v-if="row.status === 'confirmed'" link type="success" @click="openComplete(row._id)">完成</el-button>
+          <el-button v-if="row.status === 'confirmed'" link type="success" @click="openComplete(row._id)"
+            >完成</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
 
     <div class="flex items-center justify-end gap-2">
-      <el-button :disabled="query.page <= 1" @click="query.page -= 1; fetchList()">上一页</el-button>
+      <el-button :disabled="query.page <= 1" @click="prevPage">上一页</el-button>
       <div class="text-sm text-gray-500">{{ query.page }} / {{ pageCount }}</div>
-      <el-button :disabled="query.page >= pageCount" @click="query.page += 1; fetchList()">下一页</el-button>
+      <el-button :disabled="query.page >= pageCount" @click="nextPage">下一页</el-button>
     </div>
 
     <el-drawer v-model="drawerOpen" title="预约详情" size="520px">
@@ -343,7 +385,9 @@ onMounted(() => {
         <el-descriptions v-if="detail?.appointment" :column="1" border>
           <el-descriptions-item label="预约号">{{ detail.appointment._id }}</el-descriptions-item>
           <el-descriptions-item label="用户">{{ detail.appointment.user_id }}</el-descriptions-item>
-          <el-descriptions-item label="状态">{{ statusLabel(detail.appointment.status) }}</el-descriptions-item>
+          <el-descriptions-item label="状态">{{
+            statusLabel(detail.appointment.status)
+          }}</el-descriptions-item>
           <el-descriptions-item label="时间">{{ detail.appointment.scheduled_start }}</el-descriptions-item>
           <el-descriptions-item label="联系方式">{{ detail.appointment.contact_phone }}</el-descriptions-item>
           <el-descriptions-item label="备注">{{ detail.appointment.notes || '-' }}</el-descriptions-item>
@@ -404,4 +448,3 @@ onMounted(() => {
     </el-dialog>
   </div>
 </template>
-

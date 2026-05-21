@@ -46,4 +46,3 @@ export const useUserAuthStore = defineStore('userAuth', () => {
 
   return { verified, checking, isAuthed, verifyUser, logout, bindLogoutListener }
 })
-

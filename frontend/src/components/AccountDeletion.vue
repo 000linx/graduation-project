@@ -64,7 +64,13 @@
         title="身份验证"
         description="请输入您的登录密码以确认身份。"
       />
-      <el-form ref="verifyFormRef" :model="verifyForm" :rules="verifyRules" label-position="top" @submit.prevent>
+      <el-form
+        ref="verifyFormRef"
+        :model="verifyForm"
+        :rules="verifyRules"
+        label-position="top"
+        @submit.prevent
+      >
         <el-form-item label="登录密码" prop="password">
           <el-input
             v-model="verifyForm.password"
@@ -187,11 +193,16 @@ const verifyRules: FormRules = {
 
 const dialogTitle = computed(() => {
   switch (flowStep.value) {
-    case 'idle': return '注销账户'
-    case 'verify': return '身份验证'
-    case 'result': return '注销申请已提交'
-    case 'cancelled': return '注销已撤销'
-    default: return '注销账户'
+    case 'idle':
+      return '注销账户'
+    case 'verify':
+      return '身份验证'
+    case 'result':
+      return '注销申请已提交'
+    case 'cancelled':
+      return '注销已撤销'
+    default:
+      return '注销账户'
   }
 })
 

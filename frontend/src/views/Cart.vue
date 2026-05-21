@@ -20,13 +20,25 @@
       <p class="text-xl font-extrabold text-[var(--c-text)] mb-2">购物车还是空的</p>
       <p class="text-[var(--c-muted)] font-semibold mb-8">赶紧去选购你心仪的助听器吧！</p>
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-        <router-link to="/" v-feedback class="a11y-hit px-8 rounded-full font-extrabold bg-[var(--c-primary)] text-[var(--c-on-primary)] no-underline">去逛逛</router-link>
-        <router-link to="/recommendations" v-feedback class="a11y-hit px-8 rounded-full font-extrabold border-2 border-[var(--c-border)] bg-[var(--c-bg)] text-[var(--c-text)] no-underline">去个性化推荐</router-link>
+        <router-link
+          to="/"
+          v-feedback
+          class="a11y-hit px-8 rounded-full font-extrabold bg-[var(--c-primary)] text-[var(--c-on-primary)] no-underline"
+          >去逛逛</router-link
+        >
+        <router-link
+          to="/recommendations"
+          v-feedback
+          class="a11y-hit px-8 rounded-full font-extrabold border-2 border-[var(--c-border)] bg-[var(--c-bg)] text-[var(--c-text)] no-underline"
+          >去个性化推荐</router-link
+        >
       </div>
     </div>
 
     <div v-else class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      <div class="lg:col-span-8 bg-[var(--c-surface)] rounded-3xl p-6 shadow-sm border-2 border-[var(--c-border)] space-y-4">
+      <div
+        class="lg:col-span-8 bg-[var(--c-surface)] rounded-3xl p-6 shadow-sm border-2 border-[var(--c-border)] space-y-4"
+      >
         <div v-if="cart.loading" class="space-y-4">
           <CartSkeleton v-for="i in 4" :key="i" />
         </div>
@@ -103,7 +115,10 @@
           </div>
         </div>
 
-        <div v-if="recommended.length" class="bg-[var(--c-surface)] rounded-3xl p-6 shadow-sm border-2 border-[var(--c-border)]">
+        <div
+          v-if="recommended.length"
+          class="bg-[var(--c-surface)] rounded-3xl p-6 shadow-sm border-2 border-[var(--c-border)]"
+        >
           <div class="text-lg font-extrabold text-[var(--c-text)] mb-4">你可能还需要</div>
           <div v-loading="recoLoading" class="grid grid-cols-1 gap-4">
             <ProductCard v-for="p in recommended" :key="p.id" :product="p" />

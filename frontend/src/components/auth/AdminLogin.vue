@@ -80,7 +80,11 @@ async function submit() {
     await router.replace('/admin')
   } catch (e: any) {
     const msg = toZhAuthErrorMessage(
-      { status: e?.response?.status, message: e?.response?.data?.message || e?.message, url: '/api/admin/login' },
+      {
+        status: e?.response?.status,
+        message: e?.response?.data?.message || e?.message,
+        url: '/api/admin/login'
+      },
       '管理员登录失败'
     )
     submitError.value = msg

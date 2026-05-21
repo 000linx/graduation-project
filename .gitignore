@@ -45,6 +45,7 @@ tests_backup_*/
 
 lighthouse-report.json
 lh-scores.json
+*.report.html
 
 .trash/
 audit/

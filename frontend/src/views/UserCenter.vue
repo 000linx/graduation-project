@@ -113,17 +113,35 @@
               </el-table-column>
               <el-table-column label="状态" width="140">
                 <template #default="{ row }">
-                  <el-tag :type="statusTagType(row.status)" data-testid="order-status">{{ statusLabel(row.status) }}</el-tag>
+                  <el-tag :type="statusTagType(row.status)" data-testid="order-status">{{
+                    statusLabel(row.status)
+                  }}</el-tag>
                 </template>
               </el-table-column>
               <el-table-column prop="created_at" label="创建时间" min-width="180" show-overflow-tooltip />
               <el-table-column label="操作" width="260" fixed="right">
                 <template #default="{ row }">
-                  <el-button data-testid="order-action-detail" link type="primary" @click="openDetail(row._id)">详情</el-button>
-                  <el-button v-if="row.status === 'pending'" data-testid="order-action-pay" link type="success" @click="openPay(row._id)"
+                  <el-button
+                    data-testid="order-action-detail"
+                    link
+                    type="primary"
+                    @click="openDetail(row._id)"
+                    >详情</el-button
+                  >
+                  <el-button
+                    v-if="row.status === 'pending'"
+                    data-testid="order-action-pay"
+                    link
+                    type="success"
+                    @click="openPay(row._id)"
                     >支付</el-button
                   >
-                  <el-button v-if="canCancel(row.status)" data-testid="order-action-cancel" link type="warning" @click="cancelOrder(row._id)"
+                  <el-button
+                    v-if="canCancel(row.status)"
+                    data-testid="order-action-cancel"
+                    link
+                    type="warning"
+                    @click="cancelOrder(row._id)"
                     >取消</el-button
                   >
                   <el-button
@@ -142,7 +160,12 @@
                     @click="openReview(row._id)"
                     >评价</el-button
                   >
-                  <el-button v-if="canAfterSale(row)" data-testid="order-action-after-sale" link type="danger" @click="openAfterSale(row._id)"
+                  <el-button
+                    v-if="canAfterSale(row)"
+                    data-testid="order-action-after-sale"
+                    link
+                    type="danger"
+                    @click="openAfterSale(row._id)"
                     >售后</el-button
                   >
                 </template>
@@ -176,7 +199,12 @@
                   <el-form label-position="top" class="md:col-span-2">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <el-form-item label="关联订单（已购买）" required>
-                        <el-select v-model="maintForm.order_id" placeholder="请选择订单" filterable @change="onOrderChange">
+                        <el-select
+                          v-model="maintForm.order_id"
+                          placeholder="请选择订单"
+                          filterable
+                          @change="onOrderChange"
+                        >
                           <el-option
                             v-for="o in eligibleOrders"
                             :key="o.order_id"
@@ -222,12 +250,22 @@
                         </el-select>
                       </el-form-item>
                       <el-form-item label="备注（可选）" class="md:col-span-2">
-                        <el-input v-model="maintForm.notes" type="textarea" :rows="3" placeholder="如：希望更换耳塞/清洁/调试等" />
+                        <el-input
+                          v-model="maintForm.notes"
+                          type="textarea"
+                          :rows="3"
+                          placeholder="如：希望更换耳塞/清洁/调试等"
+                        />
                       </el-form-item>
                     </div>
                     <div class="flex items-center gap-3">
-                      <el-button type="primary" :loading="maintSubmitting" @click="submitAppointment">提交预约</el-button>
-                      <div class="text-sm font-semibold text-[var(--c-muted)]" v-if="slots.length === 0 && maintForm.date">
+                      <el-button type="primary" :loading="maintSubmitting" @click="submitAppointment"
+                        >提交预约</el-button
+                      >
+                      <div
+                        class="text-sm font-semibold text-[var(--c-muted)]"
+                        v-if="slots.length === 0 && maintForm.date"
+                      >
                         暂无可预约时段，请更换日期
                       </div>
                     </div>
@@ -242,10 +280,17 @@
                     <el-table-column prop="_id" label="预约号" min-width="220" show-overflow-tooltip />
                     <el-table-column label="状态" width="120">
                       <template #default="{ row }">
-                        <el-tag :type="maintenanceStatusTag(row.status)">{{ maintenanceStatusLabel(row.status) }}</el-tag>
+                        <el-tag :type="maintenanceStatusTag(row.status)">{{
+                          maintenanceStatusLabel(row.status)
+                        }}</el-tag>
                       </template>
                     </el-table-column>
-                    <el-table-column prop="scheduled_start" label="预约时间" min-width="180" show-overflow-tooltip />
+                    <el-table-column
+                      prop="scheduled_start"
+                      label="预约时间"
+                      min-width="180"
+                      show-overflow-tooltip
+                    />
                     <el-table-column prop="contact_phone" label="联系方式" width="140" />
                     <el-table-column label="操作" width="160" fixed="right">
                       <template #default="{ row }">
@@ -327,7 +372,9 @@
                 <div class="flex items-center justify-between gap-4 py-2">
                   <div class="min-w-0">
                     <div class="font-extrabold text-[var(--c-text)]">邮件通知</div>
-                    <div class="text-sm font-semibold text-[var(--c-muted)]">活动订阅、订单状态等邮件提醒</div>
+                    <div class="text-sm font-semibold text-[var(--c-muted)]">
+                      活动订阅、订单状态等邮件提醒
+                    </div>
                   </div>
                   <el-switch
                     v-model="notif.email_notifications"
@@ -462,17 +509,33 @@
               </div>
               <div class="flex items-center gap-3">
                 <el-button v-if="hasToken" type="primary" @click="openBindDevice">绑定新设备</el-button>
-                <el-button :loading="deviceStore.loading" :disabled="!hasToken" @click="deviceStore.fetchDevices()">刷新</el-button>
+                <el-button
+                  :loading="deviceStore.loading"
+                  :disabled="!hasToken"
+                  @click="deviceStore.fetchDevices()"
+                  >刷新</el-button
+                >
               </div>
             </div>
 
-            <el-alert v-if="!hasToken" type="warning" show-icon title="未登录" description="请先登录后管理设备。" />
+            <el-alert
+              v-if="!hasToken"
+              type="warning"
+              show-icon
+              title="未登录"
+              description="请先登录后管理设备。"
+            />
             <el-alert v-else-if="deviceStore.error" type="error" show-icon :title="deviceStore.error" />
 
-            <div v-if="hasToken && deviceStore.devices.length === 0 && !deviceStore.loading" class="text-center py-12 bg-[var(--c-bg)] border-2 border-dashed border-[var(--c-border)] rounded-2xl">
+            <div
+              v-if="hasToken && deviceStore.devices.length === 0 && !deviceStore.loading"
+              class="text-center py-12 bg-[var(--c-bg)] border-2 border-dashed border-[var(--c-border)] rounded-2xl"
+            >
               <Cpu class="h-12 w-12 mx-auto icon-tone--muted mb-3" />
               <div class="text-base font-extrabold text-[var(--c-muted)]">暂无已绑定设备</div>
-              <div class="text-sm font-semibold text-[var(--c-muted)] mt-1 mb-4">点击"绑定新设备"添加您的助听器</div>
+              <div class="text-sm font-semibold text-[var(--c-muted)] mt-1 mb-4">
+                点击"绑定新设备"添加您的助听器
+              </div>
               <el-button type="primary" @click="openBindDevice">绑定新设备</el-button>
             </div>
 
@@ -565,7 +628,9 @@
         收货地址：{{ orderDetail.shipping_address || '-' }}
       </div>
       <div v-if="orderDetail.coupon" class="text-sm font-semibold text-[var(--c-muted)]">
-        优惠券：{{ orderDetail.coupon.code }}（-¥{{ Number(orderDetail.coupon.discount_amount ?? 0).toFixed(2) }}）
+        优惠券：{{ orderDetail.coupon.code }}（-¥{{
+          Number(orderDetail.coupon.discount_amount ?? 0).toFixed(2)
+        }}）
       </div>
       <div class="text-sm font-semibold text-[var(--c-muted)]">支付：{{ paymentText }}</div>
       <div v-if="orderDetail.shipping" class="text-sm font-semibold text-[var(--c-muted)]">
@@ -631,7 +696,12 @@
         <el-option label="退货退款" value="return" />
         <el-option label="维修" value="repair" />
       </el-select>
-      <el-input v-model="afterSaleForm.reason" type="textarea" :rows="4" placeholder="请详细描述售后原因（必填）" />
+      <el-input
+        v-model="afterSaleForm.reason"
+        type="textarea"
+        :rows="4"
+        placeholder="请详细描述售后原因（必填）"
+      />
     </div>
     <template #footer>
       <el-button @click="afterSaleOpen = false">取消</el-button>
@@ -723,7 +793,9 @@ import { Cpu } from 'lucide-vue-next'
 
 const router = useRouter()
 const userAuth = useUserAuthStore()
-const activeTab = ref<'orders' | 'maintenance' | 'profile' | 'notifications' | 'security' | 'address' | 'devices'>('orders')
+const activeTab = ref<
+  'orders' | 'maintenance' | 'profile' | 'notifications' | 'security' | 'address' | 'devices'
+>('orders')
 const deviceStore = useDeviceStore()
 
 const hasToken = computed(() => userAuth.verified)
@@ -1029,7 +1101,13 @@ function onOrderChange() {
 }
 
 async function submitAppointment() {
-  if (!maintForm.order_id || !maintForm.product_id || !maintForm.contact_name || !maintForm.contact_phone || !maintForm.preferred_start) {
+  if (
+    !maintForm.order_id ||
+    !maintForm.product_id ||
+    !maintForm.contact_name ||
+    !maintForm.contact_phone ||
+    !maintForm.preferred_start
+  ) {
     ElMessage.warning('请填写完整预约信息')
     return
   }
@@ -1094,7 +1172,9 @@ async function fetchProfile() {
   if (!hasToken.value) return
   try {
     const resp = await http.get('/api/user/profile')
-    const data = unwrap<{ username?: string; phone?: string; notification_settings?: NotificationSettings }>(resp)
+    const data = unwrap<{ username?: string; phone?: string; notification_settings?: NotificationSettings }>(
+      resp
+    )
     profile.username = String(data?.username ?? '')
     profile.phone = String(data?.phone ?? '')
     const s = data?.notification_settings

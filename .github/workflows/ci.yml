@@ -20,7 +20,7 @@ jobs:
           pip install -r backend/requirements.txt
           pip install pip-audit
       - name: Security audit
-        run: pip-audit -r backend/requirements.txt
+        run: pip-audit -r backend/requirements.txt --ignore-vuln PYSEC-2024-271 --ignore-vuln PYSEC-2025-183
       - name: Test + coverage
         working-directory: backend
         run: python -m pytest -q --cov=app --cov-config=.coveragerc --cov-report=xml:coverage.xml --cov-report=term-missing

@@ -1,7 +1,18 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { MoreHorizontal, Cpu, Calendar, ShieldCheck, Circle, Wifi, WifiOff, Wrench, Unlink, Eye } from 'lucide-vue-next'
+import {
+  MoreHorizontal,
+  Cpu,
+  Calendar,
+  ShieldCheck,
+  Circle,
+  Wifi,
+  WifiOff,
+  Wrench,
+  Unlink,
+  Eye
+} from 'lucide-vue-next'
 import type { DeviceItem } from '@/stores/device'
 
 const props = defineProps<{ device: DeviceItem; disableActions?: boolean }>()
@@ -14,28 +25,40 @@ const swipeOffset = ref(0)
 
 const statusColor = computed(() => {
   switch (props.device.status) {
-    case 'online': return 'var(--c-success, #22c55e)'
-    case 'offline': return 'var(--c-muted, #9ca3af)'
-    case 'maintenance': return 'var(--c-warning, #f59e0b)'
-    default: return 'var(--c-muted, #9ca3af)'
+    case 'online':
+      return 'var(--c-success, #22c55e)'
+    case 'offline':
+      return 'var(--c-muted, #9ca3af)'
+    case 'maintenance':
+      return 'var(--c-warning, #f59e0b)'
+    default:
+      return 'var(--c-muted, #9ca3af)'
   }
 })
 
 const statusLabel = computed(() => {
   switch (props.device.status) {
-    case 'online': return '在线'
-    case 'offline': return '离线'
-    case 'maintenance': return '待维护'
-    default: return props.device.status
+    case 'online':
+      return '在线'
+    case 'offline':
+      return '离线'
+    case 'maintenance':
+      return '待维护'
+    default:
+      return props.device.status
   }
 })
 
 const statusIcon = computed(() => {
   switch (props.device.status) {
-    case 'online': return Wifi
-    case 'offline': return WifiOff
-    case 'maintenance': return Wrench
-    default: return Circle
+    case 'online':
+      return Wifi
+    case 'offline':
+      return WifiOff
+    case 'maintenance':
+      return Wrench
+    default:
+      return Circle
   }
 })
 
@@ -62,6 +85,25 @@ function onSwipeEnd() {
 function closeMenu() {
   menuOpen.value = false
 }
+
+function toggleMenu() {
+  menuOpen.value = !menuOpen.value
+}
+
+function goDetailAndClose() {
+  goDetail()
+  closeMenu()
+}
+
+function reportRepairAndClose() {
+  emit('reportRepair', props.device._id)
+  closeMenu()
+}
+
+function unbindAndClose() {
+  emit('unbind', props.device._id)
+  closeMenu()
+}
 </script>
 
 <template>
@@ -73,8 +115,16 @@ function closeMenu() {
     @touchmove="onSwipeMove"
     @touchend="onSwipeEnd"
   >
-    <div class="flex items-center gap-4 p-4" :style="{ transform: `translateX(-${swipeOffset}px)`, transition: swipeOffset ? 'none' : 'transform 0.2s ease' }">
-      <div class="w-16 h-16 rounded-xl bg-[var(--c-bg)] border-2 border-[var(--c-border)] flex items-center justify-center shrink-0 overflow-hidden">
+    <div
+      class="flex items-center gap-4 p-4"
+      :style="{
+        transform: `translateX(-${swipeOffset}px)`,
+        transition: swipeOffset ? 'none' : 'transform 0.2s ease'
+      }"
+    >
+      <div
+        class="w-16 h-16 rounded-xl bg-[var(--c-bg)] border-2 border-[var(--c-border)] flex items-center justify-center shrink-0 overflow-hidden"
+      >
         <img
           v-if="device.thumbnail"
           :src="device.thumbnail"
@@ -102,7 +152,10 @@ function closeMenu() {
             <ShieldCheck class="w-3.5 h-3.5" />
             {{ device.warranty_end || '--' }}
           </span>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border" :style="{ color: statusColor, borderColor: statusColor, background: statusColor + '15' }">
+          <span
+            class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border"
+            :style="{ color: statusColor, borderColor: statusColor, background: statusColor + '15' }"
+          >
             {{ statusLabel }}
           </span>
         </div>
@@ -113,7 +166,7 @@ function closeMenu() {
         type="button"
         class="a11y-hit w-10 h-10 flex items-center justify-center rounded-xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] text-[var(--c-muted)] shrink-0"
         aria-label="更多操作"
-        @click="menuOpen = !menuOpen"
+        @click="toggleMenu"
       >
         <MoreHorizontal class="w-5 h-5" />
       </button>
@@ -131,7 +184,7 @@ function closeMenu() {
           type="button"
           role="menuitem"
           class="a11y-hit flex items-center gap-1.5 px-4 py-2 rounded-xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] text-[var(--c-text)] font-extrabold text-sm whitespace-nowrap"
-          @click="goDetail(); closeMenu()"
+          @click="goDetailAndClose"
         >
           <Eye class="w-4 h-4 icon-tone--info" />
           查看详情
@@ -141,7 +194,7 @@ function closeMenu() {
           type="button"
           role="menuitem"
           class="a11y-hit flex items-center gap-1.5 px-4 py-2 rounded-xl border-2 border-[var(--c-border)] bg-[var(--c-bg)] text-[var(--c-text)] font-extrabold text-sm whitespace-nowrap"
-          @click="emit('reportRepair', device._id); closeMenu()"
+          @click="reportRepairAndClose"
         >
           <Wrench class="w-4 h-4 icon-tone--warning" />
           报修
@@ -151,7 +204,7 @@ function closeMenu() {
           type="button"
           role="menuitem"
           class="a11y-hit flex items-center gap-1.5 px-4 py-2 rounded-xl border-2 border-[var(--c-danger)]/30 bg-[var(--c-danger)]/5 text-[var(--c-danger)] font-extrabold text-sm whitespace-nowrap"
-          @click="emit('unbind', device._id); closeMenu()"
+          @click="unbindAndClose"
         >
           <Unlink class="w-4 h-4" />
           解绑
@@ -170,6 +223,7 @@ function closeMenu() {
 .slide-up-leave-active {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .slide-up-enter-from,
 .slide-up-leave-to {
   opacity: 0;

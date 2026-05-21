@@ -441,14 +441,22 @@ onBeforeUnmount(() => {
             <div class="text-base font-extrabold text-[var(--c-text)]">已记录阈值</div>
             <div class="mt-3 text-sm font-semibold text-[var(--c-muted)]">左耳</div>
             <div class="mt-2 grid grid-cols-3 gap-2 text-sm font-extrabold text-[var(--c-text)]">
-              <div v-for="f in freqs" :key="`l-${f}`" class="rounded-xl border-2 border-[var(--c-border)] p-2 bg-[var(--c-surface)]">
+              <div
+                v-for="f in freqs"
+                :key="`l-${f}`"
+                class="rounded-xl border-2 border-[var(--c-border)] p-2 bg-[var(--c-surface)]"
+              >
                 <div class="text-[var(--c-muted)] text-xs font-semibold">{{ f }}Hz</div>
                 <div>{{ thresholds.left[String(f)] ?? '-' }}</div>
               </div>
             </div>
             <div class="mt-4 text-sm font-semibold text-[var(--c-muted)]">右耳</div>
             <div class="mt-2 grid grid-cols-3 gap-2 text-sm font-extrabold text-[var(--c-text)]">
-              <div v-for="f in freqs" :key="`r-${f}`" class="rounded-xl border-2 border-[var(--c-border)] p-2 bg-[var(--c-surface)]">
+              <div
+                v-for="f in freqs"
+                :key="`r-${f}`"
+                class="rounded-xl border-2 border-[var(--c-border)] p-2 bg-[var(--c-surface)]"
+              >
                 <div class="text-[var(--c-muted)] text-xs font-semibold">{{ f }}Hz</div>
                 <div>{{ thresholds.right[String(f)] ?? '-' }}</div>
               </div>
@@ -484,7 +492,8 @@ onBeforeUnmount(() => {
                 <div class="mt-1 text-lg font-extrabold">{{ rightPta }} dB HL · {{ rightDegree }}</div>
               </div>
               <div class="text-xs font-semibold text-[var(--c-muted)]">
-                若一侧明显高于另一侧、或 PTA ≥ 40 dB HL，建议尽快前往正规医院/机构进行标准纯音测听与声导抗检查。
+                若一侧明显高于另一侧、或 PTA ≥ 40 dB
+                HL，建议尽快前往正规医院/机构进行标准纯音测听与声导抗检查。
               </div>
             </div>
 

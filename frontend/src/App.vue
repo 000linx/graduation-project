@@ -175,7 +175,9 @@ onBeforeUnmount(() => {
 
           <section aria-label="订阅">
             <div class="text-base font-extrabold text-[var(--c-text)]">{{ $t('footer.subscribe') }}</div>
-            <div class="mt-3 text-sm font-semibold text-[var(--c-muted)]">{{ $t('footer.subscribeHint') }}</div>
+            <div class="mt-3 text-sm font-semibold text-[var(--c-muted)]">
+              {{ $t('footer.subscribeHint') }}
+            </div>
             <div class="mt-4 flex gap-2">
               <input
                 v-model="footerEmail"

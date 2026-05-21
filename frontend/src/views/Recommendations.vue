@@ -199,7 +199,11 @@ watch(
       <div>
         <h1 class="text-3xl font-extrabold text-[var(--c-text)]">{{ t('reco.title') }}</h1>
         <div class="text-base font-bold text-[var(--c-muted)] mt-1">{{ t('reco.subtitle') }}</div>
-        <div v-if="filterChips.length" class="mt-3 flex flex-nowrap gap-2 overflow-x-auto" aria-label="筛选摘要">
+        <div
+          v-if="filterChips.length"
+          class="mt-3 flex flex-nowrap gap-2 overflow-x-auto"
+          aria-label="筛选摘要"
+        >
           <span
             v-for="c in filterChips"
             :key="c.key"
@@ -215,10 +219,7 @@ watch(
           v-feedback
           class="a11y-hit"
           :disabled="!reco.profile.hearing_level"
-          @click="
-            autoEnabled = true,
-            refresh()
-          "
+          @click="((autoEnabled = true), refresh())"
         >
           刷新推荐
         </el-button>
@@ -229,12 +230,7 @@ watch(
       <div
         class="bg-[var(--c-surface)] border-2 border-[var(--c-border)] rounded-2xl p-6 lg:sticky lg:top-24 h-fit"
       >
-        <HearingProfileForm
-          @recommended="
-            autoEnabled = true,
-            refresh()
-          "
-        />
+        <HearingProfileForm @recommended="((autoEnabled = true), refresh())" />
       </div>
 
       <div class="lg:col-span-2">

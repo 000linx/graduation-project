@@ -21,7 +21,9 @@ const redirectTo = computed(() => {
 })
 
 const modeHint = computed(() => '专业听力技术与适老设计，帮助你更轻松地参与交流')
-const particleDebug = computed(() => typeof window !== 'undefined' && /(^|[?&])particleDebug=1(&|$)/.test(window.location.search))
+const particleDebug = computed(
+  () => typeof window !== 'undefined' && /(^|[?&])particleDebug=1(&|$)/.test(window.location.search)
+)
 
 function onParticleScaleInput(e: Event) {
   const v = Number((e.target as HTMLInputElement).value)
@@ -77,18 +79,18 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="cover__center" role="region" aria-label="封面交互区" @pointerenter="onHoverEnter" @pointerleave="onHoverLeave">
+      <div
+        class="cover__center"
+        role="region"
+        aria-label="封面交互区"
+        @pointerenter="onHoverEnter"
+        @pointerleave="onHoverLeave"
+      >
         <div class="cover__headline">重回听的世界</div>
         <div class="cover__hint">{{ modeHint }}</div>
 
         <div class="cover__actions">
-          <button
-            type="button"
-            class="cover__cta"
-            :disabled="entering"
-            aria-label="进入商城"
-            @click="enter"
-          >
+          <button type="button" class="cover__cta" :disabled="entering" aria-label="进入商城" @click="enter">
             进入商城
             <ArrowRight class="h-4 w-4 icon-tone--info" aria-hidden="true" />
           </button>
@@ -111,7 +113,12 @@ onMounted(() => {
           <div class="cover__debugHint">开启调试：?particleDebug=1（同时显示椭圆边界与 FPS 日志）</div>
         </div>
 
-        <div v-if="cover.perfReduced && cover.perfMessage" class="cover__perf" role="status" aria-live="polite">
+        <div
+          v-if="cover.perfReduced && cover.perfMessage"
+          class="cover__perf"
+          role="status"
+          aria-live="polite"
+        >
           {{ cover.perfMessage }}
         </div>
       </div>
@@ -161,12 +168,12 @@ onMounted(() => {
   width: 40px;
   height: 40px;
   border-radius: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.16);
-  background: rgba(11, 16, 32, 0.6);
+  border: 2px solid rgb(255 255 255 / 16%);
+  background: rgb(11 16 32 / 60%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(0, 245, 255, 0.9);
+  color: rgb(0 245 255 / 90%);
 }
 
 .cover__title {
@@ -180,7 +187,7 @@ onMounted(() => {
   margin-top: 2px;
   font-size: 12px;
   font-weight: 700;
-  color: rgba(184, 192, 204, 0.92);
+  color: rgb(184 192 204 / 92%);
 }
 
 .cover__center {
@@ -199,13 +206,13 @@ onMounted(() => {
   line-height: 1.05;
   font-weight: 900;
   color: #fff;
-  text-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 10px 28px rgb(0 0 0 / 30%);
 }
 
 .cover__hint {
   font-size: 14px;
   font-weight: 700;
-  color: rgba(184, 192, 204, 0.96);
+  color: rgb(184 192 204 / 96%);
   max-width: 680px;
 }
 
@@ -223,12 +230,14 @@ onMounted(() => {
   align-items: center;
   gap: 10px;
   border-radius: 14px;
-  border: 2px solid rgba(91, 140, 255, 0.55);
-  background: rgba(91, 140, 255, 0.92);
+  border: 2px solid rgb(91 140 255 / 55%);
+  background: rgb(91 140 255 / 92%);
   color: #fff;
   padding: 12px 16px;
   font-weight: 900;
-  transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition:
+    transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .cover__cta:disabled {
@@ -240,9 +249,9 @@ onMounted(() => {
   display: inline-flex;
   align-self: flex-start;
   border-radius: 14px;
-  border: 2px solid rgba(255, 209, 102, 0.35);
-  background: rgba(20, 18, 12, 0.6);
-  color: rgba(255, 209, 102, 0.96);
+  border: 2px solid rgb(255 209 102 / 35%);
+  background: rgb(20 18 12 / 60%);
+  color: rgb(255 209 102 / 96%);
   padding: 10px 12px;
   font-weight: 900;
   font-size: 12px;
@@ -251,10 +260,10 @@ onMounted(() => {
 .cover__debug {
   margin-top: 10px;
   border-radius: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.12);
-  background: rgba(11, 16, 32, 0.55);
-  padding: 12px 12px;
-  color: rgba(255, 255, 255, 0.92);
+  border: 2px solid rgb(255 255 255 / 12%);
+  background: rgb(11 16 32 / 55%);
+  padding: 12px;
+  color: rgb(255 255 255 / 92%);
 }
 
 .cover__debugRow {
@@ -266,7 +275,7 @@ onMounted(() => {
 .cover__debugLabel {
   font-size: 12px;
   font-weight: 900;
-  color: rgba(184, 192, 204, 0.96);
+  color: rgb(184 192 204 / 96%);
   width: 64px;
 }
 
@@ -279,17 +288,17 @@ onMounted(() => {
   text-align: right;
   font-size: 12px;
   font-weight: 900;
-  color: rgba(255, 255, 255, 0.92);
+  color: rgb(255 255 255 / 92%);
 }
 
 .cover__debugHint {
   margin-top: 8px;
   font-size: 12px;
   font-weight: 800;
-  color: rgba(184, 192, 204, 0.96);
+  color: rgb(184 192 204 / 96%);
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .cover__headline {
     font-size: 34px;
   }
@@ -301,4 +310,3 @@ onMounted(() => {
   }
 }
 </style>
-

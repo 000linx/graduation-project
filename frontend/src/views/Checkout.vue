@@ -59,7 +59,9 @@ const orderRows = computed(() => {
 
 const totalAmount = computed(() => orderRows.value.reduce((sum, r) => sum + r.subtotal, 0))
 const couponDiscount = computed(() => {
-  const code = String(couponCode.value || '').trim().toUpperCase()
+  const code = String(couponCode.value || '')
+    .trim()
+    .toUpperCase()
   if (!code) return 0
   if (code === 'OFF10') return Math.min(totalAmount.value * 0.1, totalAmount.value)
   if (code === 'OFF50') return Math.min(50, totalAmount.value)

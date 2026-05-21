@@ -126,8 +126,9 @@ export const useCartStore = defineStore('cart', () => {
     const entries = Array.from(_pendingUpdates.entries())
     _pendingUpdates.clear()
     if (entries.length === 0) return
-    const promises = entries.map(([product_id, quantity]) =>
-      http.put('/api/cart/update', { product_id, quantity })?.catch(() => {}) ?? Promise.resolve()
+    const promises = entries.map(
+      ([product_id, quantity]) =>
+        http.put('/api/cart/update', { product_id, quantity })?.catch(() => {}) ?? Promise.resolve()
     )
     Promise.all(promises).finally(() => {
       _saveCache()

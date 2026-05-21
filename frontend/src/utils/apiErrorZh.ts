@@ -2,7 +2,10 @@ export function isProbablyChinese(text: string) {
   return /[\u4e00-\u9fff]/.test(String(text || ''))
 }
 
-export function toZhAuthErrorMessage(input: { status?: number; message?: string; url?: string }, fallback: string) {
+export function toZhAuthErrorMessage(
+  input: { status?: number; message?: string; url?: string },
+  fallback: string
+) {
   const status = input.status
   const url = String(input.url || '')
   const raw = String(input.message || '').trim()
@@ -43,4 +46,3 @@ export function toZhAuthErrorMessage(input: { status?: number; message?: string;
   if (status && status >= 500) return '服务器繁忙，请稍后重试'
   return fallback
 }
-

@@ -68,13 +68,9 @@ http.interceptors.response.use(
       url.startsWith('/api/user/register') ||
       url.startsWith('/api/admin/login')
 
-    const isRefresh =
-      url.startsWith('/api/user/refresh') ||
-      url.startsWith('/api/admin/refresh')
+    const isRefresh = url.startsWith('/api/user/refresh') || url.startsWith('/api/admin/refresh')
 
-    const isSilentCheck =
-      url.startsWith('/api/user/profile') ||
-      url.startsWith('/api/admin/me/permissions')
+    const isSilentCheck = url.startsWith('/api/user/profile') || url.startsWith('/api/admin/me/permissions')
 
     const needsFeedback = !isAuthAction && !isRefresh && !isSilentCheck
 

@@ -71,7 +71,7 @@ onBeforeUnmount(clearTimer)
   background: var(--c-surface);
   color: var(--c-text);
   border-radius: 1rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 15%);
   z-index: 9999;
   overflow: hidden;
 }
@@ -133,6 +133,7 @@ onBeforeUnmount(clearTimer)
   from {
     width: 100%;
   }
+
   to {
     width: 0%;
   }
@@ -142,13 +143,16 @@ onBeforeUnmount(clearTimer)
   .a11y-banner--flash {
     animation: a11yFlash 0.9s ease-in-out 0s 2;
   }
+
   @keyframes a11yFlash {
     0% {
       filter: brightness(1);
     }
+
     50% {
       filter: brightness(1.35);
     }
+
     100% {
       filter: brightness(1);
     }

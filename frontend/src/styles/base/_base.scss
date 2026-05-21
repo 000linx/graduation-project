@@ -3,7 +3,7 @@ html {
   font-size: calc(16px * var(--a11y-font-scale, 1));
   color-scheme: light;
   font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  text-rendering: optimizelegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -41,45 +41,45 @@ a:hover {
 }
 
 :where(
-    .el-button,
-    .el-link,
-    .el-tag,
-    .el-breadcrumb__inner,
-    .el-menu-item,
-    .el-sub-menu__title,
-    .el-tabs__item,
-    .el-pagination,
-    .el-form-item__label,
-    .el-form-item__content,
-    .el-checkbox__label,
-    .el-radio__label,
-    .el-dropdown-menu__item,
-    .el-dialog__title,
-    .el-dialog__body,
-    .el-message-box__title,
-    .el-message-box__message,
-    .el-notification__title,
-    .el-notification__content,
-    .el-alert__title,
-    .el-alert__description,
-    .el-descriptions__label,
-    .el-descriptions__content,
-    .el-drawer__body,
-    .el-card__body,
-    .el-empty__description,
-    .el-result__title,
-    .el-result__subtitle,
-    .el-statistic__content,
-    .el-step__title,
-    .el-step__description,
-    .el-timeline-item__content,
-    .el-collapse-item__content,
-    .el-select .el-select__placeholder,
-    .el-date-editor .el-input__wrapper,
-    .el-cascader .el-input__wrapper,
-    .el-select .el-input__wrapper,
-    .el-autocomplete .el-input__wrapper
-  ) {
+  .el-button,
+  .el-link,
+  .el-tag,
+  .el-breadcrumb__inner,
+  .el-menu-item,
+  .el-sub-menu__title,
+  .el-tabs__item,
+  .el-pagination,
+  .el-form-item__label,
+  .el-form-item__content,
+  .el-checkbox__label,
+  .el-radio__label,
+  .el-dropdown-menu__item,
+  .el-dialog__title,
+  .el-dialog__body,
+  .el-message-box__title,
+  .el-message-box__message,
+  .el-notification__title,
+  .el-notification__content,
+  .el-alert__title,
+  .el-alert__description,
+  .el-descriptions__label,
+  .el-descriptions__content,
+  .el-drawer__body,
+  .el-card__body,
+  .el-empty__description,
+  .el-result__title,
+  .el-result__subtitle,
+  .el-statistic__content,
+  .el-step__title,
+  .el-step__description,
+  .el-timeline-item__content,
+  .el-collapse-item__content,
+  .el-select .el-select__placeholder,
+  .el-date-editor .el-input__wrapper,
+  .el-cascader .el-input__wrapper,
+  .el-select .el-input__wrapper,
+  .el-autocomplete .el-input__wrapper
+) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

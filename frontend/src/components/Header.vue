@@ -26,7 +26,10 @@ const handleSearch = () => {
 
 async function goCover() {
   const redirect = route.fullPath
-  await transition.run('to-cover', () => router.push({ path: '/cover', query: { redirect } }), { inMs: 200, outMs: 520 })
+  await transition.run('to-cover', () => router.push({ path: '/cover', query: { redirect } }), {
+    inMs: 200,
+    outMs: 520
+  })
 }
 
 function goToSupport() {

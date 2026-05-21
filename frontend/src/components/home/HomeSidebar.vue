@@ -227,7 +227,12 @@ function openSocial(name: string) {
           :aria-label="`打开${s.label}`"
           @click="openSocial(s.label)"
         >
-          <component :is="s.icon" class="h-5 w-5 mx-auto" :class="`icon-tone--${s.tone}`" aria-hidden="true" />
+          <component
+            :is="s.icon"
+            class="h-5 w-5 mx-auto"
+            :class="`icon-tone--${s.tone}`"
+            aria-hidden="true"
+          />
           <span class="sr-only">{{ s.label }}</span>
         </button>
       </div>

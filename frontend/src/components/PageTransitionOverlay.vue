@@ -28,21 +28,21 @@ const cls = computed(() => {
 .overlay__veil {
   position: absolute;
   inset: 0;
-  background: radial-gradient(1200px 800px at 50% 40%, rgba(91, 140, 255, 0.22), rgba(7, 10, 18, 0.92));
+  background: radial-gradient(1200px 800px at 50% 40%, rgb(91 140 255 / 22%), rgb(7 10 18 / 92%));
   animation: veil 720ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 .overlay__shine {
   position: absolute;
   inset: -20%;
-  background: radial-gradient(700px 260px at 50% 40%, rgba(0, 245, 255, 0.18), transparent 70%);
+  background: radial-gradient(700px 260px at 50% 40%, rgb(0 245 255 / 18%), transparent 70%);
   filter: blur(18px);
   opacity: 0;
   animation: shine 720ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 .overlay--cover .overlay__veil {
-  background: radial-gradient(1100px 760px at 50% 40%, rgba(0, 245, 255, 0.18), rgba(7, 10, 18, 0.92));
+  background: radial-gradient(1100px 760px at 50% 40%, rgb(0 245 255 / 18%), rgb(7 10 18 / 92%));
 }
 
 @keyframes veil {
@@ -50,10 +50,12 @@ const cls = computed(() => {
     opacity: 0;
     transform: scale(1.01);
   }
+
   40% {
     opacity: 1;
     transform: scale(1);
   }
+
   100% {
     opacity: 0;
     transform: scale(0.995);
@@ -65,10 +67,12 @@ const cls = computed(() => {
     opacity: 0;
     transform: translateY(12px) scale(0.98);
   }
+
   45% {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+
   100% {
     opacity: 0;
     transform: translateY(-10px) scale(1.02);
@@ -83,4 +87,3 @@ const cls = computed(() => {
   }
 }
 </style>
-

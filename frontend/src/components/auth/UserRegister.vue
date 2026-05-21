@@ -60,8 +60,14 @@ const rules: FormRules = {
         const emailVal = (form.email || '').trim()
         if (!emailVal) return callback()
         const v = (value || '').trim()
-        if (!v) { callback(new Error('请输入邮箱验证码')); return }
-        if (!/^\d{6}$/.test(v)) { callback(new Error('验证码为6位数字')); return }
+        if (!v) {
+          callback(new Error('请输入邮箱验证码'))
+          return
+        }
+        if (!/^\d{6}$/.test(v)) {
+          callback(new Error('验证码为6位数字'))
+          return
+        }
         callback()
       },
       trigger: 'blur'
@@ -112,7 +118,10 @@ async function sendVerifyCode() {
     countdownTimer = setInterval(() => {
       countdown.value--
       if (countdown.value <= 0) {
-        if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null }
+        if (countdownTimer) {
+          clearInterval(countdownTimer)
+          countdownTimer = null
+        }
       }
     }, 1000)
     ElMessage.success('验证码已发送')
@@ -159,7 +168,11 @@ async function submit() {
     await router.replace(redirectTo.value)
   } catch (e: any) {
     const msg = toZhAuthErrorMessage(
-      { status: e?.response?.status, message: e?.response?.data?.message || e?.message, url: '/api/user/register' },
+      {
+        status: e?.response?.status,
+        message: e?.response?.data?.message || e?.message,
+        url: '/api/user/register'
+      },
       '注册失败'
     )
     submitError.value = msg
@@ -207,11 +220,7 @@ watch(
           inputmode="numeric"
           class="flex-1"
         />
-        <el-button
-          :loading="sendingCode"
-          :disabled="countdown > 0"
-          @click="sendVerifyCode"
-        >
+        <el-button :loading="sendingCode" :disabled="countdown > 0" @click="sendVerifyCode">
           {{ countdown > 0 ? `${countdown}s 后重发` : codeSent ? '重新发送' : '发送验证码' }}
         </el-button>
       </div>

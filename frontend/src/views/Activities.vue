@@ -78,6 +78,23 @@ function openDetail(id: string) {
   router.push(`/activities/${id}`)
 }
 
+function search() {
+  query.page = 1
+  fetchList()
+}
+
+function prevPage() {
+  if (query.page <= 1) return
+  query.page -= 1
+  fetchList()
+}
+
+function nextPage() {
+  if (query.page >= pageCount.value) return
+  query.page += 1
+  fetchList()
+}
+
 onMounted(() => {
   fetchList()
 })
@@ -91,11 +108,17 @@ onMounted(() => {
         <div class="text-sm font-semibold text-[var(--c-muted)] mt-1">浏览最新活动并报名参加。</div>
       </div>
       <div class="flex items-center gap-2 flex-nowrap overflow-x-auto">
-        <el-input v-model="query.q" placeholder="搜索活动名称" clearable style="width: 220px" @keyup.enter="query.page = 1; fetchList()" />
-        <el-select v-model="query.status" placeholder="状态" clearable style="width: 140px" @change="query.page = 1; fetchList()">
+        <el-input
+          v-model="query.q"
+          placeholder="搜索活动名称"
+          clearable
+          style="width: 220px"
+          @keyup.enter="search"
+        />
+        <el-select v-model="query.status" placeholder="状态" clearable style="width: 140px" @change="search">
           <el-option v-for="o in statusOptions" :key="o.value" :label="o.label" :value="o.value" />
         </el-select>
-        <el-button type="primary" :loading="loading" @click="query.page = 1; fetchList()">查询</el-button>
+        <el-button type="primary" :loading="loading" @click="search">查询</el-button>
       </div>
     </div>
 
@@ -107,7 +130,12 @@ onMounted(() => {
       >
         <div class="h-40 bg-[var(--c-bg)] overflow-hidden">
           <img v-if="a.cover" :src="a.cover" alt="cover" class="w-full h-full object-cover" />
-          <div v-else class="w-full h-full flex items-center justify-center text-[var(--c-muted)] font-semibold">无封面</div>
+          <div
+            v-else
+            class="w-full h-full flex items-center justify-center text-[var(--c-muted)] font-semibold"
+          >
+            无封面
+          </div>
         </div>
         <div class="p-4 space-y-2">
           <div class="flex items-start justify-between gap-2">
@@ -115,7 +143,9 @@ onMounted(() => {
               <div class="text-base font-extrabold text-[var(--c-text)] truncate">{{ a.name }}</div>
               <div class="text-sm font-semibold text-[var(--c-muted)] truncate">{{ a.subtitle || '' }}</div>
             </div>
-            <el-tag size="small" :type="statusTagType(String(a.time_status))">{{ statusLabel(String(a.time_status)) }}</el-tag>
+            <el-tag size="small" :type="statusTagType(String(a.time_status))">{{
+              statusLabel(String(a.time_status))
+            }}</el-tag>
           </div>
           <div class="text-sm text-[var(--c-muted)]">
             <div>开始：{{ a.start_at || '-' }}</div>
@@ -132,10 +162,9 @@ onMounted(() => {
     </div>
 
     <div class="flex items-center justify-end gap-2">
-      <el-button :disabled="query.page <= 1" @click="query.page -= 1; fetchList()">上一页</el-button>
+      <el-button :disabled="query.page <= 1" @click="prevPage">上一页</el-button>
       <div class="text-sm font-semibold text-[var(--c-muted)]">{{ query.page }} / {{ pageCount }}</div>
-      <el-button :disabled="query.page >= pageCount" @click="query.page += 1; fetchList()">下一页</el-button>
+      <el-button :disabled="query.page >= pageCount" @click="nextPage">下一页</el-button>
     </div>
   </main>
 </template>
-
